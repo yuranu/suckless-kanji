@@ -1,0 +1,14 @@
+{
+  "name": "suckless-kanji",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch": "scripts/fetch.sh",
+    "build": "node scripts/build.mjs && node scripts/build-curriculum.mjs",
+    "all": "npm run fetch && npm run build",
+    "test": "node scripts/test-matcher.mjs"
+  },
+  "devDependencies": {
+    "kuromoji": "0.1.2"
+  }
+}

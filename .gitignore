@@ -1,0 +1,12 @@
+# Downloaded sources and their extracted files: reproduce with `npm run fetch`
+# (verified against scripts/sources.sha256).
+raw/
+
+# Build-time dependencies: `npm install`
+node_modules/
+
+# Local editor / tool state
+.claude/settings.local.json
+.DS_Store
+*.swp
+*~
