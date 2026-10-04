@@ -1,6 +1,7 @@
-// Kanji stroke drawing minigame. Depends on window.KANJI (data/kanji.js) and window.Stroke (stroke.js).
-(function () {
+// Kanji stroke drawing minigame. Depends on window.Stroke (stroke.js); loads data/kanji.json.
+fetch('data/kanji.json').then((r) => r.json()).then((data) => {
   'use strict';
+  window.KANJI = data.map((k) => ({ ...k, jlpt: k.level, strokes: k.paths.length }));
 
   const $ = (id) => document.getElementById(id);
   const SVGNS = 'http://www.w3.org/2000/svg';
@@ -270,4 +271,4 @@
 
   for (const b of $('mode').children) b.classList.toggle('on', b.dataset.mode === mode);
   setLevel(level);
-})();
+});

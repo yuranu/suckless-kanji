@@ -79,7 +79,9 @@ for (const w of vocab.values()) {
     const applies = (list, v) => list.includes('*') || list.includes(v);
     const sense = e.sense.find((x) => applies(x.appliesToKanji, w.word) && applies(x.appliesToKana, w.kana));
     if (sense) w.meaning = sense.gloss.slice(0, 3).map((g) => g.text).join('; ');
+    w.pos = (sense || e.sense[0])?.partOfSpeech || [];
   }
+  w.id = `${w.word}|${w.kana}`; // stable across regenerations: progress is keyed by it
   words.push(w);
 }
 
@@ -146,6 +148,8 @@ for (const w of usable) {
   const segs = segments(w);
   w.readings = [];
   w.irregular = [];
+  // segs: [text, reading|null] pairs, e.g. 分かる -> [["分","わ"],["かる",null]]
+  w.segs = segs ? segs.map((s) => [s.ruby, s.rt || null]) : [[w.word, w.kana]];
   if (!segs) { w.furigana = `${w.word}[${w.kana}]`; w.readings.push(`${w.word}:${w.kana}`); continue; }
   w.furigana = segs.map((s) => (s.rt ? `${s.ruby}[${s.rt}]` : s.ruby)).join('');
   for (const s of segs) {
@@ -307,6 +311,7 @@ out.push(
   '# with that level\'s words written with kanji from earlier levels; then kanji are introduced one at',
   '# a time (most frequent kanji that unlocks a word at that point), each followed by the words it unlocks.',
   '# Lesson fields:',
+  '#   id: stable key ("word|kana", or the kanji for kanji-only lessons); app progress is keyed by it',
   '#   level: curriculum section (JLPT N-level being studied); jlpt: the word\'s own JLPT level',
   '#   new_kanji: kanji introduced by this lesson, with its meaning',
   '#   word, kana, furigana (Anki style), meaning, common: false if not a JMdict common word',
@@ -334,7 +339,7 @@ out.push(
 );
 const kanjiLine = (k) => `{kanji: ${q(k.c)}, meaning: ${q(k.meaning)}${k.extra ? ', extra: true' : ''}}`;
 flat.forEach(({ level, w, newKanji, kanjiOnly }, i) => {
-  out.push(`  - lesson: ${i + 1}`, `    level: ${level}`);
+  out.push(`  - lesson: ${i + 1}`, `    id: ${q(kanjiOnly ? kanjiOnly.c : w.id)}`, `    level: ${level}`);
   if (kanjiOnly) {
     out.push(`    kanji: ${q(kanjiOnly.c)}`, `    meaning: ${q(kanjiOnly.meaning)}`);
     if (kanjiOnly.extra) out.push('    extra: true');
@@ -356,6 +361,20 @@ for (const [reason, items] of Object.entries(skipped)) {
   out.push(`  ${reason}:`);
   for (const s of items) out.push(`    - ${q(s)}`);
 }
+
+// App copy: same lessons as compact JSON, plus the kanji introduction order for scripts/build.mjs.
+const json = {
+  items: flat.map(({ level, w, newKanji, kanjiOnly }) => (kanjiOnly
+    ? { id: kanjiOnly.c, level, kanji: kanjiOnly.c }
+    : {
+      id: w.id, level, jlpt: w.jlpt, word: w.word, kana: w.kana, segs: w.segs, meaning: w.meaning, pos: w.pos,
+      ...(newKanji ? { newKanji: newKanji.c } : {}),
+      ...(w.example ? { example: { ja: w.example.ja, en: w.example.en } } : {}),
+    })),
+  kanji: kanjiLessons.map((l) => ({ c: l.k.c, level: l.k.jlpt, ...(l.k.extra ? { extra: true } : {}) })),
+};
+fs.mkdirSync(path.join(root, 'web/data'), { recursive: true });
+fs.writeFileSync(path.join(root, 'web/data/curriculum.json'), JSON.stringify(json));
 
 fs.mkdirSync(path.join(root, 'data'), { recursive: true });
 fs.writeFileSync(path.join(root, 'data/curriculum.yaml'), out.join('\n') + '\n');

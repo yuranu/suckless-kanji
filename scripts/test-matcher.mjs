@@ -11,8 +11,8 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
 const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(root, 'web/stroke.js'), 'utf8'), ctx);
-vm.runInContext(fs.readFileSync(path.join(root, 'web/data/kanji.js'), 'utf8'), ctx);
-const { Stroke, KANJI } = ctx.window;
+const { Stroke } = ctx.window;
+const KANJI = JSON.parse(fs.readFileSync(path.join(root, 'web/data/kanji.json'), 'utf8'));
 
 let seed = 42;
 const rnd = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
