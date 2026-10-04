@@ -15,6 +15,7 @@ export function homeScreen(root, app) {
 
     add(clear(root),
       h('div.row.between', h('h1.title.home-title', 'Suckless Kanji'), syncPill(app)),
+      installCard(),
       !app.persistent ? h('div.banner.bad', 'Storage is unavailable in this browser: progress will be lost when the page closes.') : null,
 
       h('section.card',
@@ -35,14 +36,12 @@ export function homeScreen(root, app) {
       app.state.items.size ? h('section.card',
         h('div.row.between',
           h('div', h('div.label', 'Free practice'), h('div.muted.small', 'Drill words of kanji you pick. Does not affect reviews.')),
-          h('a.btn', { href: '#/free' }, 'Pick kanji'))) : null,
+          h('a.btn.primary', { href: '#/free' }, 'Practice'))) : null,
 
       !app.state.items.size ? h('section.card',
         h('div.label', 'Already know some kanji?'),
         h('p.muted.small', 'Import what you know: mark your kanji, and their reviews are spread out over the coming weeks instead of all at once.'),
         h('a.btn', { href: '#/import' }, 'Import prior knowledge')) : null,
-
-      installCard(),
 
       h('section.card.stats',
         h('div.stat', h('b', String(counts.words)), h('span', ` / ${totalWords} words`)),
