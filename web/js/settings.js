@@ -31,7 +31,6 @@ export const SETTINGS = [
 
   // ---- display
   { key: 'theme', group: 'Display', label: 'Theme', type: 'select', options: ['system', 'light', 'dark'], def: 'system', scope: 'device' },
-  { key: 'furigana', group: 'Display', label: 'Show furigana on example sentences', type: 'bool', def: false, scope: 'device' },
 ];
 
 export const DEFAULTS = Object.fromEntries(SETTINGS.map((s) => [s.key, s.def]));

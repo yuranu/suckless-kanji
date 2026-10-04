@@ -293,3 +293,4 @@ svg path, svg polyline { fill: none; stroke-linecap: round; stroke-linejoin: rou
   transition: opacity 0.25s, transform 0.25s; max-width: 90vw; text-align: center;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+.summary-body > .word.huge:first-child { margin-top: 6px; }
