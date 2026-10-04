@@ -10,8 +10,8 @@
   - Blank line, then a body in Markdown explaining what and why.
   - Wrap the body at 80 columns, except where wrapping would make it ugly
     (tables, long URLs, code).
-- Push to `origin` (`git@github.com:yuranu/suckless-kanji.git`) after
-  committing.
+- Work on `master` (not `main`) and push to `origin`
+  (`git@github.com:yuranu/suckless-kanji.git`) after committing.
 
 ## Generated files
 
