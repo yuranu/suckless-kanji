@@ -13,7 +13,7 @@ export function homeScreen(root, app) {
     const totalWords = app.data.items.filter((it) => !it.kanji).length;
 
     add(clear(root),
-      h('div.row.between', h('h1.title', 'Suckless Kanji'), syncPill(app)),
+      h('div.row.between', h('h1.title.home-title', 'Suckless Kanji'), syncPill(app)),
       !app.persistent ? h('div.banner.bad', 'Storage is unavailable in this browser: progress will be lost when the page closes.') : null,
 
       h('section.card',

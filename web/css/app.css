@@ -72,6 +72,25 @@ h1, h2, h3 { margin: 0.4em 0; }
   color: var(--muted); text-decoration: none; font-weight: 600; font-size: 14px;
 }
 .tabbar a.on { color: var(--accent); }
+.tabbar .brand { display: none; }
+
+/* Desktop / tablet: the bar becomes a sticky header at the top (phones keep it at the
+   bottom, within thumb reach). */
+@media (min-width: 768px) {
+  .tabbar {
+    position: sticky; top: 0; bottom: auto; order: -1;
+    border-top: none; border-bottom: 1px solid var(--line);
+    padding: 0 max(16px, calc((100% - 960px) / 2));
+    justify-content: flex-end; gap: 4px;
+  }
+  .tabbar a { flex: 0 0 auto; max-width: none; padding: 16px 14px; font-size: 15px; border-bottom: 2px solid transparent; }
+  .tabbar a.on { border-bottom-color: var(--accent); }
+  .tabbar a:hover { color: var(--fg); }
+  .tabbar .brand { display: block; margin-right: auto; padding-left: 0; color: var(--fg); font-size: 17px; }
+  .screen { padding-bottom: 40px; }
+  .toast { bottom: 32px; }
+  .home-title { display: none; } /* the top bar already shows the name */
+}
 
 /* ---- building blocks ---- */
 .card {

@@ -53,8 +53,10 @@ async function main() {
     root.appendChild(body);
     // Full-screen flows (learning, reviews) hide the navigation bar.
     if (tab) {
-      root.appendChild(h('nav.tabbar', NAV.map(([id, href, label]) =>
-        h('a', { href, class: id === tab ? 'on' : '' }, label, id === 'settings' ? syncIcon(app) : null))));
+      root.appendChild(h('nav.tabbar',
+        h('a.brand', { href: '#/' }, 'Suckless Kanji'), // shown only in the desktop top bar
+        NAV.map(([id, href, label]) =>
+          h('a', { href, class: id === tab ? 'on' : '' }, label, id === 'settings' ? syncIcon(app) : null))));
     }
     cleanup = screen(body, app, params);
     window.scrollTo(0, 0);
