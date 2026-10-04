@@ -6,13 +6,17 @@
     "fetch": "scripts/fetch.sh",
     "build": "node scripts/build-curriculum.mjs && node scripts/build.mjs",
     "all": "npm run fetch && npm run build",
-    "test": "node --test tests/",
+    "test": "node --test \"tests/*.test.mjs\"",
     "test:matcher": "node scripts/test-matcher.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler d1 migrations apply suckless-kanji --remote && wrangler deploy"
   },
   "devDependencies": {
     "kuromoji": "0.1.2",
-    "wrangler": "^4.147.0"
+    "wrangler": "4.147.0",
+    "yaml": "2.9.1"
+  },
+  "engines": {
+    "node": ">=22.13"
   }
 }

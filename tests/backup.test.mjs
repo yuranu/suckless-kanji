@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import YAML from 'yaml';
 import { indexData, cardIds } from '../web/js/data.js';
 import { toYaml, parseBackup } from '../web/js/backup.js';
 import { replay, DAY } from '../web/js/state.js';
@@ -36,16 +36,15 @@ test('YAML backup round-trips the event log exactly', () => {
   assert.match(yaml, /^ {2}algorithm: "sm2"$/m);
 });
 
-test('YAML backup is valid YAML (checked with PyYAML when available)', (t) => {
+test('YAML backup parses with a standard YAML parser (1.2 and 1.1)', () => {
   const yaml = toYaml({ events: sampleEvents(), data, device: 'dev1', now: NOW });
-  let out;
-  try {
-    out = execFileSync('python3', ['-c', 'import sys, yaml, json; d = yaml.safe_load(sys.stdin); print(json.dumps({"n": len(d["events"]), "fmt": d["format"], "cards": len(d["cards"])}))'], { input: yaml }).toString();
-  } catch (err) {
-    t.skip('python3 with PyYAML not available');
-    return;
+  for (const version of ['1.2', '1.1']) {
+    const d = YAML.parse(yaml, { version, strict: true });
+    assert.equal(d.format, 'suckless-kanji-progress', version);
+    assert.equal(d.events.length, 5, version);
+    assert.equal(d.cards.length, 17, version);
+    assert.deepEqual(d.events, parseBackup(yaml).events, version); // same data either way
   }
-  assert.deepEqual(JSON.parse(out), { n: 5, fmt: 'suckless-kanji-progress', cards: 17 });
 });
 
 test('damaged files are rejected with a useful message', () => {

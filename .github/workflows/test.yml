@@ -1,0 +1,27 @@
+# Unit tests on clean machines: npm ci from the lockfile, then npm test.
+# Covers the pinned Node (.node-version) on Linux/macOS/Windows and the minimum
+# supported Node (package.json "engines") on Linux.
+name: test
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, node: from-file }
+          - { os: macos-latest, node: from-file }
+          - { os: windows-latest, node: from-file }
+          - { os: ubuntu-latest, node: '22.13' }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ matrix.node == 'from-file' && '.node-version' || '' }}
+          node-version: ${{ matrix.node != 'from-file' && matrix.node || '' }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
