@@ -133,7 +133,6 @@ A flat list of lessons, one per word+reading, in study order:
 | [JmdictFurigana](https://github.com/Doublevil/JmdictFurigana) | per-kanji reading split | CC BY-SA 4.0 |
 | [Tatoeba](https://tatoeba.org) / Tanaka corpus | example sentences | CC BY 2.0 FR |
 
-`ref/*.pdf` contains the original tanos kanji lists, kept as a cross-check.
 
 ## Layout
 
