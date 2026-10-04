@@ -150,6 +150,7 @@ details.level summary { padding: 12px 16px; font-weight: 700; cursor: pointer; d
   position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 18px 16px; text-align: center;
 }
+.step > .corner + * { margin-top: 30px; } /* keep the prompt clear of the corner button */
 .step.done { padding: 28px 16px; }
 .corner {
   position: absolute; top: 8px; right: 8px; font: inherit; font-size: 12px;
@@ -178,13 +179,14 @@ details.level summary { padding: 12px 16px; font-weight: 700; cursor: pointer; d
 .choice:disabled { cursor: default; }
 .choice.right { border-color: var(--good); background: var(--good-bg); }
 .choice.wrong { border-color: var(--bad); background: var(--bad-bg); }
-.blanked { display: flex; gap: 2px; justify-content: center; margin-top: 4px; }
+.blanked { display: flex; gap: 2px; justify-content: center; align-items: center; margin-top: 4px; }
 .blank {
-  display: inline-block; min-width: 1.05em; border-bottom: 3px solid var(--accent);
-  margin: 0 1px; text-align: center;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.1em; height: 1.1em; line-height: 1; margin: 0 2px;
+  border: 2px dashed var(--accent); border-radius: 8px;
 }
-.blank.right { border-color: var(--good); color: var(--good); }
-.blank.wrong { border-color: var(--bad); color: var(--bad); }
+.blank.right { border: 2px solid transparent; color: var(--good); }
+.blank.wrong { border: 2px solid var(--bad); color: var(--bad); }
 .kanji-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px auto 6px; max-width: 320px; }
 .kanji-grid.wide { grid-template-columns: repeat(4, 1fr); max-width: 400px; }
 .grid-cell {
