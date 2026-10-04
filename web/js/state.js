@@ -147,3 +147,19 @@ export function cardStage(card, settings) {
   if (!card) return 'new';
   return intervalOf(card, settings) >= 21 ? 'mature' : 'young';
 }
+
+// Interval each rating would give if the card were answered now (for the rating buttons).
+export function previewIntervals(state, card, now = Date.now()) {
+  const elapsed = Math.max(0, today(state, now) - card.lastDay);
+  const out = {};
+  for (const r of [1, 2, 3, 4]) {
+    const next = {
+      ...card,
+      reps: card.reps + 1,
+      sm2: sm2Next(card.sm2, r, elapsed, sm2Options(state.settings)),
+      fsrs: fsrsNext(card.fsrs, r, elapsed),
+    };
+    out[r] = intervalOf(next, state.settings);
+  }
+  return out;
+}
