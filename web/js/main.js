@@ -1,4 +1,5 @@
 // Entry point: boot the app context and route hash URLs to screens.
+import './install.js'; // first: catches beforeinstallprompt even while the app loads
 import { createApp } from './app.js';
 import { h, clear } from './ui/dom.js';
 import { syncIcon } from './ui/sync-ui.js';

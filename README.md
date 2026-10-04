@@ -8,7 +8,14 @@ A kanji/vocabulary trainer: a fixed JLPT curriculum (N5→N1), spaced repetition
 python3 -m http.server 8765 --directory web
 ```
 
-Open http://localhost:8765. The app uses ES modules, so it must be served over HTTP; opening `index.html` as a file does not work. It installs as a PWA and keeps working offline.
+Open http://localhost:8765. The app uses ES modules, so it must be served over HTTP; opening `index.html` as a file does not work. `npm run dev` (Wrangler, port 8787) serves it exactly as production does, including clean URLs.
+
+**Installable and offline:**
+- **Installing:** in Chrome or Edge, Home shows an *Install* card while installing is possible. On iOS Safari it shows "Share → Add to Home Screen" instructions instead. The card never appears inside the installed app.
+- **Offline:** the service worker ([web/sw.js](web/sw.js)) downloads every file of the app when it installs, so everything works offline from then on.
+  - Requests try the network first, so updates show up immediately, but fall back to the cached copy after 3 seconds.
+  - [tests/pwa.test.mjs](tests/pwa.test.mjs) fails if a file in `web/` is missing from the offline list, or if the manifest or icons stop meeting Chrome's install requirements.
+- **Icons:** `npm run icons` regenerates `web/icons/` from KanjiVG's strokes of 字. No fonts are involved, so the output is the same on any machine.
 
 ```bash
 npm test               # unit tests: schedulers, state replay, distractors, queues

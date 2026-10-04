@@ -2,6 +2,7 @@ import { h, add, clear } from '../ui/dom.js';
 import { dueCards, today } from '../state.js';
 import { nextLessonItems, forecast, learnedCounts } from '../progress.js';
 import { syncPill } from '../ui/sync-ui.js';
+import { install } from '../install.js';
 
 export function homeScreen(root, app) {
   function render() {
@@ -41,6 +42,8 @@ export function homeScreen(root, app) {
         h('p.muted.small', 'Import what you know: mark your kanji, and their reviews are spread out over the coming weeks instead of all at once.'),
         h('a.btn', { href: '#/import' }, 'Import prior knowledge')) : null,
 
+      installCard(),
+
       h('section.card.stats',
         h('div.stat', h('b', String(counts.words)), h('span', ` / ${totalWords} words`)),
         h('div.stat', h('b', String(counts.kanji)), h('span', ` / ${app.data.kanjiList.length} kanji`)),
@@ -52,6 +55,21 @@ export function homeScreen(root, app) {
           h('div.fc-label', i === 0 ? 'today' : i === 1 ? 'tmrw' : `+${i}`))))),
     );
   }
+  // Shown only in a browser tab where installing is possible; never inside the installed app.
+  function installCard() {
+    const how = install.available;
+    if (!how) return null;
+    return h('section.card.install',
+      h('div.row.between',
+        h('div', h('div.label', 'Install the app'),
+          h('div.muted.small', how === 'ios'
+            ? 'In Safari: Share, then "Add to Home Screen". It then opens like an app and works offline.'
+            : 'Opens in its own window and works fully offline.')),
+        how === 'prompt' ? h('button.btn.primary', { onclick: () => install.prompt() }, 'Install') : null));
+  }
+
   render();
-  return app.onChange(render);
+  const offApp = app.onChange(render);
+  const offInstall = install.onChange(render);
+  return () => { offApp(); offInstall(); };
 }
