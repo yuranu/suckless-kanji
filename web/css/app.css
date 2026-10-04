@@ -371,3 +371,9 @@ details summary { cursor: pointer; }
 .sync-icon[data-state="off"], .sync-icon[data-state="offline"] { color: var(--muted); opacity: 0.6; }
 .session-head .sync-icon { margin-left: 0; }
 @keyframes sync-pulse { 50% { opacity: 0.45; } }
+
+/* ---- static text pages (privacy) ---- */
+.prose { line-height: 1.6; }
+.prose h3 { margin-top: 1.4em; }
+.prose ul { padding-left: 1.2em; }
+.prose li { margin: 0.4em 0; }

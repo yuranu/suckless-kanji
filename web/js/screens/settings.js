@@ -118,6 +118,7 @@ export function settingsScreen(root, app) {
           h('a', { href: 'https://github.com/Doublevil/JmdictFurigana' }, 'JmdictFurigana'), '. JLPT lists ',
           h('a', { href: 'http://www.tanos.co.uk/jlpt/' }, 'tanos.co.uk'), '. Example sentences ',
           h('a', { href: 'https://tatoeba.org' }, 'Tatoeba'), ' (CC BY 2.0 FR).'),
+        h('p', h('a', { href: 'privacy' }, 'Privacy policy')),
         h('p.muted', `Device id ${app.dev}`)),
     );
   }

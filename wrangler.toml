@@ -16,5 +16,5 @@ GOOGLE_CLIENT_ID = "276404407742-dq3le281o8mocggu96eqltkdds8egf5r.apps.googleuse
 [[d1_databases]]
 binding = "DB"
 database_name = "suckless-kanji"
-database_id = "00000000-0000-0000-0000-000000000000" # replaced by the real id on first deploy
+database_id = "094483b8-10ca-4e37-9584-4560f84b95eb" # replaced by the real id on first deploy
 migrations_dir = "server/migrations"
