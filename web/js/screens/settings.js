@@ -2,7 +2,7 @@
 import { h, add, clear, confirmDialog, toast } from '../ui/dom.js';
 import { SETTINGS } from '../settings.js';
 import { tts } from '../tts.js';
-import { exportBlob, parseExport } from '../store.js';
+import { toYaml, parseBackup } from '../backup.js';
 import { replay } from '../state.js';
 import { syncSection } from '../ui/sync-ui.js';
 
@@ -36,8 +36,8 @@ function control(app, def) {
   }
 }
 
-function download(name, text) {
-  const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: 'application/json' })), download: name });
+function download(name, text, type = 'application/yaml') {
+  const a = h('a', { href: URL.createObjectURL(new Blob([text], { type })), download: name });
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
@@ -64,15 +64,17 @@ export function settingsScreen(root, app) {
           app.storagePersisted ? ', protected from automatic eviction.' : '. The browser did not grant persistent storage, so it may evict it under storage pressure: export a backup now and then.'),
         h('div.row',
           h('button.btn', {
-            onclick: () => download(`suckless-kanji-${new Date().toISOString().slice(0, 10)}.json`, exportBlob(events, reports)),
-          }, 'Export backup'),
+            onclick: () => download(`suckless-kanji-${new Date().toISOString().slice(0, 10)}.yaml`,
+              toYaml({ events, reports, data: app.data, device: app.dev })),
+          }, 'Export progress (.yaml)'),
           h('label.btn', 'Import / merge…', h('input.hidden', {
-            type: 'file', accept: 'application/json,.json',
+            type: 'file', accept: '.yaml,.yml,application/yaml',
             onchange: async (e) => {
               const file = e.target.files[0];
+              e.target.value = ''; // so picking the same file again fires `change` again
               if (!file) return;
               try {
-                const d = parseExport(await file.text());
+                const d = parseBackup(await file.text());
                 replay(d.events); // validate that it replays before touching storage
                 const added = await app.backend.putNew('events', d.events);
                 await app.backend.putNew('reports', d.reports || []);
@@ -84,7 +86,7 @@ export function settingsScreen(root, app) {
               }
             },
           }))),
-        h('p.small.muted', 'Import merges: events already present are skipped, so importing a backup twice or from another device is safe.'),
+        h('p.small.muted', 'The file is readable YAML: a summary, your settings, every card with its due date, and the full history (the part that is imported). Import merges: events already present are skipped, so importing twice or from another device is safe.'),
         h('div.row', h('a.btn', { href: '#/import' }, 'Import prior knowledge…')),
         h('p.small.muted', 'Coming from another app? Mark the kanji you know; their reviews are spread out instead of all due at once.'),
         reports.length ? h('p.small.muted', `${reports.length} drawing-checker reports saved (included in exports).`) : null,

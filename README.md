@@ -67,7 +67,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 - **Stable keys:** item ids (`word|kana`, or the kanji itself) come from the curriculum. Regenerating the data doesn't orphan progress, and unknown ids are ignored.
 - **Both schedulers at once:** each card keeps an SM-2 state and an FSRS state, both updated on every answer. Switching the algorithm or the desired retention re-times every card immediately.
 - **Sync:** the server only stores events. Clients upload the events the server lacks and download the ones they lack (matched by `id`), then replay. Concurrent reviews on two devices simply both count (see *Server*).
-- **Backups:** Settings → *Export backup* writes the full log as JSON. *Import / merge* adds events by id, so importing twice, or from another device, is safe.
+- **Backups:** Settings → *Export progress* writes a readable YAML file: a summary, settings, every card with its due date, and the full event log, one event per line. *Import / merge* reads the event log back and adds events by id, so importing twice, or from another device, is safe.
 - **Device-only settings:** voice, theme and stroke leniency live in `localStorage`.
 
 ## Server (sync)

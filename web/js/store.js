@@ -111,18 +111,3 @@ export function makeEvent(type, data, dev, now = Date.now()) {
     data,
   };
 }
-
-export const EXPORT_FORMAT = 'suckless-kanji-events';
-
-export function exportBlob(events, reports) {
-  return JSON.stringify({ format: EXPORT_FORMAT, version: 1, exported: new Date().toISOString(), events, reports }, null, 0);
-}
-
-export function parseExport(text) {
-  const d = JSON.parse(text);
-  if (d.format !== EXPORT_FORMAT || !Array.isArray(d.events)) throw new Error('Not a suckless-kanji export file');
-  for (const e of d.events) {
-    if (typeof e.id !== 'string' || typeof e.t !== 'number' || typeof e.type !== 'string') throw new Error('Malformed event in export');
-  }
-  return d;
-}

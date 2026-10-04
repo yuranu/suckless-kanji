@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { replay, dayIndex, dueCards, intervalOf, DAY } from '../web/js/state.js';
-import { makeEvent, MemoryBackend, exportBlob, parseExport } from '../web/js/store.js';
+import { makeEvent, MemoryBackend } from '../web/js/store.js';
 
 const T0 = Date.UTC(2026, 0, 10, 12); // noon UTC
 const ev = (type, data, t, dev = 'a') => ({ ...makeEvent(type, data, dev, t), tz: 0 });
@@ -84,11 +84,6 @@ test('two devices merge into the same state', async () => {
   assert.equal(merged.cards.get('x#r').reps, 3);
 });
 
-test('export round-trips and validates', () => {
-  const events = [ev('learn', { cards: { 'x#r': 3 } }, T0)];
-  assert.deepEqual(parseExport(exportBlob(events, [])).events, events);
-  assert.throws(() => parseExport('{"format":"other"}'));
-});
 
 test('a second learn of the same card (another device) keeps the existing schedule', () => {
   const s = replay([
