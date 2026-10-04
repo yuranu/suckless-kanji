@@ -5,6 +5,10 @@ raw/
 # Build-time dependencies: `npm install`
 node_modules/
 
+# Wrangler local state and local-only secrets (.dev.vars)
+.wrangler/
+.dev.vars
+
 # Local editor / tool state
 .claude/settings.local.json
 .DS_Store

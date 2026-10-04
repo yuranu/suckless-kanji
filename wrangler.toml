@@ -1,0 +1,20 @@
+# Cloudflare Worker: static client from web/ plus the sync/auth API in server/worker.js.
+# Deploy: npx wrangler deploy (see README "Server").
+name = "suckless-kanji"
+main = "server/worker.js"
+compatibility_date = "2026-09-01"
+routes = [{ pattern = "kanji.yuranu.com", custom_domain = true }]
+
+[assets]
+directory = "web"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/auth/*"]
+
+[vars]
+GOOGLE_CLIENT_ID = "276404407742-dq3le281o8mocggu96eqltkdds8egf5r.apps.googleusercontent.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "suckless-kanji"
+database_id = "00000000-0000-0000-0000-000000000000" # replaced by the real id on first deploy
+migrations_dir = "server/migrations"
