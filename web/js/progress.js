@@ -31,6 +31,19 @@ export function kanjiKnown(app, c) {
   return (app.data.wordsByKanji.get(c) || []).some((it) => isLearned(app, it));
 }
 
+// Items to practice for a set of kanji: the kanji-only lessons and every word using any of
+// them. learnedOnly keeps just what the user already learned.
+export function itemsForKanji(app, chars, learnedOnly) {
+  const seen = new Map();
+  for (const c of chars) {
+    const own = app.data.itemById.get(c);
+    for (const it of own ? [own, ...(app.data.wordsByKanji.get(c) || [])] : (app.data.wordsByKanji.get(c) || [])) {
+      if (!learnedOnly || isLearned(app, it)) seen.set(it.id, it);
+    }
+  }
+  return [...seen.values()].sort((a, b) => a.index - b.index);
+}
+
 export function nextLessonIndex(app) {
   const ls = lessonList(app);
   const i = ls.findIndex((l) => lessonStatus(app, l) !== 'done');

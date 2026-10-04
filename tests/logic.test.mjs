@@ -91,3 +91,15 @@ test('sample choices (eyeball)', () => {
     if (kanjiOfWord(it.word).length > 1) console.log('   grid', kanjiGrid(it.word, 12, data, rng).join(''));
   }
 });
+
+test('itemsForKanji: union over kanji, deduped, curriculum order, learned filter', async () => {
+  const { itemsForKanji } = await import('../web/js/progress.js');
+  const learned = new Set(['一|いち', '一日|いちにち', '人|ひと']);
+  const app = { data, state: { items: new Map([...learned].map((id) => [id, {}])) } };
+  const all = itemsForKanji(app, ['一', '日'], false);
+  const ids = all.map((it) => it.id);
+  assert.equal(new Set(ids).size, ids.length); // 一日 uses both kanji but appears once
+  assert.ok(ids.includes('一日|いちにち') && ids.includes('一つ|ひとつ'));
+  assert.deepEqual(all.map((it) => it.index), [...all.map((it) => it.index)].sort((a, b) => a - b));
+  assert.deepEqual(itemsForKanji(app, ['一', '日'], true).map((it) => it.id), ['一|いち', '一日|いちにち']);
+});

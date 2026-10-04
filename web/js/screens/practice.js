@@ -1,24 +1,24 @@
 // Practice: play cards without touching the schedule. Spec in the URL:
 //   practice/lesson:<n>   cards of lesson n
-//   practice/kanji:<c>    cards of learned words using kanji c (all its words if none learned)
+//   practice/kanji:<cs>      cards of learned words using any of kanji cs (all of their
+//                            words if none is learned)
+//   practice/kanji-all:<cs>  cards of all words using any of kanji cs
 import { h, clear } from '../ui/dom.js';
 import { sessionFrame } from '../ui/session.js';
 import { runCard } from '../ui/games.js';
 import { ReviewQueue } from '../session.js';
 import { cardIds } from '../data.js';
 import { itemOfCard, kindOfCard } from '../state.js';
-import { lessonList, isLearned } from '../progress.js';
+import { lessonList, itemsForKanji } from '../progress.js';
 import { shuffle } from '../distractors.js';
 
 function itemsFor(app, spec) {
   const [type, arg] = [spec.slice(0, spec.indexOf(':')), spec.slice(spec.indexOf(':') + 1)];
   if (type === 'lesson') return lessonList(app)[+arg - 1] || [];
-  if (type === 'kanji') {
-    const all = [...(app.data.wordsByKanji.get(arg) || [])];
-    const own = app.data.itemById.get(arg);
-    if (own) all.unshift(own);
-    const learned = all.filter((it) => isLearned(app, it));
-    return learned.length ? learned : all;
+  if (type === 'kanji' || type === 'kanji-all') {
+    const chars = [...arg];
+    const learned = type === 'kanji' ? itemsForKanji(app, chars, true) : [];
+    return learned.length ? learned : itemsForKanji(app, chars, false);
   }
   return [];
 }

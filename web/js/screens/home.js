@@ -31,6 +31,11 @@ export function homeScreen(root, app) {
             : [h('span.jp', it.word), ' ', h('span.muted', it.kana), h('span.preview-meaning', it.meaning)]))))
         : h('section.card', h('p', 'Every lesson is learned. おめでとう!')),
 
+      app.state.items.size ? h('section.card',
+        h('div.row.between',
+          h('div', h('div.label', 'Free practice'), h('div.muted.small', 'Drill words of kanji you pick. Does not affect reviews.')),
+          h('a.btn', { href: '#/free' }, 'Pick kanji'))) : null,
+
       !app.state.items.size ? h('section.card',
         h('div.label', 'Already know some kanji?'),
         h('p.muted.small', 'Import what you know: mark your kanji, and their reviews are spread out over the coming weeks instead of all at once.'),

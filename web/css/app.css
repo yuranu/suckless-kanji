@@ -396,3 +396,19 @@ details summary { cursor: pointer; }
 .prose h3 { margin-top: 1.4em; }
 .prose ul { padding-left: 1.2em; }
 .prose li { margin: 0.4em 0; }
+
+/* ---- free practice picker ---- */
+.picker-wall button {
+  aspect-ratio: 1; display: grid; place-items: center; font: inherit; font-family: var(--jp); font-size: 24px;
+  border-radius: 8px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); cursor: pointer; padding: 0;
+}
+.picker-wall button.k-new { color: var(--muted); }
+.picker-wall button.sel { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.select-bar {
+  position: sticky; bottom: 60px; z-index: 5; margin: 12px 0; padding: 10px 14px;
+  background: var(--panel); border: 1px solid var(--accent); border-radius: var(--radius);
+}
+.select-bar .row { margin: 6px 0 0; }
+.select-info { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.select-info label { display: inline-flex; gap: 4px; align-items: center; margin-left: auto; }
+@media (min-width: 768px) { .select-bar { bottom: 16px; } }

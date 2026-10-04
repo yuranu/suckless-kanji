@@ -10,6 +10,7 @@ import { kanjiScreen, kanjiDetailScreen } from './screens/kanji.js';
 import { settingsScreen } from './screens/settings.js';
 import { practiceScreen } from './screens/practice.js';
 import { importScreen } from './screens/import.js';
+import { freePracticeScreen } from './screens/free.js';
 
 const ROUTES = [
   [/^$/, homeScreen, 'home'],
@@ -21,6 +22,7 @@ const ROUTES = [
   [/^practice\/(.+)$/, practiceScreen, null],
   [/^settings$/, settingsScreen, 'settings'],
   [/^import$/, importScreen, 'settings'],
+  [/^free$/, freePracticeScreen, 'home'],
 ];
 
 const NAV = [
