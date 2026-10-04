@@ -1,6 +1,7 @@
 // Entry point: boot the app context and route hash URLs to screens.
 import { createApp } from './app.js';
 import { h, clear } from './ui/dom.js';
+import { syncIcon } from './ui/sync-ui.js';
 import { homeScreen } from './screens/home.js';
 import { lessonsScreen } from './screens/lessons.js';
 import { learnScreen } from './screens/learn.js';
@@ -53,7 +54,7 @@ async function main() {
     // Full-screen flows (learning, reviews) hide the navigation bar.
     if (tab) {
       root.appendChild(h('nav.tabbar', NAV.map(([id, href, label]) =>
-        h('a', { href, class: id === tab ? 'on' : '' }, label))));
+        h('a', { href, class: id === tab ? 'on' : '' }, label, id === 'settings' ? syncIcon(app) : null))));
     }
     cleanup = screen(body, app, params);
     window.scrollTo(0, 0);

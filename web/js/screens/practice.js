@@ -26,7 +26,7 @@ function itemsFor(app, spec) {
 export function practiceScreen(root, app, [spec]) {
   const items = itemsFor(app, spec);
   if (!items.length) { location.hash = '#/'; return; }
-  const frame = sessionFrame(root, { title: 'Practice' });
+  const frame = sessionFrame(root, { app, title: 'Practice' });
   const queue = new ReviewQueue(shuffle(items.flatMap(cardIds)));
   let alive = true, misses = 0;
 

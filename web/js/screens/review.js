@@ -18,7 +18,7 @@ export function reviewScreen(root, app) {
     return;
   }
 
-  const frame = sessionFrame(root, { title: 'Review' });
+  const frame = sessionFrame(root, { app, title: 'Review' });
   const queue = new ReviewQueue(due.map((c) => c.id));
   let alive = true, answered = 0, again = 0;
   const t0 = Date.now();

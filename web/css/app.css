@@ -362,3 +362,12 @@ details summary { cursor: pointer; }
 .sync-pill.bad { color: var(--bad); border-color: var(--bad); }
 .conflict { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--bad-bg); }
 .choices-col { display: grid; gap: 8px; }
+.sync-icon { display: inline-flex; vertical-align: -4px; margin-left: 4px; color: var(--muted); }
+.sync-icon[hidden] { display: none; }
+.sync-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.sync-icon[data-state="ok"] { color: var(--muted); }
+.sync-icon[data-state="busy"] { color: var(--fg); animation: sync-pulse 1.2s ease-in-out infinite; }
+.sync-icon[data-state="bad"] { color: var(--bad); }
+.sync-icon[data-state="off"], .sync-icon[data-state="offline"] { color: var(--muted); opacity: 0.6; }
+.session-head .sync-icon { margin-left: 0; }
+@keyframes sync-pulse { 50% { opacity: 0.45; } }

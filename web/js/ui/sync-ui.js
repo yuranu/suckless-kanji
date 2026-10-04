@@ -1,5 +1,55 @@
 // Sync status pill (Home) and the Sync section of Settings, including conflict resolution.
-import { h, confirmDialog, toast } from './dom.js';
+import { h, s, confirmDialog, toast } from './dom.js';
+
+// ---- compact status icon (tab bar, session header) ----------------------------------
+const CLOUD = 'M7 18.5h10.2a4.3 4.3 0 0 0 .6-8.55A6.2 6.2 0 0 0 6 8.9a4.8 4.8 0 0 0 1 9.6z';
+const MARKS = {
+  ok: 'M9.4 13.6l2 2 3.6-3.7',
+  busy: 'M12 16.2v-5m-2.3 2.3L12 11.2l2.3 2.3',
+  bad: 'M12 10.8v3.1m0 2.2v.1',
+  offline: 'M4.5 4.5l15 15',
+  off: '',
+};
+
+function iconState(st) {
+  switch (st.state) {
+    case 'unavailable': return null;
+    case 'signed-out': return ['off', 'Not signed in: progress stays on this device'];
+    case 'syncing': return ['busy', 'Syncing…'];
+    case 'conflict': return ['bad', 'Sync needs your decision (Settings)'];
+    case 'error': return st.error === 'offline'
+      ? ['offline', `Offline${st.pending ? ` · ${st.pending} events waiting` : ''}`]
+      : ['bad', `Sync failed: ${st.error}`];
+    default: return st.pending
+      ? ['busy', `${st.pending} events waiting to upload`]
+      : ['ok', `Synced ${ago(st.lastSync)}`];
+  }
+}
+
+// Self-updating icon: follows app.sync status until it leaves the document.
+export function syncIcon(app) {
+  const el = h('span.sync-icon');
+  const svg = s('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' });
+  const cloud = s('path', { d: CLOUD }, svg);
+  const mark = s('path', { d: '' }, svg);
+  el.appendChild(svg);
+  const update = () => {
+    const v = iconState(app.sync.status);
+    el.hidden = !v;
+    if (!v) return;
+    el.dataset.state = v[0];
+    el.title = v[1];
+    el.setAttribute('aria-label', v[1]);
+    mark.setAttribute('d', MARKS[v[0]]);
+    cloud.setAttribute('stroke-dasharray', v[0] === 'off' ? '2.5 2' : '');
+  };
+  update();
+  const off = app.onChange(() => (el.isConnected ? update() : off()));
+  // Callers insert the icon synchronously; if it is not in the page by the next tick it
+  // never will be, so drop the listener (screens are rebuilt on every navigation).
+  setTimeout(() => { if (!el.isConnected) off(); }, 0);
+  return el;
+}
 
 export function ago(t) {
   if (!t) return 'never';
@@ -10,17 +60,15 @@ export function ago(t) {
   return `${Math.round(s / 86400)} d ago`;
 }
 
+// Home: a text pill only when something needs action; the icon covers the rest.
 export function syncPill(app) {
   const st = app.sync.status;
-  const pend = st.pending ? ` · ${st.pending} to upload` : '';
   switch (st.state) {
-    case 'unavailable': return null;
-    case 'signed-out': return h('a.sync-pill', { href: '#/settings' }, '☁ Sign in to sync');
-    case 'syncing': return h('span.sync-pill', '☁ Syncing…');
-    case 'conflict': return h('a.sync-pill.bad', { href: '#/settings' }, '☁ Sync needs your decision');
-    case 'error': return h('button.sync-pill.bad', { title: st.error, onclick: () => app.sync.run() },
-      st.error === 'offline' ? `☁ Offline${pend}` : `☁ Sync failed — retry${pend}`);
-    default: return h('span.sync-pill', `☁ Synced ${ago(st.lastSync)}${pend}`);
+    case 'signed-out': return h('a.sync-pill', { href: '#/settings' }, 'Sign in to sync');
+    case 'conflict': return h('a.sync-pill.bad', { href: '#/settings' }, 'Sync needs your decision');
+    case 'error': return st.error === 'offline' ? null
+      : h('button.sync-pill.bad', { title: st.error, onclick: () => app.sync.run() }, 'Sync failed — retry');
+    default: return null;
   }
 }
 

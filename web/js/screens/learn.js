@@ -88,7 +88,7 @@ export function learnScreen(root, app, [n]) {
     return;
   }
 
-  const frame = sessionFrame(root, { title, confirmExit: 'Leave the lesson? Progress in this lesson is not saved until it is finished.' });
+  const frame = sessionFrame(root, { app, title, confirmExit: 'Leave the lesson? Progress in this lesson is not saved until it is finished.' });
   let alive = true;
 
   (async () => {
