@@ -28,31 +28,42 @@ function kanjiPanel(app, k) {
   setTimeout(animate, 50);
   return {
     el: h('div.kanji-panel',
-      h('div.kanji-info',
-        h('div.label', 'New kanji'),
+      h('div.kanji-head',
         h('div.kanji-char', k.c),
-        h('div.meaning', k.meanings.join(', ')),
-        h('div.readings', k.on.length ? h('div', '音 ' + k.on.join('・')) : null, k.kun.length ? h('div', '訓 ' + k.kun.join('・')) : null),
-        h('div.muted.small', `${k.paths.length} strokes · trace it on the pad`),
-        h('button.btn.small', { onclick: animate }, 'Stroke order')),
-      holder),
+        h('div',
+          h('div.meaning', k.meanings.join(', ')),
+          h('div.readings.left', k.on.length ? h('span', '音 ' + k.on.join('・')) : null, k.kun.length ? h('span', '訓 ' + k.kun.join('・')) : null))),
+      holder,
+      h('div.row.center',
+        h('span.muted.small', `${k.paths.length} stroke${k.paths.length > 1 ? 's' : ''} · trace it`),
+        h('button.btn.small', { onclick: animate }, 'Stroke order'))),
     destroy: () => pad?.destroy(),
   };
 }
 
-function intro(root, app, item, i, n, showKanji) {
+// Introduce one item: the word, then (on its own screen, so each fits a phone) the new kanji
+// with stroke order and a trace pad.
+async function intro(root, app, item, i, n, showKanji) {
+  const kc = showKanji ? item.kanji || item.newKanji : null;
+  const last = i + 1 === n;
+  if (!item.kanji) {
+    app.autoSpeak(item.kana);
+    await page(root, h('div.label', `New word ${i + 1} of ${n}`), wordSummary(app, item), kc || !last ? 'Next' : 'Start practice');
+  }
+  if (kc) {
+    const panel = kanjiPanel(app, app.data.kanjiByChar.get(kc));
+    await page(root, h('div.label', item.kanji ? `New kanji ${i + 1} of ${n}` : `New kanji in ${item.word}`), panel.el, last ? 'Start practice' : 'Next');
+    panel.destroy();
+  }
+}
+
+function page(root, label, body, buttonText) {
   return new Promise((resolve) => {
-    const kc = showKanji ? item.kanji || item.newKanji : null;
-    const panel = kc ? kanjiPanel(app, app.data.kanjiByChar.get(kc)) : null;
-    const next = () => { panel?.destroy(); document.removeEventListener('keydown', onKey); resolve(); };
+    const next = () => { document.removeEventListener('keydown', onKey); resolve(); };
     const onKey = (e) => { if (e.key === 'Enter' && root.isConnected) next(); };
     document.addEventListener('keydown', onKey);
-    clear(root).appendChild(h('div.step.intro',
-      h('div.label', `New ${item.kanji ? 'kanji' : 'word'} ${i + 1} of ${n}`),
-      item.kanji ? null : wordSummary(app, item),
-      panel?.el,
-      h('div.row.center', h('button.btn.primary', { onclick: next }, i + 1 < n ? 'Next' : 'Start practice'))));
-    if (!item.kanji) app.autoSpeak(item.kana);
+    clear(root).appendChild(h('div.step.intro', label, body,
+      h('div.row.center', h('button.btn.primary', { onclick: next }, buttonText))));
   });
 }
 

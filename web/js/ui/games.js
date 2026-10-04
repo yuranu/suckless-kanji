@@ -74,7 +74,9 @@ function choiceStep(root, { prompt, options, correct, cls = '' }) {
       unbind();
       resolve(ok);
     }
-    clear(root).appendChild(stepCard(misclick, prompt, h('div.choices', buttons), h('div.row.center', cont)));
+    // Many options: kana go in two columns, translations get compact rows (fit one screen).
+    const many = options.length > 4 ? (cls === 'jp' ? '.many.cols' : '.many') : '';
+    clear(root).appendChild(stepCard(misclick, prompt, h('div.choices' + many, buttons), h('div.row.center', cont)));
   });
 }
 
@@ -93,7 +95,7 @@ function meaningStep(root, app, item) {
   app.autoSpeak(item.kana);
   return choiceStep(root, {
     prompt: h('div.prompt', h('div.question', 'What does it mean?'),
-      h('div.word.big', ruby(item.segs)), speakButton(app, item.kana)),
+      h('div.word-line', h('div.word.big', ruby(item.segs)), speakButton(app, item.kana))),
     options: meaningChoices(item, s.choices, app.data),
     correct: item.meaning,
   });

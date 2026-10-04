@@ -38,6 +38,18 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
   - Today's due cards are shown, rated Hard, Good or Easy (an Again rating is automatic when the card was missed).
   - Missed cards come back later in the same session.
 - **Practice** (from a lesson or a kanji page) never changes the schedule.
+- **Next lesson** is the next N *unlearned* items in curriculum order, so gaps (items skipped by an import or by learning lessons out of order) are filled first, in full-size lessons.
+- **Mobile first:** every exercise fits one screen, down to 360×640. The drawing pad sizes itself to the viewport height, many-option questions switch to compact layouts, and a new kanji gets its own intro screen.
+
+## Importing prior knowledge
+
+For people switching from another app (Settings → *Import prior knowledge*):
+
+1. **Mark the kanji you know.** Tap to toggle, use *Fill up to* to mark everything before a kanji, add whole JLPT levels, or paste any text to mark the kanji in it.
+2. **Pick the vocabulary level you reached.** A word counts as known when all its kanji are known and its JLPT level is at or below that level.
+3. **Pick a window for first reviews** (the default aims at about 25 a day), with a load preview.
+
+Each card gets an assumed memory strength: early curriculum items are strong, recent ones weak, and writing is weaker than reading. First reviews are spread evenly across the window, weakest first. Nothing is due on import day and nothing is dropped. After the first real review, scheduling follows your actual answers. The import is one `seed` event and can be undone.
 
 ## State and sync design
 
@@ -47,6 +59,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 |---|---|---|
 | `learn` | `{cards: {cardId: rating}}` | lesson finished: creates the cards and schedules them for the first time |
 | `review` | `{card, rating, ms}` | an SRS answer |
+| `seed` | `{cards: {cardId: [stability, dueInDays]}}` | prior-knowledge import |
 | `forget` | `{items: [itemId]}` | un-learns items |
 | `settings` | `{key: value}` | synced settings, last writer wins |
 

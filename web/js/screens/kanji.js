@@ -71,7 +71,7 @@ export function kanjiDetailScreen(root, app, [c]) {
         h('div.kanji-char', k.c),
         h('div.meaning', k.meanings.join(', ')),
         h('div.readings', k.on.length ? h('div', '音 ' + k.on.join('・')) : null, k.kun.length ? h('div', '訓 ' + k.kun.join('・')) : null),
-        h('div.muted.small', `${k.paths.length} strokes`, k.parts.length ? ` · parts ${k.parts.join(' ')}` : ''),
+        h('div.muted.small', `${k.paths.length} stroke${k.paths.length > 1 ? 's' : ''}`, k.parts.length ? ` · parts ${k.parts.join(' ')}` : ''),
         h('div.k-status.k-' + kanjiStatus(app, c), { new: 'not learned', young: 'learning', mature: 'mature' }[kanjiStatus(app, c)])),
       h('div',
         holder,
