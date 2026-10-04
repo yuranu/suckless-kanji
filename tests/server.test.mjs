@@ -39,7 +39,7 @@ test('static assets pass through; API requires a valid session', async () => {
   assert.equal((await call(env, '/api/me', { cookie: 'sk_session=v1.forged.sig' })).status, 401);
   const me = await call(env, '/api/me', { cookie: await session(env) });
   assert.equal(me.status, 200);
-  assert.deepEqual(me.data, { email: 'me@example.com', generation: 1, count: 0 });
+  assert.deepEqual(me.data, { email: 'me@example.com', generation: 1 }); // no count: see the read-cost test
 });
 
 test('allowlist is checked on every request, not just at sign-in', async () => {
@@ -116,7 +116,7 @@ test('sync: upload, dedup, cursor paging, two devices', async () => {
   // A catches up from its cursor
   a = await sync({ generation: 1, cursor: curA, events: [] });
   assert.deepEqual(a.data.events.map((e) => e.id), ['b1']);
-  assert.equal((await call(env, '/api/me', { cookie })).data.count, 3);
+  assert.equal(env.DB.raw.prepare('SELECT COUNT(*) AS n FROM events').get().n, 3);
 });
 
 test('sync: first sync with local data against a non-empty server is a conflict', async () => {
@@ -162,4 +162,36 @@ test('sync pages large downloads', async () => {
   assert.equal(got, 2500);
   assert.equal(pages, 3);
   assert.equal((await sync({ generation: 1, cursor: 0, events: Array.from({ length: 501 }, (_, j) => ev(`z${j}`)) })).status, 413);
+});
+
+// D1 bills per row read. Per-sync queries must use indexes, so their cost does not grow with
+// the size of the user's history (a full COUNT on every sync would hit the free daily read
+// limit after a year or two of use).
+test('per-sync queries read through indexes, not the whole table', () => {
+  const env = setup();
+  const plan = (sql) => env.DB.raw.prepare(`EXPLAIN QUERY PLAN ${sql}`).all().map((r) => r.detail).join(' | ');
+  const queries = [
+    "SELECT seq, body FROM events WHERE email = 'a' AND gen = 1 AND seq > 5 ORDER BY seq LIMIT 1001",
+    "SELECT 1 FROM events WHERE email = 'a' AND gen = 1 LIMIT 1",
+    "SELECT 1 FROM allowlist WHERE email = 'a'",
+    "SELECT generation FROM users WHERE email = 'a'",
+  ];
+  for (const q of queries) {
+    const p = plan(q);
+    assert.match(p, /USING (COVERING )?INDEX|USING INTEGER PRIMARY KEY/, `${q}\n  -> ${p}`);
+    assert.doesNotMatch(p, /^SCAN|\| SCAN|TEMP B-TREE/, `${q}\n  -> ${p}`);
+  }
+});
+
+test('/api/me and a normal sync never count the whole history', async () => {
+  const env = setup();
+  const cookie = await session(env);
+  await call(env, '/api/sync', { method: 'POST', body: { generation: null, cursor: 0, events: [ev('a1'), ev('a2')] }, cookie });
+  const statements = [];
+  const prepare = env.DB.prepare;
+  env.DB.prepare = (sql) => { statements.push(sql); return prepare(sql); };
+  await call(env, '/api/me', { cookie });
+  await call(env, '/api/sync', { method: 'POST', body: { generation: 1, cursor: 2, events: [ev('a3')] }, cookie });
+  assert.ok(statements.length > 0);
+  assert.ok(!statements.some((s) => /COUNT\(/i.test(s)), statements.join('\n'));
 });

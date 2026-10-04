@@ -3,7 +3,7 @@
 //   GET  /auth/login      -> Google OAuth (authorization code + PKCE)
 //   GET  /auth/callback   -> checks allowlist, sets a signed session cookie
 //   POST /auth/logout
-//   GET  /api/me          -> {email, generation, count}
+//   GET  /api/me          -> {email, generation}
 //   POST /api/sync        -> upload missing events, download new ones (see below)
 //   POST /api/replace     -> start a new generation ("use local" / reset); old one is archived
 //
@@ -89,6 +89,8 @@ async function generationOf(env, email) {
   return 1;
 }
 
+// D1 bills reads per row scanned, and COUNT(*) scans the user's whole log. Only call it on
+// rare paths (conflict responses), never on every sync.
 async function countEvents(env, email, gen) {
   const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM events WHERE email = ? AND gen = ?').bind(email, gen).first();
   return row ? row.n : 0;
@@ -191,8 +193,11 @@ async function sync(env, email, body) {
     }
   }
   if (body.generation === null || body.generation === undefined) {
-    const count = await countEvents(env, email, gen);
-    if (count > 0 && events.length > 0) return json({ conflict: 'first', generation: gen, count }, 409);
+    // First sync of a device that has its own events: conflict if the server has any.
+    if (events.length > 0) {
+      const any = await env.DB.prepare('SELECT 1 FROM events WHERE email = ? AND gen = ? LIMIT 1').bind(email, gen).first();
+      if (any) return json({ conflict: 'first', generation: gen, count: await countEvents(env, email, gen) }, 409);
+    }
   } else if (body.generation !== gen) {
     return json({ conflict: 'generation', generation: gen, count: await countEvents(env, email, gen) }, 409);
   }
@@ -232,7 +237,7 @@ async function api(env, request, path) {
 
   if (path === '/api/me' && request.method === 'GET') {
     const gen = await generationOf(env, email);
-    return json({ email, generation: gen, count: await countEvents(env, email, gen) });
+    return json({ email, generation: gen });
   }
   if (path === '/api/sync' && request.method === 'POST') {
     let body;

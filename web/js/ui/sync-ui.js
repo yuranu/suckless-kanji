@@ -75,7 +75,7 @@ export function syncPill(app) {
 const CONFLICT_TEXT = {
   first: (c) => `The cloud already has progress (${c.count} events) and so does this device (${c.local} events).`,
   generation: (c) => `Progress was reset or replaced from another device. The cloud has ${c.count} events, this device ${c.local}.`,
-  account: (c) => `This device last synced as ${c.previous}. Signed in as a different account, whose cloud has ${c.count} events.`,
+  account: (c) => `This device last synced as ${c.previous}, but you are now signed in with a different account.`,
 };
 
 export function syncSection(app, rerender) {

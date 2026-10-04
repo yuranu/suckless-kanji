@@ -65,7 +65,7 @@ export class Sync {
     const m = await this.meta();
     // Signed in as someone else than last time: never mix two people's logs silently.
     if (m.email && m.email !== r.data.email) {
-      this.set({ state: 'conflict', email: r.data.email, conflict: { kind: 'account', generation: r.data.generation, count: r.data.count, previous: m.email } });
+      this.set({ state: 'conflict', email: r.data.email, conflict: { kind: 'account', generation: r.data.generation, previous: m.email } });
       return false;
     }
     this.set({ email: r.data.email, lastSync: m.lastSync });
