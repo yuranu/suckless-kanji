@@ -1,7 +1,7 @@
 {
   "id": "/",
   "name": "Suckless Kanji",
-  "short_name": "Kanji",
+  "short_name": "Suckless Kanji",
   "description": "Learn kanji and JLPT vocabulary: spaced repetition and stroke-by-stroke writing.",
   "start_url": "/",
   "scope": "/",
