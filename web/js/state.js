@@ -5,6 +5,9 @@
 // Event: {id, t, tz, dev, type, data}
 //   learn    {cards: {cardId: rating}}   lesson finished; creates and first-schedules cards
 //   review   {card, rating, ms}          an SRS review answer
+//   seed     {cards: {cardId: [s, due]}} prior knowledge import: card with stability s days,
+//                                        first due `due` days after the event; existing cards
+//                                        are left alone
 //   forget   {items: [itemId]}           drop items and their cards (back to unlearned)
 //   settings {key: value, ...}           synced settings (last writer wins)
 // Card ids are `${itemId}#${kind}`, kind: r (reading), w (writing), k (kanji-only item).
@@ -85,6 +88,22 @@ export function applyEvent(state, e) {
       if (d.rating === 1) st.again++;
       break;
     }
+    case 'seed':
+      for (const [cardId, [stability, due]] of Object.entries(d.cards || {})) {
+        if (state.cards.has(cardId)) continue;
+        const item = itemOfCard(cardId);
+        if (!state.items.has(item)) state.items.set(item, { day, seeded: true });
+        const s = Math.max(1, stability);
+        // Pretend the last review was one interval before the due day, with the same interval
+        // in both models (FSRS at 90% retention), so either puts the first review on `due`.
+        const ivl = fsrsInterval(s, 0.9, Infinity);
+        state.cards.set(cardId, {
+          id: cardId, item, kind: kindOfCard(cardId), reps: 1, lapses: 0, seeded: true,
+          lastDay: day + due - ivl,
+          sm2: { interval: ivl, ease: state.settings.sm2StartingEase }, fsrs: { s, d: 5 },
+        });
+      }
+      break;
     case 'forget':
       for (const item of d.items || []) {
         state.items.delete(item);
@@ -120,6 +139,8 @@ export function intervalOf(card, settings) {
   const raw = settings.algorithm === 'sm2'
     ? card.sm2.interval
     : fsrsInterval(card.fsrs.s, settings.retention, settings.maxInterval);
+  // Imported cards keep their planned first due day exactly (fuzz could make them overdue).
+  if (card.seeded && card.reps === 1) return Math.min(settings.maxInterval, raw);
   return Math.min(settings.maxInterval, fuzz(raw, card.id + ':' + card.reps));
 }
 
