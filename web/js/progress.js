@@ -13,6 +13,24 @@ export function lessonStatus(app, lesson) {
   return n === 0 ? 'new' : n === lesson.length ? 'done' : 'partial';
 }
 
+// The next lesson: the first `wordsPerLesson` unlearned items in curriculum order. Unlike
+// the fixed lesson grouping this skips items already known, so gaps (e.g. after importing
+// prior knowledge) are filled first, in full-size lessons.
+export function nextLessonItems(app) {
+  const out = [];
+  for (const it of app.data.items) {
+    if (!isLearned(app, it)) out.push(it);
+    if (out.length >= app.settings.wordsPerLesson) break;
+  }
+  return out;
+}
+
+// True when some learned item already uses kanji c.
+export function kanjiKnown(app, c) {
+  if (app.state.items.has(c)) return true;
+  return (app.data.wordsByKanji.get(c) || []).some((it) => isLearned(app, it));
+}
+
 export function nextLessonIndex(app) {
   const ls = lessonList(app);
   const i = ls.findIndex((l) => lessonStatus(app, l) !== 'done');

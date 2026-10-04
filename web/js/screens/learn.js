@@ -7,7 +7,7 @@ import { runCard, wordSummary } from '../ui/games.js';
 import { Drill } from '../session.js';
 import { cardIds } from '../data.js';
 import { itemOfCard, kindOfCard, intervalOf } from '../state.js';
-import { lessonList, isLearned } from '../progress.js';
+import { lessonList, isLearned, nextLessonItems, kanjiKnown } from '../progress.js';
 
 // Big kanji with stroke-order animation and a trace pad.
 function kanjiPanel(app, k) {
@@ -40,9 +40,9 @@ function kanjiPanel(app, k) {
   };
 }
 
-function intro(root, app, item, i, n) {
+function intro(root, app, item, i, n, showKanji) {
   return new Promise((resolve) => {
-    const kc = item.kanji || item.newKanji;
+    const kc = showKanji ? item.kanji || item.newKanji : null;
     const panel = kc ? kanjiPanel(app, app.data.kanjiByChar.get(kc)) : null;
     const next = () => { panel?.destroy(); document.removeEventListener('keydown', onKey); resolve(); };
     const onKey = (e) => { if (e.key === 'Enter' && root.isConnected) next(); };
@@ -57,10 +57,14 @@ function intro(root, app, item, i, n) {
 }
 
 export function learnScreen(root, app, [n]) {
-  const index = +n - 1;
-  const lesson = lessonList(app)[index];
-  if (!lesson) { location.hash = '#/lessons'; return; }
+  const isNext = n === 'next';
+  const index = isNext ? -1 : +n - 1;
+  const lesson = isNext ? nextLessonItems(app) : lessonList(app)[index];
+  if (!lesson || !lesson.length) { location.hash = '#/lessons'; return; }
   const todo = lesson.filter((it) => !isLearned(app, it));
+  const title = isNext ? 'Lesson' : `Lesson ${index + 1}`;
+  // Show the kanji panel only for kanji the user does not know yet (imports, gaps).
+  const newKanji = new Set(todo.map((it) => it.kanji || it.newKanji).filter((c) => c && !kanjiKnown(app, c)));
 
   if (!todo.length) {
     add(root, 
@@ -73,13 +77,13 @@ export function learnScreen(root, app, [n]) {
     return;
   }
 
-  const frame = sessionFrame(root, { title: `Lesson ${index + 1}`, confirmExit: 'Leave the lesson? Progress in this lesson is not saved until it is finished.' });
+  const frame = sessionFrame(root, { title, confirmExit: 'Leave the lesson? Progress in this lesson is not saved until it is finished.' });
   let alive = true;
 
   (async () => {
     frame.progress(0, todo.length, 'introduction');
     for (let i = 0; i < todo.length; i++) {
-      await intro(frame.body, app, todo[i], i, todo.length);
+      await intro(frame.body, app, todo[i], i, todo.length, newKanji.has(todo[i].kanji || todo[i].newKanji));
       if (!alive) return;
       frame.progress(i + 1, todo.length, 'introduction');
     }
@@ -101,14 +105,19 @@ export function learnScreen(root, app, [n]) {
     await app.dispatch('learn', { cards: ratings });
     if (!alive) return;
     const days = ids.map((id) => intervalOf(app.state.cards.get(id), app.state.settings));
-    const nextIdx = lessonList(app).findIndex((l, i) => i > index && l.some((it) => !isLearned(app, it)));
     clear(frame.body).appendChild(h('div.step.done',
       h('h2', 'Lesson learned'),
       h('p', `${todo.length} new ${todo.length === 1 ? 'item' : 'items'}, ${ids.length} cards added to your deck.`),
       h('p.muted', `First review in ${Math.min(...days) === Math.max(...days) ? Math.min(...days) : `${Math.min(...days)}–${Math.max(...days)}`} days.`),
       h('ul.preview', todo.map((it) => h('li', h('span.jp', it.kanji || ruby(it.segs)), h('span.preview-meaning', it.meaning || '')))),
       h('div.row.center',
-        nextIdx >= 0 ? h('a.btn.primary', { href: `#/learn/${nextIdx + 1}` }, 'Next lesson') : null,
+        nextLessonItems(app).length ? h('button.btn.primary', {
+          onclick: () => {
+            // Already on #/learn/next: re-run the route instead of setting the same hash.
+            if (location.hash === '#/learn/next') window.dispatchEvent(new HashChangeEvent('hashchange'));
+            else location.hash = '#/learn/next';
+          },
+        }, 'Next lesson') : null,
         h('a.btn', { href: '#/' }, 'Home'))));
   })();
 

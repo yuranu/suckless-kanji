@@ -10,14 +10,15 @@ export function kanjiFromText(data, text) {
 
 // Known items: kanji-only items for known kanji; words whose kanji are all known and whose
 // JLPT level is at or below the reached one (N5 = 5 ... N1 = 1).
-// Holes: unknown items before the last known one; lessons will fill them first.
+// Holes: items of the curriculum sections up to the reached level (N5..level) that are not
+// known; "Next lesson" teaches them first. (Stray known kanji from higher levels do not turn
+// everything before them into holes.)
 export function estimateKnown(data, known, level) {
   const isKnown = (it) => (it.kanji
     ? known.has(it.kanji)
     : it.jlpt >= level && kanjiOfWord(it.word).every((c) => known.has(c)));
   const items = data.items.filter(isKnown);
-  const last = items.length ? items[items.length - 1].index : -1;
-  const holes = data.items.filter((it) => it.index < last && !isKnown(it));
+  const holes = data.items.filter((it) => it.level >= level && !isKnown(it));
   return { items, holes };
 }
 

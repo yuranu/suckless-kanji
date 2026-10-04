@@ -83,6 +83,8 @@ export function settingsScreen(root, app) {
             },
           }))),
         h('p.small.muted', 'Import merges: events already present are skipped, so importing a backup twice or from another device is safe.'),
+        h('div.row', h('a.btn', { href: '#/import' }, 'Import prior knowledge…')),
+        h('p.small.muted', 'Coming from another app? Mark the kanji you know; their reviews are spread out instead of all due at once.'),
         reports.length ? h('p.small.muted', `${reports.length} drawing-checker reports saved (included in exports).`) : null,
         h('button.btn.danger', {
           onclick: async () => {

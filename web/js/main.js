@@ -8,16 +8,18 @@ import { reviewScreen } from './screens/review.js';
 import { kanjiScreen, kanjiDetailScreen } from './screens/kanji.js';
 import { settingsScreen } from './screens/settings.js';
 import { practiceScreen } from './screens/practice.js';
+import { importScreen } from './screens/import.js';
 
 const ROUTES = [
   [/^$/, homeScreen, 'home'],
   [/^lessons$/, lessonsScreen, 'lessons'],
-  [/^learn\/(\d+)$/, learnScreen, null],
+  [/^learn\/(\d+|next)$/, learnScreen, null],
   [/^review$/, reviewScreen, null],
   [/^kanji$/, kanjiScreen, 'kanji'],
   [/^kanji\/(.+)$/, kanjiDetailScreen, 'kanji'],
   [/^practice\/(.+)$/, practiceScreen, null],
   [/^settings$/, settingsScreen, 'settings'],
+  [/^import$/, importScreen, 'settings'],
 ];
 
 const NAV = [

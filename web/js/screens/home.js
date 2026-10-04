@@ -1,12 +1,11 @@
 import { h, add, clear } from '../ui/dom.js';
 import { dueCards, today } from '../state.js';
-import { lessonList, nextLessonIndex, forecast, learnedCounts, isLearned } from '../progress.js';
+import { nextLessonItems, forecast, learnedCounts } from '../progress.js';
 
 export function homeScreen(root, app) {
   function render() {
     const due = dueCards(app.state).length;
-    const next = nextLessonIndex(app);
-    const ls = lessonList(app);
+    const next = nextLessonItems(app);
     const counts = learnedCounts(app);
     const fc = forecast(app, 7);
     const todayStats = app.state.days.get(today(app.state)) || { reviews: 0, learned: 0, again: 0 };
@@ -21,15 +20,20 @@ export function homeScreen(root, app) {
           h('div', h('div.big-number', String(due)), h('div.muted', due === 1 ? 'card due' : 'cards due')),
           h('a.btn.primary' + (due ? '' : '.disabled'), { href: due ? '#/review' : undefined }, 'Review'))),
 
-      next !== null ? h('section.card',
+      next.length ? h('section.card',
         h('div.row.between',
-          h('div', h('div.label', `Lesson ${next + 1}`), h('div.muted', `level N${ls[next][0].level}`)),
-          h('a.btn.primary', { href: `#/learn/${next + 1}` }, 'Learn')),
-        h('ul.preview', ls[next].map((it) => h('li' + (isLearned(app, it) ? '.learned' : ''),
+          h('div', h('div.label', 'Next lesson'), h('div.muted', `level N${next[0].level}`)),
+          h('a.btn.primary', { href: '#/learn/next' }, 'Learn')),
+        h('ul.preview', next.map((it) => h('li',
           it.kanji
             ? [h('span.jp', it.kanji), h('span.muted', ' new kanji')]
             : [h('span.jp', it.word), ' ', h('span.muted', it.kana), h('span.preview-meaning', it.meaning)]))))
         : h('section.card', h('p', 'Every lesson is learned. おめでとう!')),
+
+      !app.state.items.size ? h('section.card',
+        h('div.label', 'Already know some kanji?'),
+        h('p.muted.small', 'Import what you know: mark your kanji, and their reviews are spread out over the coming weeks instead of all at once.'),
+        h('a.btn', { href: '#/import' }, 'Import prior knowledge')) : null,
 
       h('section.card.stats',
         h('div.stat', h('b', String(counts.words)), h('span', ` / ${totalWords} words`)),

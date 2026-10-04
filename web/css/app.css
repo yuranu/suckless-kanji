@@ -296,3 +296,19 @@ svg path, svg polyline { fill: none; stroke-linecap: round; stroke-linejoin: rou
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .summary-body > .word.huge:first-child { margin-top: 6px; }
+
+/* ---- import ---- */
+.wall-level { font-weight: 700; color: var(--muted); margin: 12px 0 6px; font-size: 13px; }
+.kanji-wall.selectable button {
+  aspect-ratio: 1; font: inherit; font-family: var(--jp); font-size: 22px; padding: 0; cursor: pointer;
+  border-radius: 8px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--line);
+}
+.kanji-wall.selectable button.on { background: var(--mature); color: #fff; border-color: transparent; }
+.kanji-wall.selectable button.locked { opacity: 0.55; cursor: default; }
+.paste {
+  width: 100%; font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 10px; margin-top: 8px; resize: vertical;
+}
+.load-chart { display: flex; align-items: flex-end; gap: 1px; height: 70px; margin: 12px 0 4px; }
+.load-bar { flex: 1; background: var(--accent); opacity: 0.75; border-radius: 2px 2px 0 0; min-height: 1px; }
+details summary { cursor: pointer; }

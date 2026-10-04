@@ -26,8 +26,9 @@ test('estimateKnown: words need all kanji known and level <= reached', () => {
     if (it.kanji) assert.ok(known.has(it.kanji));
     else assert.ok(it.jlpt >= 3, it.id);
   }
-  // Words with the removed kanji are holes, as are N2/N1 words placed before the frontier.
+  // Words with the removed kanji are holes; holes stay within the reached levels.
   assert.ok(holes.some((it) => it.word && it.word.includes('話')));
+  assert.ok(holes.every((it) => it.level >= 3));
   assert.ok(!items.some((it) => it.word && it.word.includes('話')));
   console.log(`known items ${items.length}, holes ${holes.length}`);
 });
