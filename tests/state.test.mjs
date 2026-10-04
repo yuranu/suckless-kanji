@@ -89,3 +89,14 @@ test('export round-trips and validates', () => {
   assert.deepEqual(parseExport(exportBlob(events, [])).events, events);
   assert.throws(() => parseExport('{"format":"other"}'));
 });
+
+test('a second learn of the same card (another device) keeps the existing schedule', () => {
+  const s = replay([
+    ev('learn', { cards: { 'x#r': 3 } }, T0),
+    ev('review', { card: 'x#r', rating: 3 }, T0 + 3 * DAY),
+    ev('learn', { cards: { 'x#r': 2 } }, T0 + DAY, 'b'),
+  ]);
+  const c = s.cards.get('x#r');
+  assert.equal(c.reps, 2);
+  assert.equal(s.items.size, 1);
+});

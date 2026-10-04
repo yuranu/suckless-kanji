@@ -1,9 +1,13 @@
 // Persistence: an append-only event log in IndexedDB (the source of truth) plus a small
 // device-local key/value area in localStorage for per-device settings.
-// Sync (later) = exchange events the other side lacks, by id; see state.js for the model.
+// Sync (sync.js) exchanges events the other side lacks, by id; see state.js for the model.
 
 const DB_NAME = 'suckless-kanji';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+// events: the log. reports: local drawpad diagnostics. synced: ids of events the server has.
+// meta: small records such as the sync cursor. backups: local log copies taken before a
+// destructive sync choice ("use cloud", reset).
+const STORES = ['events', 'reports', 'synced', 'meta', 'backups'];
 
 function req(r) {
   return new Promise((resolve, reject) => { r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error); });
@@ -14,8 +18,7 @@ export class IdbBackend {
     const r = indexedDB.open(DB_NAME, DB_VERSION);
     r.onupgradeneeded = () => {
       const db = r.result;
-      if (!db.objectStoreNames.contains('events')) db.createObjectStore('events', { keyPath: 'id' });
-      if (!db.objectStoreNames.contains('reports')) db.createObjectStore('reports', { keyPath: 'id' });
+      for (const name of STORES) if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath: 'id' });
     };
     this.db = await req(r);
     return this;
@@ -25,7 +28,10 @@ export class IdbBackend {
   }
   // Inserts records whose id is not stored yet; returns how many were new.
   async putNew(store, records) {
-    const have = new Set(records.length > 1 ? await req(this.db.transaction(store).objectStore(store).getAllKeys()) : []);
+    const read = this.db.transaction(store).objectStore(store);
+    const have = new Set(records.length > 20
+      ? await req(read.getAllKeys())
+      : (await Promise.all(records.map((r) => req(read.getKey(r.id))))).filter((k) => k !== undefined));
     const tx = this.db.transaction(store, 'readwrite');
     const os = tx.objectStore(store);
     let added = 0;
@@ -42,10 +48,24 @@ export class IdbBackend {
     tx.objectStore(store).clear();
     await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
   }
+  async get(store, id) {
+    return req(this.db.transaction(store).objectStore(store).get(id));
+  }
+  // Insert or overwrite (for mutable records: meta, backups).
+  async put(store, record) {
+    const tx = this.db.transaction(store, 'readwrite');
+    tx.objectStore(store).put(record);
+    await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
+  }
+  async delete(store, id) {
+    const tx = this.db.transaction(store, 'readwrite');
+    tx.objectStore(store).delete(id);
+    await new Promise((resolve, reject) => { tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); });
+  }
 }
 
 export class MemoryBackend {
-  constructor() { this.stores = { events: new Map(), reports: new Map() }; }
+  constructor() { this.stores = Object.fromEntries(STORES.map((n) => [n, new Map()])); }
   async open() { return this; }
   async all(store) { return [...this.stores[store].values()]; }
   async putNew(store, records) {
@@ -54,6 +74,9 @@ export class MemoryBackend {
     return added;
   }
   async clear(store) { this.stores[store].clear(); }
+  async get(store, id) { return this.stores[store].get(id); }
+  async put(store, record) { this.stores[store].set(record.id, record); }
+  async delete(store, id) { this.stores[store].delete(id); }
 }
 
 // ---- device-local storage (best effort) -------------------------------------------

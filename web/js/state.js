@@ -61,6 +61,9 @@ export function applyEvent(state, e) {
     case 'learn': {
       const o = sm2Options(state.settings);
       for (const [cardId, rating] of Object.entries(d.cards || {})) {
+        // The same lesson finished on two devices before syncing: the first one counts,
+        // the later one must not wipe reviews done in between.
+        if (state.cards.has(cardId)) continue;
         const item = itemOfCard(cardId);
         if (!state.items.has(item)) {
           state.items.set(item, { day });
