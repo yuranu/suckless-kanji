@@ -1,0 +1,47 @@
+import { h, add, clear } from '../ui/dom.js';
+import { dueCards, today } from '../state.js';
+import { lessonList, nextLessonIndex, forecast, learnedCounts, isLearned } from '../progress.js';
+
+export function homeScreen(root, app) {
+  function render() {
+    const due = dueCards(app.state).length;
+    const next = nextLessonIndex(app);
+    const ls = lessonList(app);
+    const counts = learnedCounts(app);
+    const fc = forecast(app, 7);
+    const todayStats = app.state.days.get(today(app.state)) || { reviews: 0, learned: 0, again: 0 };
+    const totalWords = app.data.items.filter((it) => !it.kanji).length;
+
+    add(clear(root),
+      h('h1.title', 'Suckless Kanji'),
+      !app.persistent ? h('div.banner.bad', 'Storage is unavailable in this browser: progress will be lost when the page closes.') : null,
+
+      h('section.card',
+        h('div.row.between',
+          h('div', h('div.big-number', String(due)), h('div.muted', due === 1 ? 'card due' : 'cards due')),
+          h('a.btn.primary' + (due ? '' : '.disabled'), { href: due ? '#/review' : undefined }, 'Review'))),
+
+      next !== null ? h('section.card',
+        h('div.row.between',
+          h('div', h('div.label', `Lesson ${next + 1}`), h('div.muted', `level N${ls[next][0].level}`)),
+          h('a.btn.primary', { href: `#/learn/${next + 1}` }, 'Learn')),
+        h('ul.preview', ls[next].map((it) => h('li' + (isLearned(app, it) ? '.learned' : ''),
+          it.kanji
+            ? [h('span.jp', it.kanji), h('span.muted', ' new kanji')]
+            : [h('span.jp', it.word), ' ', h('span.muted', it.kana), h('span.preview-meaning', it.meaning)]))))
+        : h('section.card', h('p', 'Every lesson is learned. おめでとう!')),
+
+      h('section.card.stats',
+        h('div.stat', h('b', String(counts.words)), h('span', ` / ${totalWords} words`)),
+        h('div.stat', h('b', String(counts.kanji)), h('span', ` / ${app.data.kanjiList.length} kanji`)),
+        h('div.stat', h('b', String(todayStats.reviews)), h('span', ' reviews today'),
+          todayStats.reviews ? h('span.muted', ` · ${Math.round(100 * (1 - todayStats.again / todayStats.reviews))}% correct`) : null),
+        h('div.forecast', fc.map((n, i) => h('div.fc-day',
+          h('div.fc-bar', { style: { height: `${Math.min(100, (n / Math.max(1, ...fc)) * 100)}%` } }),
+          h('div.fc-n', String(n)),
+          h('div.fc-label', i === 0 ? 'today' : i === 1 ? 'tmrw' : `+${i}`))))),
+    );
+  }
+  render();
+  return app.onChange(render);
+}

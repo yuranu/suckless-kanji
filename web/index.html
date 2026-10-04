@@ -2,64 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
 <title>Suckless Kanji</title>
-<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/main.js"></script>
 </head>
 <body>
-<header>
-  <select id="level" title="JLPT level">
-    <option value="5">N5</option><option value="4">N4</option><option value="3">N3</option>
-    <option value="2">N2</option><option value="1">N1</option>
-  </select>
-  <div class="seg" id="mode" role="radiogroup" title="Trace: outline shown. Guided: hint after a miss. Recall: no help until 3 misses.">
-    <button data-mode="trace">Trace</button><button data-mode="guided">Guided</button><button data-mode="recall">Recall</button>
-  </div>
-  <input id="jump" placeholder="字" maxlength="1" title="Jump to a kanji">
-</header>
-
-<main>
-  <div class="info">
-    <div class="meaning" id="meaning"></div>
-    <div class="readings"><span id="on"></span><span id="kun"></span></div>
-  </div>
-
-  <div class="board-wrap">
-    <svg id="board" viewBox="0 0 109 109">
-      <g class="grid">
-        <rect x="0.5" y="0.5" width="108" height="108" rx="3"/>
-        <line x1="54.5" y1="0" x2="54.5" y2="109"/><line x1="0" y1="54.5" x2="109" y2="54.5"/>
-      </g>
-      <g id="ghost" class="ghost"></g>
-      <g id="done" class="done"></g>
-      <g id="hint" class="hint"></g>
-      <g id="ink" class="ink"></g>
-    </svg>
-    <div class="flash" id="flash"></div>
-  </div>
-
-  <div class="status">
-    <span id="progress"></span>
-    <span id="msg"></span>
-  </div>
-
-  <nav>
-    <button id="prev" title="Previous (←)">‹</button>
-    <button id="replay" title="Animate stroke order (A)">Animate</button>
-    <button id="restart" title="Start this kanji over (R)">Restart</button>
-    <button id="next" title="Next (→ / Enter)">›</button>
-  </nav>
-
-  <div class="stats" id="stats"></div>
-</main>
-
-<footer>
-  Stroke data <a href="https://kanjivg.tagaini.net">KanjiVG</a> (CC BY-SA 3.0) ·
-  kanji info <a href="https://www.edrdg.org/wiki/index.php/KANJIDIC_Project">KANJIDIC2</a> (EDRDG) ·
-  JLPT lists <a href="http://www.tanos.co.uk/jlpt/">tanos.co.uk</a>
-</footer>
-
-<script src="stroke.js"></script>
-<script src="app.js"></script>
+<div id="app"><main class="screen"><p class="muted">Loading…</p></main></div>
 </body>
 </html>
