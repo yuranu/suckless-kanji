@@ -6,11 +6,10 @@
 import { h, clear } from '../ui/dom.js';
 import { sessionFrame } from '../ui/session.js';
 import { runCard } from '../ui/games.js';
-import { ReviewQueue } from '../session.js';
+import { ReviewQueue, spreadShuffle } from '../session.js';
 import { cardIds } from '../data.js';
 import { itemOfCard, kindOfCard } from '../state.js';
 import { lessonList, itemsForKanji } from '../progress.js';
-import { shuffle } from '../distractors.js';
 
 function itemsFor(app, spec) {
   const [type, arg] = [spec.slice(0, spec.indexOf(':')), spec.slice(spec.indexOf(':') + 1)];
@@ -27,7 +26,7 @@ export function practiceScreen(root, app, [spec]) {
   const items = itemsFor(app, spec);
   if (!items.length) { location.hash = '#/'; return; }
   const frame = sessionFrame(root, { app, title: 'Practice' });
-  const queue = new ReviewQueue(shuffle(items.flatMap(cardIds)));
+  const queue = new ReviewQueue(spreadShuffle(items.flatMap(cardIds)));
   let alive = true, misses = 0;
 
   (async () => {

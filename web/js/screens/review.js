@@ -3,7 +3,7 @@
 import { h, add, clear } from '../ui/dom.js';
 import { sessionFrame } from '../ui/session.js';
 import { runCard } from '../ui/games.js';
-import { ReviewQueue } from '../session.js';
+import { ReviewQueue, spreadShuffle } from '../session.js';
 import { dueCards, itemOfCard, kindOfCard, dueDay, today } from '../state.js';
 
 export function reviewScreen(root, app) {
@@ -19,7 +19,9 @@ export function reviewScreen(root, app) {
   }
 
   const frame = sessionFrame(root, { app, title: 'Review' });
-  const queue = new ReviewQueue(due.map((c) => c.id));
+  // dueCards picks which cards (most overdue first, up to the daily limit); the order they
+  // are shown in is random, so it differs every session.
+  const queue = new ReviewQueue(spreadShuffle(due.map((c) => c.id)));
   let alive = true, answered = 0, again = 0;
   const t0 = Date.now();
 

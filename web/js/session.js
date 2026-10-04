@@ -1,5 +1,34 @@
 // Session queues. Pure: no UI, no persistence.
 
+const itemOf = (cardId) => cardId.slice(0, cardId.lastIndexOf('#'));
+
+// Random order in which the cards of one word (reading + writing) are not next to each
+// other when that can be avoided: seeing a word's reading right before writing it gives
+// the answer away.
+export function spreadShuffle(ids, rng = Math.random) {
+  const a = ids.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  const same = (x, y) => x !== undefined && y !== undefined && itemOf(x) === itemOf(y);
+  for (let i = 1; i < a.length; i++) {
+    if (!same(a[i], a[i - 1])) continue;
+    let j = i + 1;
+    while (j < a.length && same(a[j], a[i - 1])) j++;
+    if (j < a.length) { [a[i], a[j]] = [a[j], a[i]]; continue; } // later neighbours are checked as i advances
+    // Nothing later to swap with (pair at the end): move a[i] to an earlier slot where it
+    // creates no new pair, and the card it displaces fits between a[i - 1] and a[i + 1].
+    for (let k = 0; k < i - 1; k++) {
+      if (same(a[k], a[i - 1]) || same(a[k], a[i + 1])) continue;
+      if (same(a[i], a[k - 1]) || same(a[i], a[k + 1])) continue;
+      [a[i], a[k]] = [a[k], a[i]];
+      break;
+    }
+  }
+  return a;
+}
+
 // SRS review: each card is rated once (its first answer). A failed card comes back a few
 // cards later until it is answered correctly (Anki's relearning), without new ratings.
 export class ReviewQueue {
@@ -46,7 +75,10 @@ export class Drill {
   next() {
     const open = [...this.need].filter(([, n]) => n > 0).map(([id]) => id);
     if (!open.length) return (this.current = null);
-    const pool = open.length > 1 ? open.filter((id) => id !== this.last) : open;
+    // Prefer a different word than the last card, then at least a different card.
+    const other = this.last ? open.filter((id) => itemOf(id) !== itemOf(this.last)) : open;
+    const notSame = open.filter((id) => id !== this.last);
+    const pool = other.length ? other : notSame.length ? notSame : open;
     // Weight by how much is left, so weak cards come up more.
     const weights = pool.map((id) => this.need.get(id));
     let r = this.rng() * weights.reduce((a, b) => a + b, 0);

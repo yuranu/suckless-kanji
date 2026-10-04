@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { indexData, lessons, cardIds, kanjiOfWord } from '../web/js/data.js';
 import { readingChoices, meaningChoices, kanjiGrid } from '../web/js/distractors.js';
-import { ReviewQueue, Drill } from '../web/js/session.js';
+import { ReviewQueue, Drill, spreadShuffle } from '../web/js/session.js';
 
 const load = (p) => JSON.parse(fs.readFileSync(new URL(`../web/data/${p}`, import.meta.url), 'utf8'));
 const data = indexData(load('curriculum.json'), load('kanji.json'));
@@ -102,4 +102,32 @@ test('itemsForKanji: union over kanji, deduped, curriculum order, learned filter
   assert.ok(ids.includes('一日|いちにち') && ids.includes('一つ|ひとつ'));
   assert.deepEqual(all.map((it) => it.index), [...all.map((it) => it.index)].sort((a, b) => a - b));
   assert.deepEqual(itemsForKanji(app, ['一', '日'], true).map((it) => it.id), ['一|いち', '一日|いちにち']);
+});
+
+test('spreadShuffle: a permutation, random, and keeps a word\'s cards apart', () => {
+  const ids = Array.from({ length: 10 }, (_, i) => [`w${i}#r`, `w${i}#w`]).flat();
+  const item = (id) => id.split('#')[0];
+  const orders = new Set();
+  for (let seed = 1; seed <= 200; seed++) {
+    const out = spreadShuffle(ids, seeded(seed));
+    assert.deepEqual([...out].sort(), [...ids].sort());
+    for (let i = 1; i < out.length; i++) assert.notEqual(item(out[i]), item(out[i - 1]), out.join(' '));
+    orders.add(out.join());
+  }
+  assert.ok(orders.size > 190); // practically every session differs
+  assert.deepEqual(spreadShuffle(['a#r', 'a#w'], seeded(1)).sort(), ['a#r', 'a#w']); // unavoidable: fine
+});
+
+test('Drill: never shows two cards of the same word in a row when another word is open', () => {
+  for (let seed = 1; seed <= 50; seed++) {
+    const d = new Drill(['a#r', 'a#w', 'b#r', 'b#w', 'c#r', 'c#w'], 2, seeded(seed));
+    let prev = null;
+    while (!d.done) {
+      const open = new Set([...d.need].filter(([, n]) => n > 0).map(([id]) => id.split('#')[0]));
+      const c = d.next();
+      if (prev && open.size > 1) assert.notEqual(c.split('#')[0], prev.split('#')[0]);
+      prev = c;
+      d.answer(c, true);
+    }
+  }
 });
