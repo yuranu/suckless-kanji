@@ -1,6 +1,6 @@
 # suckless-kanji
 
-A kanji/vocabulary trainer: a fixed JLPT curriculum (N5→N1), spaced repetition (FSRS-5 or Anki's SM-2), and minigames where you draw kanji stroke by stroke. Client-side only for now. It has no framework, no bundler and no runtime dependencies, and works offline.
+A kanji/vocabulary trainer: a fixed JLPT curriculum (N5→N1), spaced repetition (FSRS-5 or Anki's SM-2), and minigames where you draw kanji stroke by stroke. The client has no framework, no bundler and no runtime dependencies, and works offline. A thin Cloudflare Worker adds Google sign-in and sync between devices.
 
 ## Run
 
@@ -66,9 +66,35 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 - **Event fields:** each event carries `id`, `t` (ms timestamp), `tz` (timezone offset) and `dev` (device id). Replay is ordered by `(t, id)` and is deterministic, so every device reaches the same state from the same events.
 - **Stable keys:** item ids (`word|kana`, or the kanji itself) come from the curriculum. Regenerating the data doesn't orphan progress, and unknown ids are ignored.
 - **Both schedulers at once:** each card keeps an SM-2 state and an FSRS state, both updated on every answer. Switching the algorithm or the desired retention re-times every card immediately.
-- **Sync later:** the server only stores events. Clients upload the events the server lacks and download the ones they lack (matched by `id`), then replay. There are no conflicts to resolve; concurrent reviews on two devices simply both count.
+- **Sync:** the server only stores events. Clients upload the events the server lacks and download the ones they lack (matched by `id`), then replay. Concurrent reviews on two devices simply both count (see *Server*).
 - **Backups:** Settings → *Export backup* writes the full log as JSON. *Import / merge* adds events by id, so importing twice, or from another device, is safe.
 - **Device-only settings:** voice, theme and stroke leniency live in `localStorage`.
+
+## Server (sync)
+
+A thin Cloudflare Worker ([server/worker.js](server/worker.js)) hosts the static app and a sync API at https://kanji.yuranu.com. It uses Workers, static assets and D1 (serverless SQLite), all on the free plan.
+
+- **Auth:** Google sign-in, with an allowlist checked on every request. The session is a signed, HttpOnly cookie. The app itself is public, and signing in is only needed to sync.
+- **Sync:** clients upload the events the server lacks and download newer ones, with duplicates ignored by id. Normal use never conflicts. When histories genuinely diverge (a first sync with data on both sides, a reset or "use local" on another device, a different account), the app asks: merge / use this device / use the cloud.
+- **No data loss:**
+  - "Use local" and reset start a new *generation* on the server; old generations stay in the database as an archive.
+  - "Use cloud" keeps a local backup of the replaced log.
+
+```bash
+scripts/server/allow.sh add|rm|ls <email> [--local]   # who may sign in
+npm run dev        # wrangler dev on :8787 (local D1; .dev.vars: SESSION_SECRET, DEV_LOGIN=1)
+npm run deploy     # apply D1 migrations, deploy
+```
+
+**First deploy:**
+1. `npx wrangler login`
+2. `scripts/server/setup.sh`: creates the D1 database and records its id in `wrangler.toml`, migrates, deploys, and sets a random `SESSION_SECRET`.
+3. `npx wrangler secret put GOOGLE_CLIENT_SECRET`
+4. `scripts/server/allow.sh add <email>`
+
+The Google OAuth client must list `https://kanji.yuranu.com/auth/callback` (and `http://localhost:8787/auth/callback` for local testing) as redirect URIs.
+
+**Local testing without Google:** with `DEV_LOGIN=1` in `.dev.vars`, `/auth/dev?email=<allowlisted>` signs in directly. This only works when `DEV_LOGIN` is set, which it never is in production.
 
 ## Data
 
@@ -122,7 +148,9 @@ web/            the app (static files)
   js/session.js review queue, lesson drill
   js/distractors.js  wrong answers for choices and grids
   js/stroke.js  stroke matcher
+  js/sync.js    sync client
   js/ui/        drawpad, minigames, DOM helpers
   js/screens/   home, lessons, learn, review, practice, kanji, settings
-tests/          node:test unit tests
+server/         Cloudflare Worker (auth, allowlist, sync) and D1 migrations
+tests/          node:test unit tests (incl. Worker + sync end to end on a D1 stand-in)
 ```
