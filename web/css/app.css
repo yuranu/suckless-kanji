@@ -353,3 +353,12 @@ details summary { cursor: pointer; }
   /* 8 translations on a small phone: one line each (the first gloss tells them apart) */
   .choices.many:not(.cols) .label { -webkit-line-clamp: 1; }
 }
+
+/* ---- sync ---- */
+.sync-pill {
+  display: inline-block; font: inherit; font-size: 13px; color: var(--muted); background: none;
+  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; text-decoration: none; cursor: pointer;
+}
+.sync-pill.bad { color: var(--bad); border-color: var(--bad); }
+.conflict { margin-top: 10px; padding: 12px; border-radius: 10px; background: var(--bad-bg); }
+.choices-col { display: grid; gap: 8px; }

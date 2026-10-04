@@ -5,6 +5,7 @@ import { IdbBackend, MemoryBackend, local, deviceId, makeEvent } from './store.j
 import { replay, applyEvent } from './state.js';
 import { SETTINGS } from './settings.js';
 import { tts } from './tts.js';
+import { Sync } from './sync.js';
 
 export async function createApp() {
   const data = await loadData();
@@ -40,6 +41,8 @@ export async function createApp() {
       else state = replay(await backend.all('events')); // clock went backwards: replay in order
       lastT = Math.max(lastT, e.t);
       listeners.forEach((fn) => fn());
+      app.sync.refreshPending();
+      app.scheduleSync();
       return e;
     },
 
@@ -65,6 +68,12 @@ export async function createApp() {
 
     onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
+    // Sync a few seconds after local changes, batching a burst of answers into one request.
+    scheduleSync(ms = 4000) {
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(() => app.sync.run(), ms);
+    },
+
     speak(text) {
       tts.speak(text, { voice: device.voice, rate: device.rate });
     },
@@ -77,6 +86,21 @@ export async function createApp() {
       await backend.putNew('reports', [{ id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`, t: Date.now(), kind, ...detail }]);
     },
   };
+
+  let syncTimer = null;
+  app.sync = new Sync({
+    backend,
+    onRemote: () => app.reload(),
+    onChange: () => listeners.forEach((fn) => fn()),
+  });
+  if (persistent) {
+    app.sync.refreshPending().then(() => app.sync.run());
+    setInterval(() => { if (document.visibilityState === 'visible') app.sync.run(); }, 5 * 60000);
+    window.addEventListener('online', () => app.sync.run());
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') app.sync.run(); });
+  } else {
+    app.sync.status.state = 'unavailable';
+  }
 
   function applyTheme() {
     const t = device.theme;

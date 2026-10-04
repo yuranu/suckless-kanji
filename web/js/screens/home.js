@@ -1,6 +1,7 @@
 import { h, add, clear } from '../ui/dom.js';
 import { dueCards, today } from '../state.js';
 import { nextLessonItems, forecast, learnedCounts } from '../progress.js';
+import { syncPill } from '../ui/sync-ui.js';
 
 export function homeScreen(root, app) {
   function render() {
@@ -12,7 +13,7 @@ export function homeScreen(root, app) {
     const totalWords = app.data.items.filter((it) => !it.kanji).length;
 
     add(clear(root),
-      h('h1.title', 'Suckless Kanji'),
+      h('div.row.between', h('h1.title', 'Suckless Kanji'), syncPill(app)),
       !app.persistent ? h('div.banner.bad', 'Storage is unavailable in this browser: progress will be lost when the page closes.') : null,
 
       h('section.card',

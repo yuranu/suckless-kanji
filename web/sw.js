@@ -1,6 +1,6 @@
 // Offline support: network first (so updates show up immediately), cache as fallback.
-// Everything the app fetches is same-origin and static, so caching every GET is safe.
-const CACHE = 'suckless-kanji-v1';
+// Only static files are cached; API and sign-in requests always go to the network.
+const CACHE = 'suckless-kanji-v2';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', 'index.html', 'css/app.css', 'js/main.js', 'data/curriculum.json', 'data/kanji.json'])));
@@ -15,6 +15,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== location.origin) return;
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) return; // never cache
   e.respondWith(
     fetch(e.request)
       .then((res) => {

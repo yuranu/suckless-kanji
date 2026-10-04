@@ -4,6 +4,7 @@ import { SETTINGS } from '../settings.js';
 import { tts } from '../tts.js';
 import { exportBlob, parseExport } from '../store.js';
 import { replay } from '../state.js';
+import { syncSection } from '../ui/sync-ui.js';
 
 function control(app, def) {
   const value = app.settings[def.key];
@@ -49,6 +50,7 @@ export function settingsScreen(root, app) {
     const groups = [...new Set(SETTINGS.map((s) => s.group))];
     add(clear(root),
       h('h1.title', 'Settings'),
+      syncSection(app, render),
       groups.map((g) => h('section.card.settings',
         h('h3', g),
         SETTINGS.filter((s) => s.group === g).map((def) => h('label.setting',
@@ -88,9 +90,19 @@ export function settingsScreen(root, app) {
         reports.length ? h('p.small.muted', `${reports.length} drawing-checker reports saved (included in exports).`) : null,
         h('button.btn.danger', {
           onclick: async () => {
-            if (!await confirmDialog('Delete ALL progress on this device? Export a backup first if unsure.', 'Delete everything')) return;
-            if (!await confirmDialog('Really delete? This cannot be undone.', 'Yes, delete')) return;
-            await app.backend.clear('events');
+            const synced = !!app.sync.status.email;
+            const where = synced ? 'on ALL your devices (synced)' : 'on this device';
+            if (!await confirmDialog(`Delete ALL progress ${where}? Export a backup first if unsure.`, 'Delete everything')) return;
+            if (!await confirmDialog('Really delete? This cannot be undone from the app.', 'Yes, delete')) return;
+            try {
+              // Signed in: start a new empty generation on the server (it archives the old
+              // one), otherwise the next sync would bring everything back.
+              if (synced) await app.sync.resetEverywhere();
+              else await app.backend.clear('events');
+            } catch (err) {
+              toast(`Reset failed: ${err.message}`, 4000);
+              return;
+            }
             await app.reload();
             toast('Progress deleted');
             render();
@@ -108,4 +120,8 @@ export function settingsScreen(root, app) {
     );
   }
   render();
+  // Re-render when the sync status changes, unless the user is interacting with a control.
+  return app.onChange(() => {
+    if (!root.contains(document.activeElement) || document.activeElement === document.body) render();
+  });
 }
