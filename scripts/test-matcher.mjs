@@ -4,14 +4,10 @@
 // Reports: true-accept rate (sloppy correct stroke), false-accept rate (another stroke drawn instead),
 // and backwards detection.
 import fs from 'node:fs';
-import vm from 'node:vm';
 import path from 'node:path';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-const ctx = { window: {} };
-vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(root, 'web/stroke.js'), 'utf8'), ctx);
-const { Stroke } = ctx.window;
+const Stroke = await import(path.join(root, 'web/js/stroke.js'));
 const KANJI = JSON.parse(fs.readFileSync(path.join(root, 'web/data/kanji.json'), 'utf8'));
 
 let seed = 42;
