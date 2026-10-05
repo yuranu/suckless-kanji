@@ -15,6 +15,25 @@ run_worker_first = ["/api/*", "/auth/*"]
 
 [vars]
 GOOGLE_CLIENT_ID = "276404407742-dq3le281o8mocggu96eqltkdds8egf5r.apps.googleusercontent.com"
+# Signup and limits. Worst case (every account at its quota): MAX_USERS * MAX_USER_BYTES =
+# 3 GB of event data, which with indexes stays within D1's free 5 GB.
+SIGNUP_MODE = "open"           # or "allowlist" (only emails added with scripts/server/users.sh allow)
+MAX_USERS = "100"
+MAX_USER_BYTES = "30000000"    # ~5 years of heavy daily use; raise per account: users.sh quota
+MAX_EVENT_BYTES = "65536"
+
+# Requests per minute. An active learner syncs at most every few seconds (answers are batched,
+# 4 s debounce) and a new device downloads ~1000 events per request; 60/min leaves headroom
+# while capping a scripted account. Sign-in is limited per IP.
+[[ratelimits]]
+name = "SYNC_LIMITER"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+[[ratelimits]]
+name = "AUTH_LIMITER"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
 
 [[d1_databases]]
 binding = "DB"

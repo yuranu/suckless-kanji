@@ -9,6 +9,10 @@
 //
 // Env: DB (D1), ASSETS, GOOGLE_CLIENT_ID (var), GOOGLE_CLIENT_SECRET (secret),
 //      SESSION_SECRET (secret), DEV_LOGIN (local only: enables /auth/dev?email=).
+// Signup and limits (vars, see limits()): SIGNUP_MODE "open" (any verified Google account,
+//      up to MAX_USERS accounts) or "allowlist"; MAX_USER_BYTES stored per account;
+//      MAX_EVENT_BYTES per event. Optional rate-limit bindings: SYNC_LIMITER (per account),
+//      AUTH_LIMITER (per IP, sign-in).
 //
 // The server never interprets events: it stores them per user and generation, dedups by
 // event id, and hands them out in arrival order (`seq`), which clients use as a cursor.
@@ -82,12 +86,48 @@ async function allowed(env, email) {
   return !!(await env.DB.prepare('SELECT 1 FROM allowlist WHERE email = ?').bind(normEmail(email)).first());
 }
 
-async function generationOf(env, email) {
-  const row = await env.DB.prepare('SELECT generation FROM users WHERE email = ?').bind(email).first();
-  if (row) return row.generation;
-  await env.DB.prepare('INSERT OR IGNORE INTO users (email, generation) VALUES (?, 1)').bind(email).run();
-  return 1;
+export function limits(env) {
+  return {
+    mode: env.SIGNUP_MODE === 'open' ? 'open' : 'allowlist',
+    maxUsers: Number(env.MAX_USERS) || 100,
+    maxUserBytes: Number(env.MAX_USER_BYTES) || 30_000_000,
+    maxEventBytes: Number(env.MAX_EVENT_BYTES) || 65_536,
+  };
 }
+
+const account = (env, email) =>
+  env.DB.prepare('SELECT generation, bytes, blocked, quota FROM users WHERE email = ?').bind(email).first();
+
+// Who may use sync. Creates the account on first use while there is room (the user count is
+// only read then, so it costs nothing per sync). Returns {user} or {denied: reason}.
+async function admit(env, email) {
+  const L = limits(env);
+  if (L.mode === 'allowlist' && !(await allowed(env, email))) return { denied: 'not-allowed' };
+  let user = await account(env, email);
+  if (!user) {
+    const { n } = await env.DB.prepare('SELECT COUNT(*) AS n FROM users').first();
+    if (n >= L.maxUsers) return { denied: 'full' };
+    await env.DB.prepare('INSERT OR IGNORE INTO users (email, generation, created) VALUES (?, 1, ?)').bind(email, Date.now()).run();
+    user = await account(env, email);
+  }
+  if (user.blocked) return { denied: 'blocked' };
+  return { user };
+}
+
+const DENIED_PAGE = {
+  'not-allowed': (email) => ['Not allowed', `${email} is not on this server's allowlist.`],
+  full: () => ['Sync is full', 'The sync server has reached its account limit for now. The app works fully without signing in: your progress stays on this device.'],
+  blocked: () => ['Account blocked', 'This account can no longer use sync. The app still works without signing in.'],
+};
+
+// Optional Cloudflare rate-limit binding; absent (e.g. in tests) means unlimited.
+async function rateLimited(limiter, key) {
+  if (!limiter) return false;
+  const { success } = await limiter.limit({ key });
+  return !success;
+}
+
+
 
 // D1 bills reads per row scanned, and COUNT(*) scans the user's whole log. Only call it on
 // rare paths (conflict responses), never on every sync.
@@ -159,8 +199,9 @@ async function callback(env, request) {
     return page('Sign-in failed', 'Unexpected identity token.', 400);
   }
   const email = normEmail(claims.email);
-  if (!(await allowed(env, email))) {
-    const r = page('Not allowed', `${email} is not on this server's allowlist.`, 403);
+  const { denied } = await admit(env, email);
+  if (denied) {
+    const r = page(...DENIED_PAGE[denied](email), 403);
     r.headers.append('set-cookie', clearOauth);
     return r;
   }
@@ -183,8 +224,9 @@ async function startSession(env, email, extraCookies = []) {
 // -> 409 {conflict, generation, count}: the client must choose merge / local / cloud:
 //      'generation' the server moved to another generation (reset / "use local" elsewhere);
 //      'first'      the client never synced, and both sides already have events.
-async function sync(env, email, body) {
-  const gen = await generationOf(env, email);
+async function sync(env, email, user, body) {
+  const gen = user.generation;
+  const L = limits(env);
   const events = Array.isArray(body.events) ? body.events : [];
   if (events.length > MAX_UPLOAD) return json({ error: `at most ${MAX_UPLOAD} events per request` }, 413);
   for (const e of events) {
@@ -192,6 +234,9 @@ async function sync(env, email, body) {
       return json({ error: 'malformed event' }, 400);
     }
   }
+  const bodies = events.map((e) => JSON.stringify(e));
+  const sizes = bodies.map((b) => enc.encode(b).length);
+  if (sizes.some((n) => n > L.maxEventBytes)) return json({ error: 'event-too-large', limit: L.maxEventBytes }, 413);
   if (body.generation === null || body.generation === undefined) {
     // First sync of a device that has its own events: conflict if the server has any.
     if (events.length > 0) {
@@ -203,8 +248,22 @@ async function sync(env, email, body) {
   }
 
   if (events.length) {
+    // Storage quota counts only events not stored yet. The cheap upper bound (all of them)
+    // decides almost always; near the quota, look up which ones are really new.
+    const quota = user.quota ?? L.maxUserBytes;
+    let incoming = sizes.reduce((a, b) => a + b, 0);
+    if (user.bytes + incoming > quota) {
+      const marks = events.map(() => '?').join(',');
+      const { results } = await env.DB.prepare(`SELECT id FROM events WHERE email = ? AND gen = ? AND id IN (${marks})`)
+        .bind(email, gen, ...events.map((e) => e.id)).all();
+      const stored = new Set(results.map((r) => r.id));
+      incoming = sizes.reduce((sum, n, i) => (stored.has(events[i].id) ? sum : sum + n), 0);
+      if (user.bytes + incoming > quota) return json({ error: 'quota', bytes: user.bytes, quota }, 413);
+    }
     const insert = env.DB.prepare('INSERT OR IGNORE INTO events (email, gen, id, body) VALUES (?, ?, ?, ?)');
-    await env.DB.batch(events.map((e) => insert.bind(email, gen, e.id, JSON.stringify(e))));
+    const done = await env.DB.batch(events.map((e, i) => insert.bind(email, gen, e.id, bodies[i])));
+    const added = sizes.reduce((sum, n, i) => (done[i]?.meta?.changes ? sum + n : sum), 0);
+    if (added) await env.DB.prepare('UPDATE users SET bytes = bytes + ? WHERE email = ?').bind(added, email).run();
   }
   const cursor = Number.isInteger(body.cursor) ? body.cursor : 0;
   const { results } = await env.DB
@@ -220,8 +279,8 @@ async function sync(env, email, body) {
 }
 
 // Start a new, empty generation. The previous one stays in the table as an archive.
-async function replace(env, email) {
-  const gen = (await generationOf(env, email)) + 1;
+async function replace(env, email, user) {
+  const gen = user.generation + 1;
   await env.DB.prepare('UPDATE users SET generation = ? WHERE email = ?').bind(gen, email).run();
   return json({ generation: gen, cursor: 0 });
 }
@@ -232,19 +291,22 @@ async function api(env, request, path) {
   // without a CORS preflight (and no CORS is allowed).
   if (request.method === 'POST' && request.headers.get('x-sk') !== '1') return json({ error: 'missing x-sk header' }, 403);
   const session = await readSession(env, request);
-  if (!session || !(await allowed(env, session.email))) return json({ error: 'not signed in' }, 401);
+  if (!session) return json({ error: 'not signed in' }, 401);
   const email = normEmail(session.email);
+  // Per-account rate limit, keyed by the signed session: checked before any database read.
+  if (await rateLimited(env.SYNC_LIMITER, email)) return json({ error: 'rate-limited' }, 429, { 'retry-after': '10' });
+  const { user, denied } = await admit(env, email);
+  if (denied) return json({ error: denied }, denied === 'not-allowed' ? 401 : 403);
 
   if (path === '/api/me' && request.method === 'GET') {
-    const gen = await generationOf(env, email);
-    return json({ email, generation: gen });
+    return json({ email, generation: user.generation, bytes: user.bytes, quota: user.quota ?? limits(env).maxUserBytes });
   }
   if (path === '/api/sync' && request.method === 'POST') {
     let body;
     try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
-    return sync(env, email, body);
+    return sync(env, email, user, body);
   }
-  if (path === '/api/replace' && request.method === 'POST') return replace(env, email);
+  if (path === '/api/replace' && request.method === 'POST') return replace(env, email, user);
   return json({ error: 'not found' }, 404);
 }
 
@@ -253,6 +315,10 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     try {
+      if ((path === '/auth/login' || path === '/auth/callback')
+        && await rateLimited(env.AUTH_LIMITER, request.headers.get('cf-connecting-ip') || 'unknown')) {
+        return page('Slow down', 'Too many sign-in attempts from your network. Try again in a minute.', 429);
+      }
       if (path === '/auth/login') return login(env, request);
       if (path === '/auth/callback') return callback(env, request);
       if (path === '/auth/logout' && request.method === 'POST') {
@@ -261,7 +327,8 @@ export default {
       // Local development only: sign in as any allowlisted email without Google.
       if (path === '/auth/dev' && env.DEV_LOGIN === '1') {
         const email = normEmail(url.searchParams.get('email'));
-        if (!(await allowed(env, email))) return page('Not allowed', `${email} is not on the allowlist.`, 403);
+        const { denied } = await admit(env, email);
+        if (denied) return page(...DENIED_PAGE[denied](email), 403);
         return startSession(env, email);
       }
       if (path.startsWith('/api/')) return await api(env, request, path);

@@ -85,14 +85,23 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 
 Cloudflare serves the static app at https://suckless-kanji.com directly, and a thin Worker ([server/worker.js](server/worker.js)) runs only for the sync API and sign-in (`/api/*`, `/auth/*`). A separate tiny Worker ([server/redirect.js](server/redirect.js)) redirects www.suckless-kanji.com and the old kanji.yuranu.com there. It uses Workers, static assets and D1 (serverless SQLite), all on the free plan.
 
-- **Auth:** Google sign-in, with an allowlist checked on every request. The session is a signed, HttpOnly cookie. The app itself is public, and signing in is only needed to sync.
+- **Auth:** Google sign-in; the session is a signed, HttpOnly cookie. The app itself is public, and signing in is only needed to sync.
+- **Signup and limits** (`wrangler.toml` vars):
+  - `SIGNUP_MODE = "open"`: any verified Google account can sync, up to `MAX_USERS` accounts. After that new accounts get "sync is full" (the app still works, locally). `"allowlist"` admits only listed emails instead.
+  - `MAX_USER_BYTES` of stored events per account (raise it per account with `users.sh quota`), and `MAX_EVENT_BYTES` per event.
+  - Rate limits: 60 API requests per minute per account, checked before any database read, and 20 sign-in attempts per minute per IP.
+  - The defaults bound the worst case (every account full) to ~3 GB, inside D1's free 5 GB. On Cloudflare's free plan, exhausting a limit makes requests fail until it resets; it is never billed.
+  - Requests that are not signed in are rejected by the cookie signature check, before touching the database. Static files never run the Worker.
 - **Sync:** clients upload the events the server lacks and download newer ones, with duplicates ignored by id. Normal use never conflicts. When histories genuinely diverge (a first sync with data on both sides, a reset or "use local" on another device, a different account), the app asks: merge / use this device / use the cloud.
 - **No data loss:**
   - "Use local" and reset start a new *generation* on the server; old generations stay in the database as an archive.
   - "Use cloud" keeps a local backup of the replaced log.
 
 ```bash
-scripts/server/allow.sh add|rm|ls <email> [--local]   # who may sign in
+scripts/server/users.sh stats|ls [--local]          # accounts, storage use, database size
+scripts/server/users.sh block|unblock <email>       # refuse / restore sync for an account
+scripts/server/users.sh quota <email> <MB|default>  # per-account storage quota
+scripts/server/users.sh allow|disallow|allowed       # allowlist (SIGNUP_MODE = "allowlist")
 npm run dev        # wrangler dev on :8787 (local D1; .dev.vars: SESSION_SECRET, DEV_LOGIN=1)
 npm run deploy     # apply D1 migrations, deploy
 ```
@@ -101,13 +110,13 @@ npm run deploy     # apply D1 migrations, deploy
 1. `npx wrangler login`
 2. `scripts/server/setup.sh`: creates the D1 database and records its id in `wrangler.toml`, migrates, deploys, and sets a random `SESSION_SECRET`.
 3. `npx wrangler secret put GOOGLE_CLIENT_SECRET`
-4. `scripts/server/allow.sh add <email>`
+4. With `SIGNUP_MODE = "allowlist"`: `scripts/server/users.sh allow <email>`.
 
 The Google OAuth client must list `https://suckless-kanji.com/auth/callback` (and `http://localhost:8787/auth/callback` for local testing) as redirect URIs.
 
 **Self-hosting a fork:** the domains in `wrangler.toml` and `server/redirect.wrangler.toml` and the D1 `database_id` belong to this deployment. Replace them with your own, create your own Google OAuth client (put its id in `GOOGLE_CLIENT_ID`), then follow the first-deploy steps above.
 
-**Local testing without Google:** with `DEV_LOGIN=1` in `.dev.vars`, `/auth/dev?email=<allowlisted>` signs in directly. This only works when `DEV_LOGIN` is set, which it never is in production.
+**Local testing without Google:** with `DEV_LOGIN=1` in `.dev.vars`, `/auth/dev?email=<email>` signs in directly (subject to the signup mode). This only works when `DEV_LOGIN` is set, which it never is in production.
 
 ## Data
 

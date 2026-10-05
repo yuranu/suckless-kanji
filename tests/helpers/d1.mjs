@@ -15,9 +15,14 @@ export function fakeD1(migrationsDir = new URL('../../server/migrations/', impor
   return {
     raw: db,
     prepare: (sql) => stmt(sql),
+    // Like D1: all statements in one transaction; one result per statement with meta.changes.
     batch: async (stmts) => {
       db.exec('BEGIN');
-      try { stmts.forEach((s) => s._run()); db.exec('COMMIT'); } catch (e) { db.exec('ROLLBACK'); throw e; }
+      try {
+        const out = stmts.map((s) => ({ meta: { changes: Number(s._run().changes) } }));
+        db.exec('COMMIT');
+        return out;
+      } catch (e) { db.exec('ROLLBACK'); throw e; }
     },
   };
 }

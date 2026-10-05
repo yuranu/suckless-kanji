@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import worker, { signSession } from '../server/worker.js';
 import redirect from '../server/redirect.js';
 import { fakeD1 } from './helpers/d1.mjs';
+import fs from 'node:fs';
+
+const enc = new TextEncoder();
 
 const BASE = 'https://kanji.example.com';
 
@@ -40,7 +43,7 @@ test('static assets pass through; API requires a valid session', async () => {
   assert.equal((await call(env, '/api/me', { cookie: 'sk_session=v1.forged.sig' })).status, 401);
   const me = await call(env, '/api/me', { cookie: await session(env) });
   assert.equal(me.status, 200);
-  assert.deepEqual(me.data, { email: 'me@example.com', generation: 1 }); // no count: see the read-cost test
+  assert.deepEqual(me.data, { email: 'me@example.com', generation: 1, bytes: 0, quota: 30_000_000 }); // no event count: see the read-cost test
 });
 
 test('allowlist is checked on every request, not just at sign-in', async () => {
@@ -202,4 +205,86 @@ test('redirect Worker: 301 to the canonical domain, path and query kept', () => 
   const r = redirect.fetch(new Request('https://kanji.yuranu.com/privacy?x=1'), { CANONICAL_HOST: 'suckless-kanji.com' });
   assert.equal(r.status, 301);
   assert.equal(r.headers.get('location'), 'https://suckless-kanji.com/privacy?x=1');
+});
+
+// ---- open signup, quotas, rate limits ------------------------------------------------
+const openEnv = (extra = {}) => ({ ...setup(), SIGNUP_MODE: 'open', MAX_USERS: '2', ...extra });
+const syncAs = async (env, email, body) => call(env, '/api/sync', { method: 'POST', body, cookie: await session(env, email) });
+const userRow = (env, email) => env.DB.raw.prepare('SELECT * FROM users WHERE email = ?').get(email);
+
+test('open signup: any account until the user cap, then "full"; existing users keep access', async () => {
+  const env = openEnv();
+  assert.equal((await syncAs(env, 'a@x.com', { generation: null, cursor: 0, events: [] })).status, 200);
+  assert.equal((await syncAs(env, 'b@x.com', { generation: null, cursor: 0, events: [] })).status, 200);
+  const third = await syncAs(env, 'c@x.com', { generation: null, cursor: 0, events: [] });
+  assert.equal(third.status, 403);
+  assert.equal(third.data.error, 'full');
+  assert.equal((await syncAs(env, 'a@x.com', { generation: 1, cursor: 0, events: [] })).status, 200);
+  assert.ok(userRow(env, 'a@x.com').created > 0);
+});
+
+test('allowlist mode still refuses unlisted accounts', async () => {
+  const env = setup(); // SIGNUP_MODE unset = allowlist; only me@example.com is listed
+  assert.equal((await syncAs(env, 'stranger@x.com', { generation: null, cursor: 0, events: [] })).status, 401);
+  assert.equal(userRow(env, 'stranger@x.com'), undefined); // no account created
+});
+
+test('blocked accounts are refused', async () => {
+  const env = openEnv();
+  await syncAs(env, 'a@x.com', { generation: null, cursor: 0, events: [] });
+  env.DB.raw.exec("UPDATE users SET blocked = 1 WHERE email = 'a@x.com'");
+  const r = await syncAs(env, 'a@x.com', { generation: 1, cursor: 0, events: [] });
+  assert.equal(r.status, 403);
+  assert.equal(r.data.error, 'blocked');
+});
+
+test('storage quota: counts only newly stored bytes; re-uploads are free; per-user override', async () => {
+  const one = enc.encode(JSON.stringify(ev('e0'))).length;
+  const env = openEnv({ MAX_USER_BYTES: String(one * 3) });
+  const up = (events, generation = 1) => syncAs(env, 'a@x.com', { generation, cursor: 0, events });
+  assert.equal((await up([ev('e0'), ev('e1')], null)).status, 200);
+  assert.equal(userRow(env, 'a@x.com').bytes, one * 2);
+  // full re-upload of what is stored (e.g. after "merge"): over the naive bound, but nothing new
+  assert.equal((await up([ev('e0'), ev('e1'), ev('e2')])).status, 200);
+  assert.equal(userRow(env, 'a@x.com').bytes, one * 3);
+  const over = await up([ev('e3')]);
+  assert.equal(over.status, 413);
+  assert.deepEqual(over.data, { error: 'quota', bytes: one * 3, quota: one * 3 });
+  env.DB.raw.exec(`UPDATE users SET quota = ${one * 10} WHERE email = 'a@x.com'`);
+  assert.equal((await up([ev('e3')])).status, 200);
+});
+
+test('events larger than MAX_EVENT_BYTES are refused', async () => {
+  const env = openEnv({ MAX_EVENT_BYTES: '200' });
+  const big = { ...ev('big'), data: { pad: 'x'.repeat(300) } };
+  const r = await syncAs(env, 'a@x.com', { generation: null, cursor: 0, events: [big] });
+  assert.equal(r.status, 413);
+  assert.equal(r.data.error, 'event-too-large');
+});
+
+test('rate limits: per account on the API (before any DB read), per IP on sign-in', async () => {
+  const counter = (limit) => { const seen = new Map(); return { limit: async ({ key }) => { seen.set(key, (seen.get(key) || 0) + 1); return { success: seen.get(key) <= limit }; } }; };
+  const env = openEnv({ SYNC_LIMITER: counter(2), AUTH_LIMITER: counter(1) });
+  const body = { generation: null, cursor: 0, events: [] };
+  assert.equal((await syncAs(env, 'a@x.com', body)).status, 200);
+  assert.equal((await syncAs(env, 'a@x.com', { ...body, generation: 1 })).status, 200);
+  const limited = await syncAs(env, 'a@x.com', { ...body, generation: 1 });
+  assert.equal(limited.status, 429);
+  assert.equal(limited.headers.get('retry-after'), '10');
+  assert.equal((await syncAs(env, 'b@x.com', body)).status, 200); // other accounts unaffected
+  const login = (ip) => call(env, '/auth/login', { headers: { 'cf-connecting-ip': ip } });
+  assert.equal((await login('1.1.1.1')).status, 302);
+  assert.equal((await login('1.1.1.1')).status, 429);
+  assert.equal((await login('2.2.2.2')).status, 302);
+});
+
+test('migration 0002 backfills stored bytes for existing accounts', () => {
+  const env = setup();
+  const db = env.DB.raw;
+  db.exec("INSERT INTO users (email, generation) VALUES ('old@x.com', 1)");
+  db.exec("INSERT INTO events (email, gen, id, body) VALUES ('old@x.com', 1, 'a', '日本'), ('old@x.com', 2, 'b', 'abcd')");
+  // The fake D1 already ran the migration on an empty table; re-run its backfill statement.
+  const sql = fs.readFileSync(new URL('../server/migrations/0002_accounts.sql', import.meta.url), 'utf8');
+  db.exec(/UPDATE users[\s\S]*?;/.exec(sql)[0]);
+  assert.equal(userRow(env, 'old@x.com').bytes, 10); // 6 bytes of UTF-8 for 日本 + 4, across generations
 });

@@ -21,4 +21,4 @@ npx wrangler deploy
 if ! npx wrangler secret list 2>/dev/null | grep -q SESSION_SECRET; then
   head -c 32 /dev/urandom | base64 | tr -d '\n' | npx wrangler secret put SESSION_SECRET
 fi
-echo "done. Remaining: npx wrangler secret put GOOGLE_CLIENT_SECRET; scripts/server/allow.sh add <email>"
+echo "done. Remaining: npx wrangler secret put GOOGLE_CLIENT_SECRET (and, in allowlist mode, scripts/server/users.sh allow <email>)"
