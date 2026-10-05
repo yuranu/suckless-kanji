@@ -195,3 +195,20 @@ test('/api/me and a normal sync never count the whole history', async () => {
   assert.ok(statements.length > 0);
   assert.ok(!statements.some((s) => /COUNT\(/i.test(s)), statements.join('\n'));
 });
+
+test('canonical domain: www always redirects, old domains only when enabled, API never', async () => {
+  const env = { ...setup(), CANONICAL_HOST: 'new.example', LEGACY_HOSTS: 'old.example, older.example', REDIRECT_LEGACY: '0' };
+  const get = (u) => worker.fetch(new Request(u), env);
+  let r = await get('https://www.new.example/privacy?x=1');
+  assert.equal(r.status, 301);
+  assert.equal(r.headers.get('location'), 'https://new.example/privacy?x=1');
+  assert.equal((await get('https://old.example/')).status, 200); // not yet
+  assert.equal((await get('https://new.example/')).status, 200);
+  env.REDIRECT_LEGACY = '1';
+  r = await get('https://older.example/auth/login');
+  assert.equal(r.status, 301);
+  assert.equal(r.headers.get('location'), 'https://new.example/auth/login');
+  assert.equal((await get('https://old.example/api/me')).status, 401); // API still answered
+  assert.equal((await get('http://localhost:8787/')).status, 200);
+  assert.equal((await get('https://suckless-kanji.someone.workers.dev/')).status, 200);
+});

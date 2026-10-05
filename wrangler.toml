@@ -3,15 +3,23 @@
 name = "suckless-kanji"
 main = "server/worker.js"
 compatibility_date = "2026-09-01"
-routes = [{ pattern = "kanji.yuranu.com", custom_domain = true }]
+routes = [
+  { pattern = "suckless-kanji.com", custom_domain = true },
+  { pattern = "www.suckless-kanji.com", custom_domain = true },
+  { pattern = "kanji.yuranu.com", custom_domain = true }, # old domain, redirects (see vars)
+]
 
 [assets]
 directory = "web"
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/auth/*"]
+# The Worker sees every request (not just /api and /auth) so it can redirect old domains.
+run_worker_first = true
 
 [vars]
 GOOGLE_CLIENT_ID = "276404407742-dq3le281o8mocggu96eqltkdds8egf5r.apps.googleusercontent.com"
+CANONICAL_HOST = "suckless-kanji.com"
+LEGACY_HOSTS = "kanji.yuranu.com"
+REDIRECT_LEGACY = "0" # "1" once the Google OAuth client allows the canonical domain
 
 [[d1_databases]]
 binding = "DB"

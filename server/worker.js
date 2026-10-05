@@ -8,7 +8,9 @@
 //   POST /api/replace     -> start a new generation ("use local" / reset); old one is archived
 //
 // Env: DB (D1), ASSETS, GOOGLE_CLIENT_ID (var), GOOGLE_CLIENT_SECRET (secret),
-//      SESSION_SECRET (secret), DEV_LOGIN (local only: enables /auth/dev?email=).
+//      SESSION_SECRET (secret), DEV_LOGIN (local only: enables /auth/dev?email=),
+//      CANONICAL_HOST (var): the app's domain; www.<it> always redirects there, and so do
+//      LEGACY_HOSTS (var, comma-separated) once REDIRECT_LEGACY (var) is "1".
 //
 // The server never interprets events: it stores them per user and generation, dedups by
 // event id, and hands them out in arrival order (`seq`), which clients use as a cursor.
@@ -248,10 +250,24 @@ async function api(env, request, path) {
   return json({ error: 'not found' }, 404);
 }
 
+// 301 to the canonical domain (same path and query) for www and, when enabled, old
+// domains. The sync API is left alone so an app still open on an old domain can upload
+// what it has not synced yet. Local hosts and *.workers.dev are never redirected.
+export function canonicalRedirect(env, url) {
+  const host = env.CANONICAL_HOST;
+  if (!host || url.hostname === host || url.pathname.startsWith('/api/')) return null;
+  const legacy = (env.LEGACY_HOSTS || '').split(',').map((h) => h.trim()).filter(Boolean);
+  const redirect = url.hostname === `www.${host}` || (env.REDIRECT_LEGACY === '1' && legacy.includes(url.hostname));
+  if (!redirect) return null;
+  return new Response(null, { status: 301, headers: { location: `https://${host}${url.pathname}${url.search}` } });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
+    const moved = canonicalRedirect(env, url);
+    if (moved) return moved;
     try {
       if (path === '/auth/login') return login(env, request);
       if (path === '/auth/callback') return callback(env, request);
