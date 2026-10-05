@@ -19,7 +19,7 @@ run_worker_first = true
 GOOGLE_CLIENT_ID = "276404407742-dq3le281o8mocggu96eqltkdds8egf5r.apps.googleusercontent.com"
 CANONICAL_HOST = "suckless-kanji.com"
 LEGACY_HOSTS = "kanji.yuranu.com"
-REDIRECT_LEGACY = "0" # "1" once the Google OAuth client allows the canonical domain
+REDIRECT_LEGACY = "1" # old domain redirects (the Google OAuth client allows the canonical one)
 
 [[d1_databases]]
 binding = "DB"

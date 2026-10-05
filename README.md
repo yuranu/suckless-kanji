@@ -83,7 +83,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 
 ## Server (sync)
 
-A thin Cloudflare Worker ([server/worker.js](server/worker.js)) hosts the static app and a sync API at https://suckless-kanji.com. www.suckless-kanji.com redirects there, and so does the old address kanji.yuranu.com once `REDIRECT_LEGACY` is `"1"` in `wrangler.toml`. The sync API stays reachable on the old address, so an app still open there can upload what it hasn't synced. It uses Workers, static assets and D1 (serverless SQLite), all on the free plan.
+A thin Cloudflare Worker ([server/worker.js](server/worker.js)) hosts the static app and a sync API at https://suckless-kanji.com. www.suckless-kanji.com redirects there, and so does the old address kanji.yuranu.com (`REDIRECT_LEGACY` in `wrangler.toml`). The sync API stays reachable on the old address, so an app still open there can upload what it hasn't synced. It uses Workers, static assets and D1 (serverless SQLite), all on the free plan.
 
 - **Auth:** Google sign-in, with an allowlist checked on every request. The session is a signed, HttpOnly cookie. The app itself is public, and signing in is only needed to sync.
 - **Sync:** clients upload the events the server lacks and download newer ones, with duplicates ignored by id. Normal use never conflicts. When histories genuinely diverge (a first sync with data on both sides, a reset or "use local" on another device, a different account), the app asks: merge / use this device / use the cloud.
