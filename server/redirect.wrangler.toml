@@ -1,0 +1,13 @@
+# Redirects alternate hostnames to the canonical domain (see redirect.js).
+# Deploy: npx wrangler deploy -c server/redirect.wrangler.toml (part of `npm run deploy`).
+name = "suckless-kanji-redirect"
+main = "redirect.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+routes = [
+  { pattern = "kanji.yuranu.com", custom_domain = true },
+  { pattern = "www.suckless-kanji.com", custom_domain = true },
+]
+
+[vars]
+CANONICAL_HOST = "suckless-kanji.com"

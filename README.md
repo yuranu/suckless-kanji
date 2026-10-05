@@ -83,7 +83,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 
 ## Server (sync)
 
-A thin Cloudflare Worker ([server/worker.js](server/worker.js)) hosts the static app and a sync API at https://suckless-kanji.com. www.suckless-kanji.com redirects there, and so does the old address kanji.yuranu.com (`REDIRECT_LEGACY` in `wrangler.toml`). The sync API stays reachable on the old address, so an app still open there can upload what it hasn't synced. It uses Workers, static assets and D1 (serverless SQLite), all on the free plan.
+Cloudflare serves the static app at https://suckless-kanji.com directly, and a thin Worker ([server/worker.js](server/worker.js)) runs only for the sync API and sign-in (`/api/*`, `/auth/*`). A separate tiny Worker ([server/redirect.js](server/redirect.js)) redirects www.suckless-kanji.com and the old kanji.yuranu.com there. It uses Workers, static assets and D1 (serverless SQLite), all on the free plan.
 
 - **Auth:** Google sign-in, with an allowlist checked on every request. The session is a signed, HttpOnly cookie. The app itself is public, and signing in is only needed to sync.
 - **Sync:** clients upload the events the server lacks and download newer ones, with duplicates ignored by id. Normal use never conflicts. When histories genuinely diverge (a first sync with data on both sides, a reset or "use local" on another device, a different account), the app asks: merge / use this device / use the cloud.
@@ -105,7 +105,7 @@ npm run deploy     # apply D1 migrations, deploy
 
 The Google OAuth client must list `https://suckless-kanji.com/auth/callback` (and `http://localhost:8787/auth/callback` for local testing) as redirect URIs.
 
-**Self-hosting a fork:** the domains in `wrangler.toml` (`routes`, `CANONICAL_HOST`, `LEGACY_HOSTS`) and the D1 `database_id` belong to this deployment. Replace them with your own, create your own Google OAuth client (put its id in `GOOGLE_CLIENT_ID`), then follow the first-deploy steps above.
+**Self-hosting a fork:** the domains in `wrangler.toml` and `server/redirect.wrangler.toml` and the D1 `database_id` belong to this deployment. Replace them with your own, create your own Google OAuth client (put its id in `GOOGLE_CLIENT_ID`), then follow the first-deploy steps above.
 
 **Local testing without Google:** with `DEV_LOGIN=1` in `.dev.vars`, `/auth/dev?email=<allowlisted>` signs in directly. This only works when `DEV_LOGIN` is set, which it never is in production.
 
