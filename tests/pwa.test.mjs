@@ -52,3 +52,9 @@ test('manifest icons exist with the declared pixel size', () => {
     assert.equal(`${w}x${h}`, icon.sizes, icon.src);
   }
 });
+
+test('home page links the privacy policy in static HTML (Google OAuth verification)', () => {
+  const html = read('index.html').toString();
+  assert.match(html, /<footer[^>]*>[\s\S]*href="privacy"[\s\S]*<\/footer>/);
+  assert.match(html, /<meta name="description" content="[^"]{40,}">/);
+});

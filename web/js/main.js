@@ -51,6 +51,7 @@ async function main() {
     const [re, screen, tab] = ROUTES.find(([r]) => r.test(path)) || ROUTES[0];
     const params = path.match(re)?.slice(1) || [];
     if (typeof cleanup === 'function') cleanup();
+    document.body.dataset.screen = path.split('/')[0] || 'home'; // the footer shows on Home only
     clear(root);
     const body = h('main.screen');
     root.appendChild(body);

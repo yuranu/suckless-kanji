@@ -412,3 +412,14 @@ details summary { cursor: pointer; }
 .select-info { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
 .select-info label { display: inline-flex; gap: 4px; align-items: center; margin-left: auto; }
 @media (min-width: 768px) { .select-bar { bottom: 16px; } }
+
+/* ---- static footer (index.html): Home only, so other screens keep all their space ---- */
+.site-footer {
+  max-width: 560px; margin: 0 auto; padding: 0 16px calc(80px + env(safe-area-inset-bottom));
+  color: var(--muted); font-size: 12px; line-height: 1.5; text-align: center;
+}
+.site-footer a { color: var(--muted); }
+body[data-screen]:not([data-screen="home"]) .site-footer { display: none; }
+#app:has(.home-title) { min-height: 0; } /* footer right below Home's content */
+.screen:has(.home-title) { padding-bottom: 12px; } /* the footer clears the tab bar instead */
+@media (min-width: 768px) { .site-footer { padding-bottom: 24px; } }

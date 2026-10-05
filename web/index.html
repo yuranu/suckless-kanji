@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
 <title>Suckless Kanji</title>
+<meta name="description" content="Learn kanji and JLPT vocabulary (N5 to N1) with spaced repetition and stroke-by-stroke writing. Free, open source, works offline.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -14,5 +15,13 @@
 </head>
 <body>
 <div id="app"><main class="screen"><p class="muted">Loading…</p></main></div>
+<!-- Static, so it is visible without JavaScript (e.g. to Google's OAuth review); the app
+     shows it on the Home screen only (body[data-screen], see css). -->
+<footer class="site-footer">
+  <p><b>Suckless Kanji</b> teaches kanji and JLPT vocabulary (N5 to N1) with spaced repetition and
+  stroke-by-stroke writing. Free and open source; works offline. Signing in with Google is optional
+  and only used to sync your progress between devices.</p>
+  <p><a href="privacy">Privacy policy</a> · <a href="credits">Credits &amp; licences</a></p>
+</footer>
 </body>
 </html>
