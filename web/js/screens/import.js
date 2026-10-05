@@ -2,7 +2,7 @@
 // review load, then record one `seed` event (see importer.js).
 import { h, add, clear, confirmDialog, toast } from '../ui/dom.js';
 import { local } from '../store.js';
-import { estimateKnown, planSeed, suggestDays, kanjiFromText } from '../importer.js';
+import { estimateKnown, planSeed, suggestDays, kanjiFromText, seedChunks } from '../importer.js';
 import { cardIds } from '../data.js';
 
 const LEVELS = [5, 4, 3, 2, 1];
@@ -116,7 +116,7 @@ export function importScreen(root, app) {
     if (!plan || !planItems.length) return;
     const ok = await confirmDialog(`Add ${planItems.length} items (${Object.keys(plan.cards).length} cards) as already known? First reviews are spread over ${daysInput.value} days. You can undo this here later.`, 'Import');
     if (!ok) return;
-    await app.dispatch('seed', { cards: plan.cards });
+    for (const cards of seedChunks(plan.cards)) await app.dispatch('seed', { cards });
     local.set('importKanji', []);
     toast(`Imported ${planItems.length} items`);
     location.hash = '#/';
@@ -130,7 +130,8 @@ export function importScreen(root, app) {
     h('button.btn.danger', {
       onclick: async () => {
         if (!await confirmDialog(`Remove all ${seeded.length} imported items from your deck?`, 'Undo import')) return;
-        await app.dispatch('forget', { items: seeded });
+        // In parts: one event naming thousands of items would exceed the sync event size limit.
+        for (let i = 0; i < seeded.length; i += 500) await app.dispatch('forget', { items: seeded.slice(i, i + 500) });
         toast('Import undone');
         location.reload();
       },

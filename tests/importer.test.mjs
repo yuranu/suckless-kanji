@@ -74,3 +74,18 @@ test('seed event: due exactly as planned, existing cards untouched, forget undoe
   const undone = replay([ev('seed', { cards }), ev('forget', { items: items.map((it) => it.id) }, NOW + 1)]);
   assert.equal(undone.cards.size, 0);
 });
+
+test('seedChunks: small events that replay exactly like one big one', async () => {
+  const { seedChunks } = await import('../web/js/importer.js');
+  const { items } = estimateKnown(data, known, 3);
+  const { cards } = planSeed(items, 60);
+  const chunks = seedChunks(cards);
+  assert.ok(chunks.length > 1);
+  for (const c of chunks) {
+    const bytes = new TextEncoder().encode(JSON.stringify(ev('seed', { cards: c }))).length;
+    assert.ok(bytes < 65536 / 2, `${bytes} bytes`);
+  }
+  const one = replay([ev('seed', { cards })]);
+  const many = replay(chunks.map((c, i) => ev('seed', { cards: c }, NOW + i)));
+  assert.deepEqual([...many.cards.values()], [...one.cards.values()]);
+});

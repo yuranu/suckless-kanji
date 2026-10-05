@@ -11,15 +11,23 @@ const MARKS = {
   off: '',
 };
 
+const DENIED_TEXT = {
+  full: 'Sync is full: the server has reached its account limit for now. Your progress stays on this device; you can try again later.',
+  blocked: 'This account can no longer use sync. Your progress stays on this device.',
+};
+const QUOTA_TEXT = 'Your sync storage is full, so new progress is no longer uploaded. It is still saved on this device.';
+const mb = (n) => `${(n / 1e6).toFixed(n < 1e6 ? 2 : 1)} MB`;
+
 function iconState(st) {
   switch (st.state) {
     case 'unavailable': return null;
+    case 'denied': return ['off', st.denied === 'blocked' ? 'Sync is blocked for this account' : 'Sync is full right now'];
     case 'signed-out': return ['off', 'Not signed in: progress stays on this device'];
     case 'syncing': return ['busy', 'Syncing…'];
     case 'conflict': return ['bad', 'Sync needs your decision (Settings)'];
-    case 'error': return st.error === 'offline'
-      ? ['offline', `Offline${st.pending ? ` · ${st.pending} events waiting` : ''}`]
-      : ['bad', `Sync failed: ${st.error}`];
+    case 'error':
+      if (st.error === 'offline') return ['offline', `Offline${st.pending ? ` · ${st.pending} events waiting` : ''}`];
+      return ['bad', st.error === 'quota' ? 'Sync storage full' : `Sync failed: ${st.error}`];
     default: return st.pending
       ? ['busy', `${st.pending} events waiting to upload`]
       : ['ok', `Synced ${ago(st.lastSync)}`];
@@ -66,8 +74,10 @@ export function syncPill(app) {
   switch (st.state) {
     case 'signed-out': return h('a.sync-pill', { href: '#/settings' }, 'Sign in to sync');
     case 'conflict': return h('a.sync-pill.bad', { href: '#/settings' }, 'Sync needs your decision');
-    case 'error': return st.error === 'offline' ? null
-      : h('button.sync-pill.bad', { title: st.error, onclick: () => app.sync.run() }, 'Sync failed — retry');
+    case 'error':
+      if (st.error === 'offline') return null;
+      if (st.error === 'quota') return h('a.sync-pill.bad', { href: '#/settings' }, 'Sync storage full');
+      return h('button.sync-pill.bad', { title: st.error, onclick: () => app.sync.run() }, 'Sync failed — retry');
     default: return null;
   }
 }
@@ -85,8 +95,15 @@ export function syncSection(app, rerender) {
     rerender();
   };
   const body = [];
+  const signOut = h('button.btn', {
+    onclick: run(async () => {
+      if (await confirmDialog('Sign out? Progress on this device stays; it just stops syncing.', 'Sign out')) await app.sync.signOut();
+    }),
+  }, 'Sign out');
   if (st.state === 'unavailable') {
     body.push(h('p.small.muted', 'Sync is not available here: the app is served without its server (e.g. a local static server).'));
+  } else if (st.state === 'denied') {
+    body.push(h('p.small', DENIED_TEXT[st.denied] || `Sync refused: ${st.denied}`), h('div.row', signOut));
   } else if (st.state === 'signed-out' || !st.email) {
     body.push(
       h('p.small', 'Sign in to sync progress between devices. Without signing in, everything stays on this device.'),
@@ -95,14 +112,12 @@ export function syncSection(app, rerender) {
     body.push(
       h('p.small', 'Signed in as ', h('b', st.email), '.'),
       h('p.small.muted', `Last sync ${ago(st.lastSync)}`, st.pending ? ` · ${st.pending} events waiting to upload` : '',
-        st.state === 'error' ? ` · last attempt failed: ${st.error}` : ''),
+        st.state === 'error' && st.error !== 'quota' ? ` · last attempt failed: ${st.error}` : ''),
+      st.usage ? h('p.small.muted', `Server storage: ${mb(st.usage.bytes)} of ${mb(st.usage.quota)}`) : null,
+      st.error === 'quota' ? h('p.small.bad-text', QUOTA_TEXT) : null,
       h('div.row',
         h('button.btn', { disabled: st.state === 'syncing', onclick: run(() => app.sync.run()) }, st.state === 'syncing' ? 'Syncing…' : 'Sync now'),
-        h('button.btn', {
-          onclick: run(async () => {
-            if (await confirmDialog('Sign out? Progress on this device stays; it just stops syncing.', 'Sign out')) await app.sync.signOut();
-          }),
-        }, 'Sign out')));
+        signOut));
   }
   if (st.state === 'conflict' && st.conflict) {
     const c = st.conflict;

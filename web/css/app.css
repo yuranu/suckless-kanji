@@ -423,3 +423,4 @@ body[data-screen]:not([data-screen="home"]) .site-footer { display: none; }
 #app:has(.home-title) { min-height: 0; } /* footer right below Home's content */
 .screen:has(.home-title) { padding-bottom: 12px; } /* the footer clears the tab bar instead */
 @media (min-width: 768px) { .site-footer { padding-bottom: 24px; } }
+.bad-text { color: var(--bad); }

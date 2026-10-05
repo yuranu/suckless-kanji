@@ -24,14 +24,15 @@ async function device(env, name, email = 'me@example.com') {
     return res;
   };
   let remote = 0;
-  const sync = new Sync({ backend, fetch: f, onRemote: async (n) => { remote += n; } });
+  const waits = [];
+  const sync = new Sync({ backend, fetch: f, onRemote: async (n) => { remote += n; }, sleep: async (ms) => { waits.push(ms); } });
   let n = 0;
   const add = async (type, data) => {
     const e = makeEvent(type, data, name, Date.UTC(2026, 0, 1) + (n++) * 1000 + (name === 'B' ? 500 : 0));
     await backend.putNew('events', [e]);
     return e;
   };
-  return { backend, sync, add, name, login: async (as) => { cookie = `sk_session=${await signSession(env, as)}`; }, get remote() { return remote; } };
+  return { backend, sync, add, name, waits, login: async (as) => { cookie = `sk_session=${await signSession(env, as)}`; }, get remote() { return remote; } };
 }
 
 const ids = async (d) => (await d.backend.all('events')).map((e) => e.id).sort();
@@ -160,4 +161,44 @@ test('sign out keeps local data and forgets the sync position', async () => {
   assert.equal(A.sync.status.state, 'signed-out');
   assert.equal((await ids(A)).length, 1);
   assert.equal((await A.backend.all('synced')).length, 0);
+});
+
+test('rate limited (429): the client waits as told and carries on', async () => {
+  const env = server();
+  let left = 2;
+  env.SYNC_LIMITER = { limit: async () => ({ success: left-- <= 0 }) };
+  const A = await device(env, 'A');
+  await A.add('learn', { cards: { 'a#r': 3 } });
+  await A.sync.run();
+  assert.equal(A.sync.status.state, 'idle');
+  assert.deepEqual(A.waits, [10000, 10000]); // retry-after: 10
+  assert.equal((await ids(A)).length, 1);
+});
+
+test('open signup full / account blocked: "denied" state, local data untouched', async () => {
+  const env = { ...server(), SIGNUP_MODE: 'open', MAX_USERS: '1' };
+  const A = await device(env, 'A', 'first@x.com');
+  await A.sync.run();
+  const B = await device(env, 'B', 'second@x.com');
+  await B.add('learn', { cards: { 'b#r': 3 } });
+  await B.sync.run();
+  assert.equal(B.sync.status.state, 'denied');
+  assert.equal(B.sync.status.denied, 'full');
+  assert.equal((await ids(B)).length, 1);
+  env.DB.raw.exec("UPDATE users SET blocked = 1 WHERE email = 'first@x.com'");
+  await A.sync.run();
+  assert.deepEqual([A.sync.status.state, A.sync.status.denied], ['denied', 'blocked']);
+});
+
+test('storage quota reached: error "quota" with usage; nothing lost locally', async () => {
+  const env = { ...server(), MAX_USER_BYTES: '300' };
+  const A = await device(env, 'A');
+  await A.sync.run();
+  assert.deepEqual(A.sync.status.usage, { bytes: 0, quota: 300 });
+  for (let i = 0; i < 5; i++) await A.add('review', { card: 'x#r', rating: 3 });
+  await A.sync.run();
+  assert.equal(A.sync.status.state, 'error');
+  assert.equal(A.sync.status.error, 'quota');
+  assert.equal(A.sync.status.usage.quota, 300);
+  assert.equal((await ids(A)).length, 5);
 });

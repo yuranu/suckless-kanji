@@ -10,15 +10,18 @@ const BATCH = 500;
 const META = 'sync';
 
 export class Sync {
-  constructor({ backend, fetch: f = (...a) => fetch(...a), base = '', onRemote = async () => {}, onChange = () => {} }) {
+  constructor({ backend, fetch: f = (...a) => fetch(...a), base = '', onRemote = async () => {}, onChange = () => {},
+    sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
     this.backend = backend;
     this.fetch = f;
+    this.sleep = sleep;
     this.base = base;
     this.onRemote = onRemote;
     this.onChange = onChange;
     // state: 'unavailable' (no server, e.g. plain static hosting), 'signed-out', 'idle',
-    // 'syncing', 'error', 'conflict'
-    this.status = { state: 'idle', email: null, lastSync: null, pending: 0, error: null, conflict: null };
+    // 'syncing', 'error', 'conflict', 'denied' (server refused the account: denied = 'full' or
+    // 'blocked'). usage: {bytes, quota} of server storage. error 'quota': storage quota reached.
+    this.status = { state: 'idle', email: null, lastSync: null, pending: 0, error: null, conflict: null, denied: null, usage: null };
     this.running = null;
   }
 
@@ -36,10 +39,17 @@ export class Sync {
     const init = body === undefined
       ? { credentials: 'same-origin' }
       : { method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json', 'x-sk': '1' }, body: JSON.stringify(body) };
-    const res = await this.fetch(this.base + path, init);
-    let data = null;
-    try { data = await res.json(); } catch { /* not JSON: static host without API */ }
-    return { status: res.status, data };
+    // Rate limited (429): wait as told and retry, so a long download just slows down.
+    for (let attempt = 0; ; attempt++) {
+      const res = await this.fetch(this.base + path, init);
+      if (res.status === 429 && attempt < 5) {
+        await this.sleep(1000 * (Number(res.headers?.get?.('retry-after')) || 10));
+        continue;
+      }
+      let data = null;
+      try { data = await res.json(); } catch { /* not JSON: static host without API */ }
+      return { status: res.status, data };
+    }
   }
 
   async pendingEvents() {
@@ -61,6 +71,7 @@ export class Sync {
       return false;
     }
     if (r.status === 401) { this.set({ state: 'signed-out', email: null }); return false; }
+    if (r.status === 403 && r.data?.error) { this.set({ state: 'denied', denied: r.data.error }); return false; }
     if (r.status !== 200 || !r.data || !r.data.email) { this.set({ state: 'unavailable' }); return false; }
     const m = await this.meta();
     // Signed in as someone else than last time: never mix two people's logs silently.
@@ -68,7 +79,8 @@ export class Sync {
       this.set({ state: 'conflict', email: r.data.email, conflict: { kind: 'account', generation: r.data.generation, previous: m.email } });
       return false;
     }
-    this.set({ email: r.data.email, lastSync: m.lastSync });
+    this.set({ email: r.data.email, lastSync: m.lastSync, denied: null,
+      usage: r.data.quota ? { bytes: r.data.bytes, quota: r.data.quota } : null });
     return true;
   }
 
@@ -91,6 +103,11 @@ export class Sync {
         const batch = pending.splice(0, BATCH);
         const r = await this.call('/api/sync', { generation: m.generation, cursor: m.cursor, events: batch });
         if (r.status === 401) { this.set({ state: 'signed-out' }); return; }
+        if (r.status === 403 && r.data?.error) { this.set({ state: 'denied', denied: r.data.error }); return; }
+        if (r.status === 413 && r.data?.error === 'quota') {
+          this.set({ state: 'error', error: 'quota', usage: { bytes: r.data.bytes, quota: r.data.quota } });
+          return;
+        }
         if (r.status === 409) {
           this.set({ state: 'conflict', conflict: { ...r.data, local: (await this.backend.all('events')).length } });
           return;

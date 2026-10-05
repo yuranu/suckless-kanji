@@ -28,6 +28,15 @@ function hash01(str) {
   return (h >>> 0) / 4294967296;
 }
 
+// Split a plan's cards into seed events of at most `size` cards (~50 bytes each), so every
+// event stays far below the sync server's per-event size limit (MAX_EVENT_BYTES, 64 KB).
+export function seedChunks(cards, size = 400) {
+  const entries = Object.entries(cards);
+  const out = [];
+  for (let i = 0; i < entries.length; i += size) out.push(Object.fromEntries(entries.slice(i, i + size)));
+  return out;
+}
+
 // Suggested window so that imported cards add about `perDay` reviews a day.
 export function suggestDays(cardCount, perDay = 25) {
   return Math.min(365, Math.max(7, Math.ceil(cardCount / perDay)));
