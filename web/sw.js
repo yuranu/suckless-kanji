@@ -11,6 +11,7 @@ const NETWORK_TIMEOUT_MS = 3000;
 const PRECACHE = [
   './',
   'privacy',
+  'credits',
   'manifest.webmanifest',
   'css/app.css',
   'data/curriculum.json',

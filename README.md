@@ -2,6 +2,10 @@
 
 A kanji/vocabulary trainer: a fixed JLPT curriculum (N5→N1), spaced repetition (FSRS-5 or Anki's SM-2), and minigames where you draw kanji stroke by stroke. The client has no framework, no bundler and no runtime dependencies, and works offline. A thin Cloudflare Worker adds Google sign-in and sync between devices.
 
+The name is borrowed from the [suckless.org](https://suckless.org) philosophy (small, simple, no bloat). This project is not affiliated with suckless.org.
+
+**License:** code [MIT](LICENSE); data and icons [CC BY-SA 4.0](DATA-LICENSE.md), because they are derived from KanjiVG, KANJIDIC2, JMdict and other freely licensed sources. See [DATA-LICENSE.md](DATA-LICENSE.md) for the full attributions.
+
 ## Run
 
 ```bash
@@ -101,6 +105,8 @@ npm run deploy     # apply D1 migrations, deploy
 
 The Google OAuth client must list `https://kanji.yuranu.com/auth/callback` (and `http://localhost:8787/auth/callback` for local testing) as redirect URIs.
 
+**Self-hosting a fork:** the domain in `wrangler.toml` (`routes`) and the D1 `database_id` belong to this deployment. Replace them with your own, create your own Google OAuth client (put its id in `GOOGLE_CLIENT_ID`), then follow the first-deploy steps above.
+
 **Local testing without Google:** with `DEV_LOGIN=1` in `.dev.vars`, `/auth/dev?email=<allowlisted>` signs in directly. This only works when `DEV_LOGIN` is set, which it never is in production.
 
 ## Data
@@ -131,14 +137,9 @@ A flat list of lessons, one per word+reading, in study order:
 
 ### Sources
 
-| Source | Used for | License |
-|---|---|---|
-| [KanjiVG](https://kanjivg.tagaini.net) | stroke paths, order, components | CC BY-SA 3.0 |
-| [kanji-data](https://github.com/davidluzgouveia/kanji-data) | KANJIDIC2 readings/meanings, JLPT kanji levels (tanos) | MIT / CC BY-SA 4.0 |
-| [yomitan-jlpt-vocab](https://github.com/stephenmk/yomitan-jlpt-vocab) | JLPT vocabulary lists (tanos) mapped to JMdict | — |
-| [JMdict](https://www.edrdg.org/) via jmdict-simplified | meanings, part of speech, usage notes | CC BY-SA 4.0 |
-| [JmdictFurigana](https://github.com/Doublevil/JmdictFurigana) | per-kanji reading split | CC BY-SA 4.0 |
-| [Tatoeba](https://tatoeba.org) / Tanaka corpus | example sentences | CC BY 2.0 FR |
+KanjiVG, KANJIDIC2 and JMdict (EDRDG), JmdictFurigana, jmdict-simplified, Jonathan Waller's JLPT lists (tanos.co.uk), yomitan-jlpt-vocab, kanji-data and Tatoeba. Authors, links and licences are in [DATA-LICENSE.md](DATA-LICENSE.md). The app shows them on its *Credits & licences* page (Settings → About).
+
+kanji-data also carries WaniKani content, which is not freely licensed; the build reads only its KANJIDIC and JLPT fields.
 
 
 ## Layout
