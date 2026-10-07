@@ -246,18 +246,22 @@ function fmtDays(d) {
 function summaryStep(root, app, item, { ok, mode, cardId }) {
   return new Promise((resolve) => {
     const rate = (r) => { unbind(); resolve(r); };
-    let buttons;
-    if (mode === 'review' && ok) {
+    // Reviews rate like Anki: after a correct answer all four (Again included, e.g. for a
+    // lucky guess); after a miss the rating is Again. Lessons and practice just continue.
+    let buttons, shortcuts;
+    if (mode === 'review') {
       const card = app.state.cards.get(cardId);
       const prev = card ? previewIntervals(app.state, card) : {};
-      buttons = [2, 3, 4].map((r) => h('button.btn.rate.r' + r, { onclick: () => rate(r) },
-        h('span', r === 3 ? 'Good' : RATING_LABELS[r]), prev[r] ? h('small', fmtDays(prev[r])) : null));
+      const ratings = ok ? [1, 2, 3, 4] : [1];
+      buttons = ratings.map((r) => h('button.btn.rate.r' + r + (!ok ? '.only' : ''), { onclick: () => rate(r) },
+        h('span', RATING_LABELS[r]), prev[r] ? h('small', fmtDays(prev[r])) : null));
+      const main = ok ? 3 : 1;
+      shortcuts = { ' ': () => rate(main), Enter: () => rate(main), ...Object.fromEntries(ratings.map((r) => [String(r), () => rate(r)])) };
     } else {
       buttons = [h('button.btn.primary', { onclick: () => rate(ok ? 3 : 1) }, 'Continue')];
+      shortcuts = { ' ': () => rate(ok ? 3 : 1), Enter: () => rate(ok ? 3 : 1) };
     }
-    const unbind = keys(mode === 'review' && ok
-      ? { 2: () => rate(2), 3: () => rate(3), 4: () => rate(4), ' ': () => rate(3), Enter: () => rate(3) }
-      : { ' ': () => rate(ok ? 3 : 1), Enter: () => rate(ok ? 3 : 1) }, root);
+    const unbind = keys(shortcuts, root);
     clear(root).appendChild(stepCard(
       h('div.verdict' + (ok ? '.ok' : '.bad'), ok ? 'Correct' : 'Missed — this card will come back'),
       wordSummary(app, item),
@@ -283,7 +287,8 @@ export async function runCard(root, app, item, kind, mode) {
   const ms = Date.now() - t0;
   const rating = await summaryStep(root, app, item, { ok, mode, cardId: `${item.id}#${kind}` });
   await sleep(0);
-  return { ok, rating, ms };
+  // Rating Again counts as a miss even when the answers were right: the card comes back.
+  return { ok: ok && rating !== 1, rating, ms };
 }
 
 export const KIND_LABEL = { r: 'Reading', w: 'Writing', k: 'Kanji' };

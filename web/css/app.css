@@ -233,8 +233,11 @@ details.level summary { padding: 12px 16px; font-weight: 700; cursor: pointer; d
 .example .ja { font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
 .example .en { color: var(--muted); font-size: 14px; }
 .rate-row { margin-top: 16px; }
-.rate { flex: 1; flex-direction: column; gap: 0; max-width: 140px; }
+.rate { flex: 1; flex-direction: column; gap: 0; max-width: 140px; padding-left: 4px; padding-right: 4px; min-width: 0; }
+.rate-row { flex-wrap: nowrap; gap: 6px; }
 .rate small { font-weight: 400; font-size: 12px; opacity: 0.8; }
+.rate.r1 { border-color: var(--bad); }
+.rate.r1.only { background: var(--bad); color: var(--accent-fg); }
 .rate.r2 { border-color: var(--young); }
 .rate.r3 { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 .rate.r4 { border-color: var(--good); }
