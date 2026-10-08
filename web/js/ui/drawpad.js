@@ -23,6 +23,7 @@ export function drawpad(kanji, opts = {}) {
   const el = h('div.drawpad-wrap', svg, msg);
 
   let stroke = 0, mistakes = 0, hintUsed = false, outline = startOutline, finished = false;
+  let strokeMistakes = 0; // rejections of the current stroke
   let timers = [];
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
 
@@ -61,14 +62,23 @@ export function drawpad(kanji, opts = {}) {
     });
   }
 
-  function complete(forced = false) {
+  function complete() {
     finished = true;
     clear(layers.ghost); clear(layers.hint); clear(layers.ink);
-    for (let i = stroke; i < kanji.paths.length; i++) s('path', { d: kanji.paths[i] }, layers.done);
-    stroke = kanji.paths.length;
     layers.done.classList.add('complete');
     say('');
-    onComplete?.({ mistakes, hintUsed, forced });
+    onComplete?.({ mistakes, hintUsed });
+  }
+
+  function accept() {
+    s('path', { d: kanji.paths[stroke], class: 'fresh' }, layers.done);
+    clear(layers.hint);
+    stroke++;
+    strokeMistakes = 0;
+    say('');
+    onStroke?.(stroke);
+    if (stroke === kanji.paths.length) complete();
+    else renderGhost();
   }
 
   // ---- input ----
@@ -111,18 +121,13 @@ export function drawpad(kanji, opts = {}) {
     const r = Stroke.match(pts, refs, stroke, leniency);
     if (r.reason === 'ok') {
       line.remove();
-      s('path', { d: kanji.paths[stroke], class: 'fresh' }, layers.done);
-      clear(layers.hint);
-      stroke++;
-      say('');
-      onStroke?.(stroke);
-      if (stroke === kanji.paths.length) complete();
-      else renderGhost();
+      accept();
       return;
     }
     line.classList.add('bad');
     later(() => line.remove(), 450);
     mistakes++;
+    strokeMistakes++;
     say(MESSAGES[r.reason], 'bad');
     if (!outline) { outline = true; renderGhost(); }
     showHintStroke();
@@ -136,6 +141,7 @@ export function drawpad(kanji, opts = {}) {
     get mistakes() { return mistakes; },
     get hintUsed() { return hintUsed; },
     get finished() { return finished; },
+    get stroke() { return stroke; },
     hint() {
       if (finished) return;
       hintUsed = true;
@@ -143,8 +149,15 @@ export function drawpad(kanji, opts = {}) {
       renderGhost();
       showHintStroke();
     },
-    // "I know how to write it but something doesn't work": accept the kanji as written.
-    forceComplete() { if (!finished) complete(true); },
+    // "My stroke was right": the checker wrongly rejected the current stroke. Count it as
+    // drawn, take back its mistakes, and hide the outline again so the rest is still drawn
+    // from memory (unless a hint was asked for).
+    forgive() {
+      if (finished || !strokeMistakes) return;
+      mistakes -= strokeMistakes;
+      if (!hintUsed) outline = startOutline;
+      accept();
+    },
     // Stroke-order animation of the whole kanji (display only).
     async animate(ms = 350) {
       finished = true;

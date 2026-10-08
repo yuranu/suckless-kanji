@@ -48,6 +48,7 @@ h1, h2, h3 { margin: 0.4em 0; }
 .muted { color: var(--muted); }
 .small { font-size: 13px; }
 .hidden { display: none !important; }
+.invisible { visibility: hidden; } /* hidden but keeps its place in the layout */
 .jp, .word, .kanji-char, .kanji-wall, .grid-cell, .choice.jp, .example .ja, .kb-c { font-family: var(--jp); }
 
 /* dvh, not vh: on mobile 100vh is the viewport with the browser bars hidden, i.e. taller

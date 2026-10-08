@@ -118,18 +118,24 @@ function drawStep(root, app, kanji, prompt) {
     let ok = null, settled = false;
     const cont = h('button.btn.primary.hidden', { onclick: () => finish() }, 'Continue');
     const hintBtn = h('button.btn', { onclick: () => pad.hint() }, 'Hint');
-    const broken = h('button.corner', {
-      title: 'Accept this kanji as written: use when the checker rejects strokes you drew correctly',
+    // Shown only right after a rejected stroke (until the next one), so it can't be hit by
+    // accident and can't skip drawing: it only forgives that one stroke.
+    const broken = h('button.corner.invisible', {
+      title: 'The checker rejected a stroke you drew correctly: count it and carry on',
       onclick: () => {
-        app.report('drawpad', { kanji: kanji.c, mistakes: pad.mistakes });
-        if (pad.finished) { ok = true; finish(); } else pad.forceComplete();
+        app.report('drawpad', { kanji: kanji.c, stroke: pad.stroke, mistakes: pad.mistakes });
+        broken.classList.add('invisible');
+        pad.forgive();
       },
-    }, 'I know it, something\'s wrong');
+    }, 'My stroke was right');
     const pad = drawpad(kanji, {
       leniency: s.leniency,
-      onComplete: ({ mistakes, hintUsed, forced }) => {
-        ok = forced || (!hintUsed && mistakes <= s.drawMistakes);
+      onMistake: () => broken.classList.remove('invisible'),
+      onStroke: () => broken.classList.add('invisible'),
+      onComplete: ({ mistakes, hintUsed }) => {
+        ok = !hintUsed && mistakes <= s.drawMistakes;
         hintBtn.disabled = true;
+        broken.classList.add('invisible');
         if (ok) setTimeout(finish, 700);
         else cont.classList.remove('hidden');
       },
