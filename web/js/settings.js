@@ -8,8 +8,8 @@ export const SETTINGS = [
   { key: 'choices', group: 'Learning', label: 'Multiple-choice options', type: 'int', min: 2, max: 8, def: 4, scope: 'synced',
     help: 'More options make reading and translation questions harder.' },
   { key: 'gridSize', group: 'Learning', label: 'Kanji grid size (multi-kanji words)', type: 'select', options: [9, 12], def: 9, scope: 'synced' },
-  { key: 'drawMistakes', group: 'Learning', label: 'Drawing mistakes forgiven per card', type: 'int', min: 0, max: 5, def: 1, scope: 'synced',
-    help: 'Wrong strokes beyond this mark the card as failed. Asking for a hint always fails it.' },
+  { key: 'drawMistakes', group: 'Learning', label: 'Drawing mistakes forgiven per card', type: 'int', min: 0, max: 5, def: 0, scope: 'synced',
+    help: 'Any wrong stroke beyond this fails the card (0: none forgiven); asking for a hint always does. If the checker rejects a stroke you drew correctly, use "I know it, something\'s wrong".' },
   { key: 'leniency', group: 'Learning', label: 'Stroke matching leniency', type: 'float', min: 0.6, max: 2, step: 0.1, def: 1, scope: 'device',
     help: 'Higher accepts sloppier strokes. Device-specific: fingers and styluses differ.' },
 
