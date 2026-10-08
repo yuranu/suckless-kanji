@@ -50,7 +50,9 @@ h1, h2, h3 { margin: 0.4em 0; }
 .hidden { display: none !important; }
 .jp, .word, .kanji-char, .kanji-wall, .grid-cell, .choice.jp, .example .ja, .kb-c { font-family: var(--jp); }
 
-#app { min-height: 100vh; display: flex; flex-direction: column; }
+/* dvh, not vh: on mobile 100vh is the viewport with the browser bars hidden, i.e. taller
+   than the visible area, which made every screen scroll a little. */
+#app { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 .screen {
   flex: 1;
   width: 100%;
@@ -58,6 +60,8 @@ h1, h2, h3 { margin: 0.4em 0; }
   margin: 0 auto;
   padding: 12px 16px 88px;
 }
+/* Full-screen flows have no tab bar to clear. */
+#app:not(:has(> .tabbar)) > .screen { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
 
 /* ---- navigation ---- */
 .tabbar {
