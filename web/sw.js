@@ -13,6 +13,7 @@ const PRECACHE = [
   'privacy',
   'credits',
   'manifest.webmanifest',
+  'version.json', // written at deploy time (scripts/version.mjs), not in git
   'css/app.css',
   'data/curriculum.json',
   'data/kanji.json',

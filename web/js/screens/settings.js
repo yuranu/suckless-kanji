@@ -43,6 +43,17 @@ function download(name, text, type = 'application/yaml') {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
+// "Version r63 · 61d2378 · 2026-10-08" from version.json (written at deploy time; absent when
+// running from a plain checkout).
+function versionLine() {
+  const line = h('p.muted', 'Version: development build');
+  fetch('version.json', { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((v) => { if (v) line.textContent = `Version ${v.version} · ${v.commit} · ${v.built.slice(0, 10)}`; })
+    .catch(() => {});
+  return line;
+}
+
 export function settingsScreen(root, app) {
   async function render() {
     const events = await app.backend.all('events');
@@ -120,6 +131,7 @@ export function settingsScreen(root, app) {
           h('a', { href: 'https://tatoeba.org' }, 'Tatoeba'), ' (CC BY 2.0 FR).'),
         h('p', 'Open source (MIT); data under CC BY-SA 4.0. ', h('a', { href: 'credits' }, 'Credits & licences'), ' · ',
           h('a', { href: 'privacy' }, 'Privacy policy')),
+        versionLine(),
         h('p.muted', `Device id ${app.dev}`)),
     );
   }

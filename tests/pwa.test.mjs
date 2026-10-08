@@ -25,8 +25,10 @@ function precacheList() {
 }
 
 test('service worker precaches every file of the app, and nothing that does not exist', () => {
-  const files = filesUnder(fileURLToPath(web)).filter((f) => f !== 'sw.js');
-  const expected = files.map(servedUrl).sort();
+  // version.json is generated at deploy time (gitignored), so it may or may not exist here,
+  // but it must always be precached.
+  const files = filesUnder(fileURLToPath(web)).filter((f) => f !== 'sw.js' && f !== 'version.json');
+  const expected = [...files.map(servedUrl), 'version.json'].sort();
   assert.deepEqual([...precacheList()].sort(), expected,
     'web/sw.js PRECACHE is out of date: add or remove entries so the app works fully offline');
 });

@@ -97,13 +97,15 @@ Cloudflare serves the static app at https://suckless-kanji.com directly, and a t
   - "Use local" and reset start a new *generation* on the server; old generations stay in the database as an archive.
   - "Use cloud" keeps a local backup of the replaced log.
 
+The app shows its version in Settings → About: `r<commits on master> · <commit> · <build date>`, written to `web/version.json` at deploy time (`+`/`-dirty` if deployed with uncommitted changes).
+
 ```bash
 scripts/server/users.sh stats|ls [--local]          # accounts, storage use, database size
 scripts/server/users.sh block|unblock <email>       # refuse / restore sync for an account
 scripts/server/users.sh quota <email> <MB|default>  # per-account storage quota
 scripts/server/users.sh allow|disallow|allowed       # allowlist (SIGNUP_MODE = "allowlist")
 npm run dev        # wrangler dev on :8787 (local D1; .dev.vars: SESSION_SECRET, DEV_LOGIN=1)
-npm run deploy     # apply D1 migrations, deploy
+npm run deploy     # write web/version.json, apply D1 migrations, deploy both Workers
 ```
 
 **First deploy:**
