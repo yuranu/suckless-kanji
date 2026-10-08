@@ -427,3 +427,12 @@ body[data-screen]:not([data-screen="home"]) .site-footer { display: none; }
 .screen:has(.home-title) { padding-bottom: 12px; } /* the footer clears the tab bar instead */
 @media (min-width: 768px) { .site-footer { padding-bottom: 24px; } }
 .bad-text { color: var(--bad); }
+
+/* ---- version (Settings -> About) ---- */
+.version { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 10px 0 4px; }
+.version-name { font-weight: 700; }
+.version-tag {
+  font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; font-size: 13px;
+}
+.version-meta { color: var(--muted); font-size: 12px; font-family: ui-monospace, monospace; }

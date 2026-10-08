@@ -43,15 +43,21 @@ function download(name, text, type = 'application/yaml') {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
-// "Version r63 · 61d2378 · 2026-10-08" from version.json (written at deploy time; absent when
-// running from a plain checkout).
+// "Suckless Kanji v1.0" with commit and build date, from version.json (written at deploy time;
+// absent when running from a plain checkout).
 function versionLine() {
-  const line = h('p.muted', 'Version: development build');
+  const ver = h('span.version-tag', 'development build');
+  const meta = h('span.version-meta');
   fetch('version.json', { cache: 'no-cache' })
     .then((r) => (r.ok ? r.json() : null))
-    .then((v) => { if (v) line.textContent = `Version ${v.version} · ${v.commit} · ${v.built.slice(0, 10)}`; })
+    .then((v) => {
+      if (!v) return;
+      ver.textContent = v.version;
+      const date = new Date(v.built).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      meta.textContent = `${v.commit} · ${date}`;
+    })
     .catch(() => {});
-  return line;
+  return h('div.version', h('span.version-name', 'Suckless Kanji'), ver, meta);
 }
 
 export function settingsScreen(root, app) {

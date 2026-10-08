@@ -97,7 +97,7 @@ Cloudflare serves the static app at https://suckless-kanji.com directly, and a t
   - "Use local" and reset start a new *generation* on the server; old generations stay in the database as an archive.
   - "Use cloud" keeps a local backup of the replaced log.
 
-The app shows its version in Settings → About: `r<commits on master> · <commit> · <build date>`, written to `web/version.json` at deploy time (`+`/`-dirty` if deployed with uncommitted changes).
+The app shows its version in Settings → About, written to `web/version.json` at deploy time. Releases are tags `vMAJOR.MINOR`: exactly on a tag the version is `v1.0`, and commits after it count up (`v1.0.1`, `v1.0.2`, …) until the next tag. `+` / `-dirty` marks a deploy with uncommitted changes. To release: `git tag -a v1.1 -m "…" && git push origin v1.1`, then `npm run deploy`.
 
 ```bash
 scripts/server/users.sh stats|ls [--local]          # accounts, storage use, database size
