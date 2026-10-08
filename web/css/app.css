@@ -320,8 +320,12 @@ svg path, svg polyline { fill: none; stroke-linecap: round; stroke-linejoin: rou
 .setting select { background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; max-width: 220px; }
 .setting input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); }
 .range { display: flex; align-items: center; gap: 8px; }
-.range input { accent-color: var(--accent); width: 150px; }
+.range input[type=range] { accent-color: var(--accent); width: 150px; }
 .range output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
+.range input[type=number] {
+  width: 5.5em; padding: 4px 6px; text-align: right; font: inherit; font-variant-numeric: tabular-nums;
+  color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+}
 
 /* ---- overlays ---- */
 .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: grid; place-items: center; z-index: 50; padding: 16px; }

@@ -25,13 +25,29 @@ function control(app, def) {
         h('button.btn.small', { onclick: () => app.speak('こんにちは、かんじ') }, 'Test'));
     }
     default: {
-      const out = h('output', String(value));
-      const input = h('input', {
-        type: 'range', min: def.min, max: def.max, step: def.step || 1, value,
-        oninput: (e) => { out.textContent = e.target.value; },
-        onchange: (e) => set(def.type === 'int' ? parseInt(e.target.value, 10) : parseFloat(e.target.value)),
+      // A slider for quick changes plus a box to type an exact value. The slider may cover
+      // only the useful part of the range (sliderMax); typing accepts anything up to max.
+      const parse = (v) => (def.type === 'int' ? parseInt(v, 10) : parseFloat(v));
+      const commit = (v) => {
+        const n = parse(v);
+        if (Number.isNaN(n)) { box.value = value; return; }
+        const clamped = Math.min(def.max, Math.max(def.min, n));
+        box.value = slider.value = clamped;
+        set(clamped);
+      };
+      const slider = h('input', {
+        type: 'range', min: def.min, max: def.sliderMax ?? def.max, step: def.step || 1, value,
+        'aria-label': def.label,
+        oninput: (e) => { box.value = e.target.value; },
+        onchange: (e) => commit(e.target.value),
       });
-      return h('div.range', input, out);
+      const box = h('input', {
+        type: 'number', min: def.min, max: def.max, step: def.step || 1, value, inputmode: def.type === 'int' ? 'numeric' : 'decimal',
+        'aria-label': def.label,
+        onchange: (e) => commit(e.target.value),
+        onkeydown: (e) => { if (e.key === 'Enter') e.target.blur(); },
+      });
+      return h('div.range', slider, box);
     }
   }
 }
