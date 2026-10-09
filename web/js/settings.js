@@ -9,7 +9,7 @@ export const SETTINGS = [
     help: 'More options make reading and translation questions harder.' },
   { key: 'gridSize', group: 'Learning', label: 'Kanji grid size (multi-kanji words)', type: 'select', options: [9, 12], def: 9, scope: 'synced' },
   { key: 'drawMistakes', group: 'Learning', label: 'Drawing mistakes forgiven per card', type: 'int', min: 0, max: 5, def: 0, scope: 'synced',
-    help: 'Any wrong stroke beyond this fails the card (0: none forgiven); asking for a hint always does. If the checker rejects a stroke you drew correctly, tap "My stroke was right" to take that mistake back.' },
+    help: 'Any wrong stroke beyond this fails the card (0: none forgiven); asking for a hint always does. "Wait, I know it" hides the outline again and takes back the mistakes and hint so far.' },
   { key: 'leniency', group: 'Learning', label: 'Stroke matching leniency', type: 'float', min: 0.6, max: 2, step: 0.1, def: 1, scope: 'device',
     help: 'Higher accepts sloppier strokes. Device-specific: fingers and styluses differ.' },
 

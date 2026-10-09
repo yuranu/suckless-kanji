@@ -11,7 +11,7 @@ const MESSAGES = {
 };
 
 export function drawpad(kanji, opts = {}) {
-  const { leniency = 1, outline: startOutline = false, onMistake, onComplete, onStroke } = opts;
+  const { leniency = 1, outline: startOutline = false, onMistake, onComplete, onStroke, onOutline } = opts;
   const refs = kanji.paths.map(Stroke.prepare);
   const svg = s('svg', { viewBox: '0 0 109 109', class: 'drawpad' });
   const grid = s('g', { class: 'grid' }, svg);
@@ -23,11 +23,16 @@ export function drawpad(kanji, opts = {}) {
   const el = h('div.drawpad-wrap', svg, msg);
 
   let stroke = 0, mistakes = 0, hintUsed = false, outline = startOutline, finished = false;
-  let strokeMistakes = 0; // rejections of the current stroke
   let timers = [];
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
 
   function say(text, cls = '') { msg.textContent = text; msg.className = 'drawpad-msg ' + cls; }
+
+  function setOutline(on) {
+    outline = on;
+    renderGhost();
+    onOutline?.(on && !startOutline);
+  }
 
   function renderGhost() {
     clear(layers.ghost);
@@ -74,7 +79,6 @@ export function drawpad(kanji, opts = {}) {
     s('path', { d: kanji.paths[stroke], class: 'fresh' }, layers.done);
     clear(layers.hint);
     stroke++;
-    strokeMistakes = 0;
     say('');
     onStroke?.(stroke);
     if (stroke === kanji.paths.length) complete();
@@ -127,9 +131,8 @@ export function drawpad(kanji, opts = {}) {
     line.classList.add('bad');
     later(() => line.remove(), 450);
     mistakes++;
-    strokeMistakes++;
     say(MESSAGES[r.reason], 'bad');
-    if (!outline) { outline = true; renderGhost(); }
+    if (!outline) setOutline(true);
     showHintStroke();
     onMistake?.(mistakes, r.reason);
   }
@@ -145,18 +148,18 @@ export function drawpad(kanji, opts = {}) {
     hint() {
       if (finished) return;
       hintUsed = true;
-      outline = true;
-      renderGhost();
+      setOutline(true);
       showHintStroke();
     },
-    // "My stroke was right": the checker wrongly rejected the current stroke. Count it as
-    // drawn, take back its mistakes, and hide the outline again so the rest is still drawn
-    // from memory (unless a hint was asked for).
-    forgive() {
-      if (finished || !strokeMistakes) return;
-      mistakes -= strokeMistakes;
-      if (!hintUsed) outline = startOutline;
-      accept();
+    // "Wait, I know it": take back the mistakes and hints so far and hide the outline; the
+    // kanji is then finished from memory, from the current stroke on.
+    retry() {
+      if (finished) return;
+      mistakes = 0;
+      hintUsed = false;
+      clear(layers.hint);
+      say('');
+      setOutline(startOutline);
     },
     // Stroke-order animation of the whole kanji (display only).
     async animate(ms = 350) {

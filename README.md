@@ -44,7 +44,7 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
   - Then the translation, then the summary.
 - **Kanji card:** draw the kanji from its meaning and readings.
 - **"I misclicked":** every choice step has this corner button, which takes back a wrong answer.
-- **Drawing escape hatch:** after a stroke is rejected, "My stroke was right" appears (until the next stroke). It counts that stroke as drawn, takes back its mistake, hides the outline again so the rest is still drawn from memory, and stores a local report about the stroke checker.
+- **"Wait, I know it":** shown in drawing steps while the outline is visible (after a mistake or a hint). It hides the outline and takes back the mistakes and hint so far: finishing the kanji from memory then counts as correct. It also stores a local report about the stroke checker.
 - **Reviews:**
   - Today's due cards are shown, rated Hard, Good or Easy (an Again rating is automatic when the card was missed).
   - Missed cards come back later in the same session.

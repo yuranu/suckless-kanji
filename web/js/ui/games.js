@@ -118,24 +118,22 @@ function drawStep(root, app, kanji, prompt) {
     let ok = null, settled = false;
     const cont = h('button.btn.primary.hidden', { onclick: () => finish() }, 'Continue');
     const hintBtn = h('button.btn', { onclick: () => pad.hint() }, 'Hint');
-    // Shown only right after a rejected stroke (until the next one), so it can't be hit by
-    // accident and can't skip drawing: it only forgives that one stroke.
-    const broken = h('button.corner.invisible', {
-      title: 'The checker rejected a stroke you drew correctly: count it and carry on',
+    // Visible while the outline is: after a mistake or a hint. It hides the outline and
+    // takes back the mistakes and hint, so finishing the kanji from memory counts as correct.
+    const retry = h('button.corner.invisible', {
+      title: 'Hide the outline and finish the kanji from memory',
       onclick: () => {
-        app.report('drawpad', { kanji: kanji.c, stroke: pad.stroke, mistakes: pad.mistakes });
-        broken.classList.add('invisible');
-        pad.forgive();
+        app.report('drawpad', { kanji: kanji.c, stroke: pad.stroke, mistakes: pad.mistakes, hint: pad.hintUsed });
+        pad.retry();
       },
-    }, 'My stroke was right');
+    }, 'Wait, I know it');
     const pad = drawpad(kanji, {
       leniency: s.leniency,
-      onMistake: () => broken.classList.remove('invisible'),
-      onStroke: () => broken.classList.add('invisible'),
+      onOutline: (on) => retry.classList.toggle('invisible', !on),
       onComplete: ({ mistakes, hintUsed }) => {
         ok = !hintUsed && mistakes <= s.drawMistakes;
         hintBtn.disabled = true;
-        broken.classList.add('invisible');
+        retry.classList.add('invisible');
         if (ok) setTimeout(finish, 700);
         else cont.classList.remove('hidden');
       },
@@ -148,7 +146,7 @@ function drawStep(root, app, kanji, prompt) {
       pad.destroy();
       resolve(ok);
     }
-    clear(root).appendChild(stepCard(broken, prompt, pad.el, h('div.row.center', hintBtn, cont)));
+    clear(root).appendChild(stepCard(retry, prompt, pad.el, h('div.row.center', hintBtn, cont)));
   });
 }
 
