@@ -16,9 +16,18 @@
   --young: #d8a32a;
   --mature: #3c8a4a;
   --radius: 12px;
-  --jp: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", serif;
+  --jp: "Klee One", "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", serif;
   color-scheme: light;
 }
+/* Japanese font (Settings -> Display). Klee One is bundled (scripts/fonts.mjs); the print
+   styles use the device's fonts. */
+@font-face {
+  font-family: "Klee One"; font-weight: 400 700; font-display: swap;
+  src: url(../fonts/klee-one.woff2) format("woff2");
+}
+:root[data-font="mincho"] { --jp: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", "Noto Serif JP", serif; }
+:root[data-font="gothic"] { --jp: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans CJK JP", "Noto Sans JP", sans-serif; }
+
 :root[data-theme="dark"] {
   --bg: #161513; --panel: #201e1b; --panel-2: #2a2723; --fg: #ece7dd; --muted: #958e82; --line: #36322c;
   --ink: #ece7dd; --ghost: #3d3830; --accent: #e0674e; --accent-fg: #1a1210; --good: #69b878; --good-bg: #1f3323;
@@ -49,7 +58,7 @@ h1, h2, h3 { margin: 0.4em 0; }
 .small { font-size: 13px; }
 .hidden { display: none !important; }
 .invisible { visibility: hidden; } /* hidden but keeps its place in the layout */
-.jp, .word, .kanji-char, .kanji-wall, .grid-cell, .choice.jp, .example .ja, .kb-c { font-family: var(--jp); }
+.jp, .word, .kanji-char, .kanji-wall, .grid-cell, .choice.jp, .example .ja, .kb-c, .readings { font-family: var(--jp); }
 
 /* dvh, not vh: on mobile 100vh is the viewport with the browser bars hidden, i.e. taller
    than the visible area, which made every screen scroll a little. */

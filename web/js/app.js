@@ -118,6 +118,7 @@ export async function createApp() {
     const t = device.theme;
     if (t === 'system') document.documentElement.removeAttribute('data-theme');
     else document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.dataset.font = device.font;
   }
   applyTheme();
 

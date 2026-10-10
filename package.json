@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "fetch": "scripts/fetch.sh",
-    "build": "node scripts/build-curriculum.mjs && node scripts/build.mjs",
+    "build": "node scripts/build-curriculum.mjs && node scripts/build.mjs && node scripts/fonts.mjs",
     "all": "npm run fetch && npm run build",
     "test": "node --test \"tests/*.test.mjs\"",
     "test:matcher": "node scripts/test-matcher.mjs",
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@resvg/resvg-js": "2.6.2",
     "kuromoji": "0.1.2",
+    "subset-font": "2.9.0",
     "wrangler": "4.147.0",
     "yaml": "2.9.1"
   },

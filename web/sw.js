@@ -17,6 +17,8 @@ const PRECACHE = [
   'css/app.css',
   'data/curriculum.json',
   'data/kanji.json',
+  'fonts/OFL.txt',
+  'fonts/klee-one.woff2',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',

@@ -132,6 +132,7 @@ Generated files are committed; never edit them by hand:
 - `data/curriculum.yaml`: the human-readable curriculum.
 - `web/data/curriculum.json`: the app's copy of the same lessons.
 - `web/data/kanji.json`: stroke paths, readings and visual components of the 2297 curriculum kanji.
+- `web/fonts/klee-one.woff2`: [Klee One](https://github.com/fontworks-fonts/Klee) SemiBold (SIL OFL 1.1), cut down by `scripts/fonts.mjs` to the characters the app can show (about 3,100, 1.2 MB instead of 8.5 MB). It is a textbook-style font: its kanji have the handwritten shapes the drawing pad expects (氵, 心, 糸, ...), unlike printed Mincho or Gothic. Settings → Display → *Japanese font* can switch to the device's Mincho or Gothic instead.
 
 The build is deterministic:
 - GitHub sources are pinned to fixed commits/releases.

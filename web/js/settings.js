@@ -30,6 +30,9 @@ export const SETTINGS = [
   { key: 'rate', group: 'Audio', label: 'Speech rate', type: 'float', min: 0.5, max: 1.5, step: 0.05, def: 0.9, scope: 'device' },
 
   // ---- display
+  { key: 'font', group: 'Display', label: 'Japanese font', type: 'select', options: ['textbook', 'mincho', 'gothic'],
+    labels: ['Textbook (matches the drawing pad)', 'Mincho (serif, printed)', 'Gothic (sans-serif)'], def: 'textbook', scope: 'device',
+    help: 'Textbook shows kanji the way they are written by hand. Mincho and Gothic are print styles and come from your device.' },
   { key: 'theme', group: 'Display', label: 'Theme', type: 'select', options: ['system', 'light', 'dark'], def: 'system', scope: 'device' },
 ];
 

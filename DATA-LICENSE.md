@@ -44,6 +44,13 @@ hiragana.
 The JLPT lists are unofficial: the JLPT has not published vocabulary or kanji
 lists since 2010.
 
+## Font
+
+`web/fonts/klee-one.woff2` is a subset of
+[Klee One](https://github.com/fontworks-fonts/Klee) SemiBold, © Fontworks Inc.,
+licensed under the [SIL Open Font License 1.1](web/fonts/OFL.txt) (not CC
+BY-SA). `scripts/fonts.mjs` builds it from the Google Fonts copy.
+
 ## kanji-data notice
 
 ```

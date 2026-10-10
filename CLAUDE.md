@@ -15,7 +15,7 @@
 
 ## Generated files
 
-- `data/curriculum.yaml` and `web/data/kanji.js` are generated. Never edit them
+- `data/curriculum.yaml`, `web/data/*` and `web/fonts/*` are generated. Never edit them
   by hand: change the scripts in `scripts/` and rebuild (`npm run build`).
 - Commit the regenerated output together with the script change that caused it.
 - `raw/` (downloads) and `node_modules/` are reproducible and not committed.

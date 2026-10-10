@@ -8,7 +8,8 @@ cd "$(dirname "$0")/.."
 mkdir -p raw
 LOCK=scripts/sources.sha256
 DOWNLOADS=(raw/kanjivg-*-main.zip raw/kanji-data.json raw/jlpt-vocab-n?.csv raw/jmdict-eng.json.zip
-  raw/JmdictFurigana.json raw/jpn_sentences.tsv.bz2 raw/jpn_indices.tar.bz2 raw/eng_sentences.tsv.bz2)
+  raw/JmdictFurigana.json raw/jpn_sentences.tsv.bz2 raw/jpn_indices.tar.bz2 raw/eng_sentences.tsv.bz2
+  raw/KleeOne-SemiBold.ttf raw/KleeOne-OFL.txt)
 
 KANJIVG_TAG="r20260714"
 KANJIVG_ZIP="kanjivg-${KANJIVG_TAG#r}-main.zip"
@@ -41,6 +42,11 @@ fi
 # Per-kanji reading split of every JMdict word (CC BY-SA 4.0)
 FURI_TAG="2.3.1%2B2026-09-25"
 get "https://github.com/Doublevil/JmdictFurigana/releases/download/${FURI_TAG}/JmdictFurigana.json" "raw/JmdictFurigana.json"
+
+# Klee One (Fontworks, SIL OFL 1.1): textbook-style font for Japanese text, subset by fonts.mjs
+FONTS_SHA="130fcfb0ff422fec96b335616b2ca99f91914792"
+get "https://raw.githubusercontent.com/google/fonts/${FONTS_SHA}/ofl/kleeone/KleeOne-SemiBold.ttf" "raw/KleeOne-SemiBold.ttf"
+get "https://raw.githubusercontent.com/google/fonts/${FONTS_SHA}/ofl/kleeone/OFL.txt" "raw/KleeOne-OFL.txt"
 
 # Example sentences: Tatoeba (CC BY 2.0 FR). jpn_indices = Tanaka corpus word index (B-lines),
 # linking each Japanese sentence to its English translation and to JMdict headwords + readings.
