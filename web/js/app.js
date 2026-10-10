@@ -5,6 +5,7 @@ import { IdbBackend, MemoryBackend, local, deviceId, makeEvent } from './store.j
 import { replay, applyEvent } from './state.js';
 import { SETTINGS } from './settings.js';
 import { tts } from './tts.js';
+import { toast } from './ui/dom.js';
 import { Sync } from './sync.js';
 
 export async function createApp() {
@@ -75,7 +76,7 @@ export async function createApp() {
     },
 
     speak(text) {
-      tts.speak(text, { voice: device.voice, rate: device.rate });
+      tts.speak(text, { voice: device.voice, rate: device.rate, onFail: speechFailed });
     },
     autoSpeak(text) {
       if (device.autoplay) app.speak(text);
@@ -88,6 +89,17 @@ export async function createApp() {
   };
 
   let syncTimer = null;
+
+  // Silence gets explained, but not on every word: at most once a minute.
+  let speechWarned = 0;
+  function speechFailed(reason) {
+    console.warn('speech failed:', reason);
+    if (Date.now() - speechWarned < 60_000) return;
+    speechWarned = Date.now();
+    toast(reason === 'unsupported'
+      ? 'This browser cannot read text aloud.'
+      : 'No sound: the system speech engine is not responding. On Android, play a word in Google Translate to wake it up, or check Settings → Text-to-speech output.', 7000);
+  }
   app.sync = new Sync({
     backend,
     onRemote: () => app.reload(),
