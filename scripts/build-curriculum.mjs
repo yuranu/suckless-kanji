@@ -300,6 +300,21 @@ for (const { k, review, words: ws } of lessons) {
   if (k && !ws.length) { flat.push({ level, kanjiOnly: k }); continue; }
   ws.forEach((w, i) => flat.push({ level, w, newKanji: k && i === 0 ? k : null }));
 }
+// Writing cards of multi-kanji words pick their kanji from a grid, which only tests
+// recognition. A kanji whose own single-kanji word (or kanji-only lesson) is far away or
+// absent would never be drawn, so the word introducing it draws it instead, with the word's
+// other kanji shown (draw: kanji).
+const DRAW_WINDOW = 300; // lessons
+const soloAt = new Map(); // kanji -> lessons that test drawing it alone
+flat.forEach(({ w, kanjiOnly }, i) => {
+  const ks = kanjiOnly ? [kanjiOnly.c] : kanjiOf(w.word);
+  if (ks.length === 1) soloAt.set(ks[0], [...(soloAt.get(ks[0]) || []), i]);
+});
+flat.forEach((x, i) => {
+  if (!x.newKanji || kanjiOf(x.w.word).length < 2) return;
+  const solo = soloAt.get(x.newKanji.c) || [];
+  if (!solo.some((j) => j >= i && j - i <= DRAW_WINDOW)) x.draw = x.newKanji.c;
+});
 const wordLessons = flat.filter((x) => x.w);
 const kanjiLessons = lessons.filter((l) => l.k);
 const levelCount = (n) => kanjiLessons.filter((l) => l.k.jlpt === n).length;
@@ -314,6 +329,8 @@ out.push(
   '#   id: stable key ("word|kana", or the kanji for kanji-only lessons); app progress is keyed by it',
   '#   level: curriculum section (JLPT N-level being studied); jlpt: the word\'s own JLPT level',
   '#   new_kanji: kanji introduced by this lesson, with its meaning',
+  `#   draw: the writing card draws this kanji (others shown) instead of a kanji grid; set when the`,
+  `#     new kanji gets no single-kanji lesson within ${DRAW_WINDOW} lessons, so it is drawn at least once`,
   '#   word, kana, furigana (Anki style), meaning, common: false if not a JMdict common word',
   '#   new: readings first seen in this lesson ("字:reading"; multi-kanji key = jukujikun)',
   '#   irregular: readings not in KANJIDIC even after rendaku / gemination',
@@ -328,6 +345,7 @@ out.push(
   `  kanji_only_lessons: ${flat.length - wordLessons.length}`,
   `  kanji: ${kanjiLessons.length}  # N5 ${levelCount(5)}, N4 ${levelCount(4)}, N3 ${levelCount(3)}, N2 ${levelCount(2)}, N1 ${levelCount(1)}`,
   `  extra_kanji: ${kanjiLessons.filter((l) => l.k.extra).length}  # used by JLPT vocab but missing from the tanos kanji lists`,
+  `  drawn_in_word: ${flat.filter((x) => x.draw).length}  # multi-kanji words whose writing card draws the new kanji`,
   `  with_example: ${wordLessons.filter((x) => x.w.example).length}`,
   `  examples_kanaized: ${wordLessons.filter((x) => x.w.example?.kanaized).length}  # unlearned kanji rewritten in hiragana`,
   `  skipped_kana_only: ${kanaOnly}`,
@@ -338,7 +356,7 @@ out.push(
   'lessons:',
 );
 const kanjiLine = (k) => `{kanji: ${q(k.c)}, meaning: ${q(k.meaning)}${k.extra ? ', extra: true' : ''}}`;
-flat.forEach(({ level, w, newKanji, kanjiOnly }, i) => {
+flat.forEach(({ level, w, newKanji, kanjiOnly, draw }, i) => {
   out.push(`  - lesson: ${i + 1}`, `    id: ${q(kanjiOnly ? kanjiOnly.c : w.id)}`, `    level: ${level}`);
   if (kanjiOnly) {
     out.push(`    kanji: ${q(kanjiOnly.c)}`, `    meaning: ${q(kanjiOnly.meaning)}`);
@@ -346,6 +364,7 @@ flat.forEach(({ level, w, newKanji, kanjiOnly }, i) => {
     return;
   }
   if (newKanji) out.push(`    new_kanji: ${kanjiLine(newKanji)}`);
+  if (draw) out.push(`    draw: ${q(draw)}`);
   out.push(`    word: ${q(w.word)}`, `    kana: ${q(w.kana)}`, `    furigana: ${q(w.furigana)}`,
     `    jlpt: ${w.jlpt}`, `    meaning: ${q(w.meaning)}`);
   if (w.common === false) out.push('    common: false');
@@ -364,11 +383,12 @@ for (const [reason, items] of Object.entries(skipped)) {
 
 // App copy: same lessons as compact JSON, plus the kanji introduction order for scripts/build.mjs.
 const json = {
-  items: flat.map(({ level, w, newKanji, kanjiOnly }) => (kanjiOnly
+  items: flat.map(({ level, w, newKanji, kanjiOnly, draw }) => (kanjiOnly
     ? { id: kanjiOnly.c, level, kanji: kanjiOnly.c }
     : {
       id: w.id, level, jlpt: w.jlpt, word: w.word, kana: w.kana, segs: w.segs, meaning: w.meaning, pos: w.pos,
       ...(newKanji ? { newKanji: newKanji.c } : {}),
+      ...(draw ? { draw } : {}),
       ...(w.example ? { example: { ja: w.example.ja, en: w.example.en } } : {}),
     })),
   kanji: kanjiLessons.map((l) => ({ c: l.k.c, level: l.k.jlpt, ...(l.k.extra ? { extra: true } : {}) })),

@@ -101,11 +101,12 @@ function meaningStep(root, app, item) {
   });
 }
 
-// Word with kanji replaced by blanks; `filled[i]` fills the i-th blank.
-function blankedWord(word, filled = [], states = []) {
+// Word with kanji replaced by blanks; `filled[i]` fills the i-th blank. With `only`, just
+// that kanji is blanked and the others are shown.
+function blankedWord(word, filled = [], states = [], only = null) {
   let bi = 0;
   return h('div.word.big.blanked', [...word].map((ch) => {
-    if (!isKanji(ch)) return h('span', ch);
+    if (!isKanji(ch) || (only && ch !== only)) return h('span', ch);
     const i = bi++;
     return h('span.blank' + (states[i] ? '.' + states[i] : ''), filled[i] || '　');
   }));
@@ -158,6 +159,10 @@ function writeStep(root, app, item) {
     h('div.hint-meaning', item.meaning));
   if (kanji.length === 1) {
     return drawStep(root, app, app.data.kanjiByChar.get(kanji[0]), prompt(blankedWord(item.word)));
+  }
+  // A kanji that is rarely or never alone in a word is drawn in the word introducing it.
+  if (item.draw) {
+    return drawStep(root, app, app.data.kanjiByChar.get(item.draw), prompt(blankedWord(item.word, [], [], item.draw)));
   }
   return gridStep(root, app, item, prompt);
 }

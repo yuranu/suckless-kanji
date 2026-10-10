@@ -21,6 +21,22 @@ test('data: every word kanji has stroke data; lessons cover all items', () => {
   assert.deepEqual(cardIds(byId('一|いち')), ['一|いち#r', '一|いち#w']);
 });
 
+test('data: every kanji is drawn by some writing or kanji card', () => {
+  // Single-kanji words and kanji-only items draw their kanji; multi-kanji words use a grid,
+  // except `draw` cards, which draw their new kanji.
+  const drawn = new Set();
+  for (const it of data.items) {
+    const ks = kanjiOfWord(it.word || it.kanji);
+    if (ks.length === 1) drawn.add(ks[0]);
+    if (it.draw) {
+      assert.ok(ks.length > 1 && ks.includes(it.draw) && it.draw === it.newKanji, it.id);
+      drawn.add(it.draw);
+    }
+  }
+  const missing = data.kanjiList.map((k) => k.c).filter((c) => !drawn.has(c));
+  assert.deepEqual(missing, []);
+});
+
 test('readingChoices: n unique options, one correct, no other valid reading', () => {
   const rng = seeded(1);
   for (const it of data.items.filter((x) => !x.kanji).filter((_, i) => i % 7 === 0)) {

@@ -41,6 +41,7 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
   - Shown: the kana, and the word with blanks where the kanji go.
   - Single-kanji words: draw the kanji on a blank pad. A wrong stroke shows the outline. A hint is always available but fails the card.
   - Multi-kanji words: fill the blanks from a 9- or 12-kanji grid.
+  - Exception: if a kanji has no single-kanji word of its own (or none within 300 lessons), the word that introduces it is a *draw* card instead. Only that kanji is blanked, the word's other kanji are shown, and you draw it. This way every kanji is drawn at least once.
   - Then the translation, then the summary.
 - **Kanji card:** draw the kanji from its meaning and readings.
 - **"I misclicked":** every choice step has this corner button, which takes back a wrong answer.
@@ -144,6 +145,7 @@ A flat list of lessons, one per word+reading, in study order:
 - **Level start:** each level begins with that level's words that use only kanji from earlier levels.
 - **Kanji order:** kanji are introduced one at a time. The next one is the most frequent kanji that unlocks a word at that point.
 - **Kanji-only lessons:** a kanji that no word at its level uses gets its own lesson.
+- **Draw cards:** a word introducing a kanji with no single-kanji lesson within 300 lessons gets `draw: <kanji>`. Its writing card draws that kanji instead of using the kanji grid.
 - **Examples:** Tatoeba sentences matched by word *and* reading, at most 32 characters. Kanji not learned yet are written in hiragana.
 
 ### Sources

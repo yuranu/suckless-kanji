@@ -7,6 +7,8 @@
 #   id: stable key ("word|kana", or the kanji for kanji-only lessons); app progress is keyed by it
 #   level: curriculum section (JLPT N-level being studied); jlpt: the word's own JLPT level
 #   new_kanji: kanji introduced by this lesson, with its meaning
+#   draw: the writing card draws this kanji (others shown) instead of a kanji grid; set when the
+#     new kanji gets no single-kanji lesson within 300 lessons, so it is drawn at least once
 #   word, kana, furigana (Anki style), meaning, common: false if not a JMdict common word
 #   new: readings first seen in this lesson ("字:reading"; multi-kanji key = jukujikun)
 #   irregular: readings not in KANJIDIC even after rendaku / gemination
@@ -21,6 +23,7 @@ stats:
   kanji_only_lessons: 520
   kanji: 2297  # N5 85, N4 170, N3 388, N2 397, N1 1257
   extra_kanji: 86  # used by JLPT vocab but missing from the tanos kanji lists
+  drawn_in_word: 616  # multi-kanji words whose writing card draws the new kanji
   with_example: 5045
   examples_kanaized: 434  # unlearned kanji rewritten in hiragana
   skipped_kana_only: 1022
@@ -650,6 +653,7 @@ lessons:
     id: "学生|がくせい"
     level: 5
     new_kanji: {kanji: "学", meaning: "Study, Learning, Science"}
+    draw: "学"
     word: "学生"
     kana: "がくせい"
     furigana: "学[がく]生[せい]"
@@ -942,6 +946,7 @@ lessons:
     id: "午後|ごご"
     level: 5
     new_kanji: {kanji: "午", meaning: "Noon, Sign Of The Horse, 11am-1pm, Seventh Sign Of Chinese Zodiac"}
+    draw: "午"
     word: "午後"
     kana: "ごご"
     furigana: "午[ご]後[ご]"
@@ -1014,6 +1019,7 @@ lessons:
     id: "名前|なまえ"
     level: 5
     new_kanji: {kanji: "名", meaning: "Name, Noted, Distinguished, Reputation"}
+    draw: "名"
     word: "名前"
     kana: "なまえ"
     furigana: "名[な]前[まえ]"
@@ -1069,6 +1075,7 @@ lessons:
     id: "半分|はんぶん"
     level: 5
     new_kanji: {kanji: "分", meaning: "Part, Minute Of Time, Segment, Share, Degree, One's Lot, Duty, Understand, Know, Rate, 1%, Chances, Shaku/100", extra: true}
+    draw: "分"
     word: "半分"
     kana: "はんぶん"
     furigana: "半[はん]分[ぶん]"
@@ -1111,6 +1118,7 @@ lessons:
     id: "電話|でんわ"
     level: 5
     new_kanji: {kanji: "電", meaning: "Electricity"}
+    draw: "電"
     word: "電話"
     kana: "でんわ"
     furigana: "電[でん]話[わ]"
@@ -1133,6 +1141,7 @@ lessons:
     id: "学校|がっこう"
     level: 5
     new_kanji: {kanji: "校", meaning: "Exam, School, Printing, Proof, Correction"}
+    draw: "校"
     word: "学校"
     kana: "がっこう"
     furigana: "学[がっ]校[こう]"
@@ -1241,6 +1250,7 @@ lessons:
     id: "毎月|まいげつ"
     level: 5
     new_kanji: {kanji: "毎", meaning: "Every"}
+    draw: "毎"
     word: "毎月"
     kana: "まいげつ"
     furigana: "毎[まい]月[げつ]"
@@ -1304,6 +1314,7 @@ lessons:
     id: "天気|てんき"
     level: 5
     new_kanji: {kanji: "天", meaning: "Heavens, Sky, Imperial"}
+    draw: "天"
     word: "天気"
     kana: "てんき"
     furigana: "天[てん]気[き]"
@@ -1751,6 +1762,7 @@ lessons:
     id: "火事|かじ"
     level: 4
     new_kanji: {kanji: "事", meaning: "Matter, Thing, Fact, Business, Reason, Possibly"}
+    draw: "事"
     word: "火事"
     kana: "かじ"
     furigana: "火[か]事[じ]"
@@ -1781,6 +1793,7 @@ lessons:
     id: "自分|じぶん"
     level: 4
     new_kanji: {kanji: "自", meaning: "Oneself"}
+    draw: "自"
     word: "自分"
     kana: "じぶん"
     furigana: "自[じ]分[ぶん]"
@@ -1792,6 +1805,7 @@ lessons:
     id: "会社|かいしゃ"
     level: 4
     new_kanji: {kanji: "社", meaning: "Company, Firm, Office, Association, Shrine"}
+    draw: "社"
     word: "会社"
     kana: "かいしゃ"
     furigana: "会[かい]社[しゃ]"
@@ -1821,6 +1835,7 @@ lessons:
     id: "出発|しゅっぱつ"
     level: 4
     new_kanji: {kanji: "発", meaning: "Departure, Discharge, Publish, Emit, Start From, Disclose, Counter For Gunshots"}
+    draw: "発"
     word: "出発"
     kana: "しゅっぱつ"
     furigana: "出[しゅっ]発[ぱつ]"
@@ -1883,6 +1898,7 @@ lessons:
     id: "会場|かいじょう"
     level: 4
     new_kanji: {kanji: "場", meaning: "Location, Place"}
+    draw: "場"
     word: "会場"
     kana: "かいじょう"
     furigana: "会[かい]場[じょう]"
@@ -2009,6 +2025,7 @@ lessons:
     id: "明日|あした"
     level: 4
     new_kanji: {kanji: "明", meaning: "Bright, Light"}
+    draw: "明"
     word: "明日"
     kana: "あした"
     furigana: "明日[あした]"
@@ -2107,6 +2124,7 @@ lessons:
     id: "意見|いけん"
     level: 4
     new_kanji: {kanji: "意", meaning: "Idea, Mind, Heart, Taste, Thought, Desire, Care, Liking"}
+    draw: "意"
     word: "意見"
     kana: "いけん"
     furigana: "意[い]見[けん]"
@@ -2235,6 +2253,7 @@ lessons:
     id: "以下|いか"
     level: 4
     new_kanji: {kanji: "以", meaning: "By Means Of, Because, In View Of, Compared With"}
+    draw: "以"
     word: "以下"
     kana: "いか"
     furigana: "以[い]下[か]"
@@ -2296,6 +2315,7 @@ lessons:
     id: "世話|せわ"
     level: 4
     new_kanji: {kanji: "世", meaning: "Generation, World, Society, Public"}
+    draw: "世"
     word: "世話"
     kana: "せわ"
     furigana: "世[せ]話[わ]"
@@ -2350,6 +2370,7 @@ lessons:
     id: "入院|にゅういん"
     level: 4
     new_kanji: {kanji: "院", meaning: "Inst., Institution, Temple, Mansion, School"}
+    draw: "院"
     word: "入院"
     kana: "にゅういん"
     furigana: "入[にゅう]院[いん]"
@@ -2382,6 +2403,7 @@ lessons:
     id: "世界|せかい"
     level: 4
     new_kanji: {kanji: "界", meaning: "World, Boundary"}
+    draw: "界"
     word: "世界"
     kana: "せかい"
     furigana: "世[せ]界[かい]"
@@ -2434,6 +2456,7 @@ lessons:
     id: "元気|げんき"
     level: 4
     new_kanji: {kanji: "元", meaning: "Beginning, Former Time, Origin"}
+    draw: "元"
     word: "元気"
     kana: "げんき"
     furigana: "元[げん]気[き]"
@@ -2675,6 +2698,7 @@ lessons:
     id: "計画|けいかく"
     level: 4
     new_kanji: {kanji: "画", meaning: "Brush-stroke, Picture"}
+    draw: "画"
     word: "計画"
     kana: "けいかく"
     furigana: "計[けい]画[かく]"
@@ -2861,6 +2885,7 @@ lessons:
     id: "真ん中|まんなか"
     level: 4
     new_kanji: {kanji: "真", meaning: "True, Reality, Buddhist Sect"}
+    draw: "真"
     word: "真ん中"
     kana: "まんなか"
     furigana: "真[ま]ん中[なか]"
@@ -2872,6 +2897,7 @@ lessons:
     id: "有名|ゆうめい"
     level: 4
     new_kanji: {kanji: "有", meaning: "Possess, Have, Exist, Happen, Occur, Approx"}
+    draw: "有"
     word: "有名"
     kana: "ゆうめい"
     furigana: "有[ゆう]名[めい]"
@@ -2954,6 +2980,7 @@ lessons:
     id: "食料品|しょくりょうひん"
     level: 4
     new_kanji: {kanji: "料", meaning: "Fee, Materials"}
+    draw: "料"
     word: "食料品"
     kana: "しょくりょうひん"
     furigana: "食[しょく]料[りょう]品[ひん]"
@@ -2965,6 +2992,7 @@ lessons:
     id: "料理|りょうり"
     level: 4
     new_kanji: {kanji: "理", meaning: "Logic, Arrangement, Reason, Justice, Truth"}
+    draw: "理"
     word: "料理"
     kana: "りょうり"
     furigana: "料[りょう]理[り]"
@@ -2998,6 +3026,7 @@ lessons:
     id: "工場|こうじょう"
     level: 4
     new_kanji: {kanji: "工", meaning: "Craft, Construction, Katakana E Radical (no. 48)"}
+    draw: "工"
     word: "工場"
     kana: "こうじょう"
     furigana: "工[こう]場[じょう]"
@@ -3008,6 +3037,7 @@ lessons:
     id: "工業|こうぎょう"
     level: 4
     new_kanji: {kanji: "業", meaning: "Business, Vocation, Arts, Performance"}
+    draw: "業"
     word: "工業"
     kana: "こうぎょう"
     furigana: "工[こう]業[ぎょう]"
@@ -3352,6 +3382,7 @@ lessons:
     id: "店員|てんいん"
     level: 4
     new_kanji: {kanji: "員", meaning: "Employee, Member, Number, The One In Charge"}
+    draw: "員"
     word: "店員"
     kana: "てんいん"
     furigana: "店[てん]員[いん]"
@@ -3362,6 +3393,7 @@ lessons:
     id: "病院|びょういん"
     level: 4
     new_kanji: {kanji: "病", meaning: "Ill, Sick"}
+    draw: "病"
     word: "病院"
     kana: "びょういん"
     furigana: "病[びょう]院[いん]"
@@ -3392,6 +3424,7 @@ lessons:
     id: "家族|かぞく"
     level: 4
     new_kanji: {kanji: "族", meaning: "Tribe, Family"}
+    draw: "族"
     word: "家族"
     kana: "かぞく"
     furigana: "家[か]族[ぞく]"
@@ -3425,6 +3458,7 @@ lessons:
     id: "映画|えいが"
     level: 4
     new_kanji: {kanji: "映", meaning: "Reflect, Reflection, Projection"}
+    draw: "映"
     word: "映画"
     kana: "えいが"
     furigana: "映[えい]画[が]"
@@ -3457,6 +3491,7 @@ lessons:
     id: "英語|えいご"
     level: 4
     new_kanji: {kanji: "英", meaning: "England, English, Hero, Outstanding, Calyx"}
+    draw: "英"
     word: "英語"
     kana: "えいご"
     furigana: "英[えい]語[ご]"
@@ -3468,6 +3503,7 @@ lessons:
     id: "医学|いがく"
     level: 4
     new_kanji: {kanji: "医", meaning: "Doctor, Medicine"}
+    draw: "医"
     word: "医学"
     kana: "いがく"
     furigana: "医[い]学[がく]"
@@ -3490,6 +3526,7 @@ lessons:
     id: "仕事|しごと"
     level: 4
     new_kanji: {kanji: "仕", meaning: "Attend, Doing, Official, Serve"}
+    draw: "仕"
     word: "仕事"
     kana: "しごと"
     furigana: "仕[し]事[ごと]"
@@ -3786,6 +3823,7 @@ lessons:
     id: "教室|きょうしつ"
     level: 4
     new_kanji: {kanji: "室", meaning: "Room, Apartment, Chamber, Greenhouse, Cellar"}
+    draw: "室"
     word: "教室"
     kana: "きょうしつ"
     furigana: "教[きょう]室[しつ]"
@@ -3942,6 +3980,7 @@ lessons:
     id: "映画館|えいがかん"
     level: 4
     new_kanji: {kanji: "館", meaning: "Building, Mansion, Large Building, Palace"}
+    draw: "館"
     word: "映画館"
     kana: "えいがかん"
     furigana: "映[えい]画[が]館[かん]"
@@ -3972,6 +4011,7 @@ lessons:
     id: "八百屋|やおや"
     level: 4
     new_kanji: {kanji: "屋", meaning: "Roof, House, Shop, Dealer, Seller"}
+    draw: "屋"
     word: "八百屋"
     kana: "やおや"
     furigana: "八百屋[やおや]"
@@ -4069,6 +4109,7 @@ lessons:
     id: "西洋|せいよう"
     level: 4
     new_kanji: {kanji: "洋", meaning: "Ocean, Sea, Foreign, Western Style"}
+    draw: "洋"
     word: "西洋"
     kana: "せいよう"
     furigana: "西[せい]洋[よう]"
@@ -4120,6 +4161,7 @@ lessons:
     id: "夕方|ゆうがた"
     level: 4
     new_kanji: {kanji: "夕", meaning: "Evening"}
+    draw: "夕"
     word: "夕方"
     kana: "ゆうがた"
     furigana: "夕[ゆう]方[がた]"
@@ -4142,6 +4184,7 @@ lessons:
     id: "日曜日|にちようび"
     level: 4
     new_kanji: {kanji: "曜", meaning: "Weekday"}
+    draw: "曜"
     word: "日曜日"
     kana: "にちようび"
     furigana: "日[にち]曜[よう]日[び]"
@@ -4252,6 +4295,7 @@ lessons:
     id: "食堂|しょくどう"
     level: 4
     new_kanji: {kanji: "堂", meaning: "Public Chamber, Hall"}
+    draw: "堂"
     word: "食堂"
     kana: "しょくどう"
     furigana: "食[しょく]堂[どう]"
@@ -4294,6 +4338,7 @@ lessons:
     id: "勉強|べんきょう"
     level: 4
     new_kanji: {kanji: "勉", meaning: "Exertion, Endeavour, Encourage, Strive, Make Effort, Diligent"}
+    draw: "勉"
     word: "勉強"
     kana: "べんきょう"
     furigana: "勉[べん]強[きょう]"
@@ -4472,6 +4517,7 @@ lessons:
     id: "漢字|かんじ"
     level: 4
     new_kanji: {kanji: "漢", meaning: "Sino-, China"}
+    draw: "漢"
     word: "漢字"
     kana: "かんじ"
     furigana: "漢[かん]字[じ]"
@@ -4483,6 +4529,7 @@ lessons:
     id: "赤ん坊|あかんぼう"
     level: 4
     new_kanji: {kanji: "坊", meaning: "Boy, Priest's Residence, Priest", extra: true}
+    draw: "坊"
     word: "赤ん坊"
     kana: "あかんぼう"
     furigana: "赤[あか]ん坊[ぼう]"
@@ -4577,6 +4624,7 @@ lessons:
     id: "研究|けんきゅう"
     level: 4
     new_kanji: {kanji: "究", meaning: "Research, Study"}
+    draw: "究"
     word: "研究"
     kana: "けんきゅう"
     furigana: "研[けん]究[きゅう]"
@@ -4602,6 +4650,7 @@ lessons:
     id: "試験|しけん"
     level: 4
     new_kanji: {kanji: "験", meaning: "Verification, Effect, Testing"}
+    draw: "験"
     word: "試験"
     kana: "しけん"
     furigana: "試[し]験[けん]"
@@ -7301,6 +7350,7 @@ lessons:
     id: "会議|かいぎ"
     level: 3
     new_kanji: {kanji: "議", meaning: "Deliberation, Consultation, Debate, Consideration"}
+    draw: "議"
     word: "会議"
     kana: "かいぎ"
     furigana: "会[かい]議[ぎ]"
@@ -7357,6 +7407,7 @@ lessons:
     id: "国民|こくみん"
     level: 3
     new_kanji: {kanji: "民", meaning: "People, Nation, Subjects"}
+    draw: "民"
     word: "国民"
     kana: "こくみん"
     furigana: "国[こく]民[みん]"
@@ -7417,6 +7468,7 @@ lessons:
     id: "部屋|へや"
     level: 3
     new_kanji: {kanji: "部", meaning: "Section, Bureau, Dept, Class, Copy, Part, Portion, Counter For Copies Of A Newspaper Or Magazine"}
+    draw: "部"
     word: "部屋"
     kana: "へや"
     furigana: "部屋[へや]"
@@ -7608,6 +7660,7 @@ lessons:
     id: "相手|あいて"
     level: 3
     new_kanji: {kanji: "相", meaning: "Inter-, Mutual, Together, Each Other, Minister Of State, Councillor, Aspect, Phase, Physiognomy"}
+    draw: "相"
     word: "相手"
     kana: "あいて"
     furigana: "相[あい]手[て]"
@@ -7619,6 +7672,7 @@ lessons:
     id: "安定|あんてい"
     level: 3
     new_kanji: {kanji: "定", meaning: "Determine, Fix, Establish, Decide"}
+    draw: "定"
     word: "安定"
     kana: "あんてい"
     furigana: "安[あん]定[てい]"
@@ -8189,6 +8243,7 @@ lessons:
     id: "文化|ぶんか"
     level: 3
     new_kanji: {kanji: "化", meaning: "Change, Take The Form Of, Influence, Enchant, Delude, -ization"}
+    draw: "化"
     word: "文化"
     kana: "ぶんか"
     furigana: "文[ぶん]化[か]"
@@ -8374,6 +8429,7 @@ lessons:
     id: "目的|もくてき"
     level: 3
     new_kanji: {kanji: "的", meaning: "Bull's Eye, Mark, Target, Object, Adjective Ending", extra: true}
+    draw: "的"
     word: "目的"
     kana: "もくてき"
     furigana: "目[もく]的[てき]"
@@ -8415,6 +8471,7 @@ lessons:
     id: "制度|せいど"
     level: 3
     new_kanji: {kanji: "制", meaning: "System, Law, Rule"}
+    draw: "制"
     word: "制度"
     kana: "せいど"
     furigana: "制[せい]度[ど]"
@@ -8437,6 +8494,7 @@ lessons:
     id: "政治|せいじ"
     level: 3
     new_kanji: {kanji: "政", meaning: "Politics, Government"}
+    draw: "政"
     word: "政治"
     kana: "せいじ"
     furigana: "政[せい]治[じ]"
@@ -8477,6 +8535,7 @@ lessons:
     id: "成人|せいじん"
     level: 3
     new_kanji: {kanji: "成", meaning: "Turn Into, Become, Get, Grow, Elapse, Reach"}
+    draw: "成"
     word: "成人"
     kana: "せいじん"
     furigana: "成[せい]人[じん]"
@@ -8497,6 +8556,7 @@ lessons:
     id: "学期|がっき"
     level: 3
     new_kanji: {kanji: "期", meaning: "Period, Time, Date, Term"}
+    draw: "期"
     word: "学期"
     kana: "がっき"
     furigana: "学[がっ]期[き]"
@@ -8700,6 +8760,7 @@ lessons:
     id: "平和|へいわ"
     level: 3
     new_kanji: {kanji: "和", meaning: "Harmony, Japanese Style, Peace, Soften, Japan"}
+    draw: "和"
     word: "平和"
     kana: "へいわ"
     furigana: "平[へい]和[わ]"
@@ -8897,6 +8958,7 @@ lessons:
     id: "日記|にっき"
     level: 3
     new_kanji: {kanji: "記", meaning: "Scribe, Account, Narrative"}
+    draw: "記"
     word: "日記"
     kana: "にっき"
     furigana: "日[にっ]記[き]"
@@ -9024,6 +9086,7 @@ lessons:
     id: "産業|さんぎょう"
     level: 3
     new_kanji: {kanji: "産", meaning: "Products, Bear, Give Birth, Yield, Childbirth, Native, Property"}
+    draw: "産"
     word: "産業"
     kana: "さんぎょう"
     furigana: "産[さん]業[ぎょう]"
@@ -9084,6 +9147,7 @@ lessons:
     id: "電報|でんぽう"
     level: 3
     new_kanji: {kanji: "報", meaning: "Report, News, Reward, Retribution"}
+    draw: "報"
     word: "電報"
     kana: "でんぽう"
     furigana: "電[でん]報[ぽう]"
@@ -9125,6 +9189,7 @@ lessons:
     id: "生活|せいかつ"
     level: 3
     new_kanji: {kanji: "活", meaning: "Lively, Resuscitation, Being Helped, Living"}
+    draw: "活"
     word: "生活"
     kana: "せいかつ"
     furigana: "生[せい]活[かつ]"
@@ -9175,6 +9240,7 @@ lessons:
     id: "共通|きょうつう"
     level: 3
     new_kanji: {kanji: "共", meaning: "Together, Both, Neither, All, And, Alike, With"}
+    draw: "共"
     word: "共通"
     kana: "きょうつう"
     furigana: "共[きょう]通[つう]"
@@ -9274,6 +9340,7 @@ lessons:
     id: "交通|こうつう"
     level: 3
     new_kanji: {kanji: "交", meaning: "Mingle, Mixing, Association, Coming & Going"}
+    draw: "交"
     word: "交通"
     kana: "こうつう"
     furigana: "交[こう]通[つう]"
@@ -9294,6 +9361,7 @@ lessons:
     id: "資本|しほん"
     level: 3
     new_kanji: {kanji: "資", meaning: "Assets, Resources, Capital, Funds, Data, Be Conducive To, Contribute To"}
+    draw: "資"
     word: "資本"
     kana: "しほん"
     furigana: "資[し]本[ほん]"
@@ -9305,6 +9373,7 @@ lessons:
     id: "予習|よしゅう"
     level: 3
     new_kanji: {kanji: "予", meaning: "Beforehand, Previous, Myself, I"}
+    draw: "予"
     word: "予習"
     kana: "よしゅう"
     furigana: "予[よ]習[しゅう]"
@@ -9517,6 +9586,7 @@ lessons:
     id: "広告|こうこく"
     level: 3
     new_kanji: {kanji: "告", meaning: "Revelation, Tell, Inform, Announce"}
+    draw: "告"
     word: "広告"
     kana: "こうこく"
     furigana: "広[こう]告[こく]"
@@ -9537,6 +9607,7 @@ lessons:
     id: "反対|はんたい"
     level: 3
     new_kanji: {kanji: "反", meaning: "Anti-"}
+    draw: "反"
     word: "反対"
     kana: "はんたい"
     furigana: "反[はん]対[たい]"
@@ -9559,6 +9630,7 @@ lessons:
     id: "参加|さんか"
     level: 3
     new_kanji: {kanji: "参", meaning: "Nonplussed, Three (in Documents), Going, Coming, Visiting, Visit, Be Defeated, Die, Be Madly In Love, Participate, Take Part In"}
+    draw: "参"
     word: "参加"
     kana: "さんか"
     furigana: "参[さん]加[か]"
@@ -9580,6 +9652,7 @@ lessons:
     id: "利用|りよう"
     level: 3
     new_kanji: {kanji: "利", meaning: "Profit, Advantage, Benefit"}
+    draw: "利"
     word: "利用"
     kana: "りよう"
     furigana: "利[り]用[よう]"
@@ -9618,6 +9691,7 @@ lessons:
     id: "権利|けんり"
     level: 3
     new_kanji: {kanji: "権", meaning: "Authority, Power, Rights"}
+    draw: "権"
     word: "権利"
     kana: "けんり"
     furigana: "権[けん]利[り]"
@@ -9688,6 +9762,7 @@ lessons:
     id: "現在|げんざい"
     level: 3
     new_kanji: {kanji: "在", meaning: "Exist, Outskirts, Suburbs, Located In"}
+    draw: "在"
     word: "現在"
     kana: "げんざい"
     furigana: "現[げん]在[ざい]"
@@ -9699,6 +9774,7 @@ lessons:
     id: "事件|じけん"
     level: 3
     new_kanji: {kanji: "件", meaning: "Affair, Case, Matter, Item"}
+    draw: "件"
     word: "事件"
     kana: "じけん"
     furigana: "事[じ]件[けん]"
@@ -10040,6 +10116,7 @@ lessons:
     id: "感情|かんじょう"
     level: 3
     new_kanji: {kanji: "情", meaning: "Feelings, Emotion, Passion, Sympathy, Circumstances, Facts"}
+    draw: "情"
     word: "感情"
     kana: "かんじょう"
     furigana: "感[かん]情[じょう]"
@@ -10225,6 +10302,7 @@ lessons:
     id: "両親|りょうしん"
     level: 3
     new_kanji: {kanji: "両", meaning: "Both, Old Japanese Coin, Counter For Carriages (e.g., In A Train), Two"}
+    draw: "両"
     word: "両親"
     kana: "りょうしん"
     furigana: "両[りょう]親[しん]"
@@ -10323,6 +10401,7 @@ lessons:
     id: "果物|くだもの"
     level: 3
     new_kanji: {kanji: "果", meaning: "Fruit, Reward, Carry Out, Achieve, Complete, End, Finish, Succeed"}
+    draw: "果"
     word: "果物"
     kana: "くだもの"
     furigana: "果物[くだもの]"
@@ -10334,6 +10413,7 @@ lessons:
     id: "内容|ないよう"
     level: 3
     new_kanji: {kanji: "容", meaning: "Contain, Form, Looks"}
+    draw: "容"
     word: "内容"
     kana: "ないよう"
     furigana: "内[ない]容[よう]"
@@ -10385,6 +10465,7 @@ lessons:
     id: "二十歳|はたち"
     level: 3
     new_kanji: {kanji: "歳", meaning: "Year-end, Age, Occasion, Opportunity"}
+    draw: "歳"
     word: "二十歳"
     kana: "はたち"
     furigana: "二十歳[はたち]"
@@ -10397,6 +10478,7 @@ lessons:
     id: "戦争|せんそう"
     level: 3
     new_kanji: {kanji: "争", meaning: "Contend, Dispute, Argue"}
+    draw: "争"
     word: "戦争"
     kana: "せんそう"
     furigana: "戦[せん]争[そう]"
@@ -10417,6 +10499,7 @@ lessons:
     id: "相談|そうだん"
     level: 3
     new_kanji: {kanji: "談", meaning: "Discuss, Talk"}
+    draw: "談"
     word: "相談"
     kana: "そうだん"
     furigana: "相[そう]談[だん]"
@@ -10556,6 +10639,7 @@ lessons:
     id: "合格|ごうかく"
     level: 3
     new_kanji: {kanji: "格", meaning: "Status, Rank, Capacity, Character, Case (law, Grammar)"}
+    draw: "格"
     word: "合格"
     kana: "ごうかく"
     furigana: "合[ごう]格[かく]"
@@ -10698,6 +10782,7 @@ lessons:
     id: "現状|げんじょう"
     level: 3
     new_kanji: {kanji: "状", meaning: "Status Quo, Conditions, Circumstances, Form, Appearance"}
+    draw: "状"
     word: "現状"
     kana: "げんじょう"
     furigana: "現[げん]状[じょう]"
@@ -10769,6 +10854,7 @@ lessons:
     id: "子供|こども"
     level: 3
     new_kanji: {kanji: "供", meaning: "Submit, Offer, Present, Serve (meal), Accompany"}
+    draw: "供"
     word: "子供"
     kana: "こども"
     furigana: "子[こ]供[ども]"
@@ -10936,6 +11022,7 @@ lessons:
     id: "費用|ひよう"
     level: 3
     new_kanji: {kanji: "費", meaning: "Expense, Cost, Spend, Consume, Waste"}
+    draw: "費"
     word: "費用"
     kana: "ひよう"
     furigana: "費[ひ]用[よう]"
@@ -10997,6 +11084,7 @@ lessons:
     id: "自由|じゆう"
     level: 3
     new_kanji: {kanji: "由", meaning: "Wherefore, A Reason"}
+    draw: "由"
     word: "自由"
     kana: "じゆう"
     furigana: "自[じ]由[ゆう]"
@@ -11063,6 +11151,7 @@ lessons:
     id: "演説|えんぜつ"
     level: 3
     new_kanji: {kanji: "演", meaning: "Performance, Act, Play, Render, Stage"}
+    draw: "演"
     word: "演説"
     kana: "えんぜつ"
     furigana: "演[えん]説[ぜつ]"
@@ -11197,6 +11286,7 @@ lessons:
     id: "判断|はんだん"
     level: 3
     new_kanji: {kanji: "判", meaning: "Judgement, Signature, Stamp, Seal"}
+    draw: "判"
     word: "判断"
     kana: "はんだん"
     furigana: "判[はん]断[だん]"
@@ -11384,6 +11474,7 @@ lessons:
     id: "手術|しゅじゅつ"
     level: 3
     new_kanji: {kanji: "術", meaning: "Art, Technique, Skill, Means, Trick, Resources, Magic"}
+    draw: "術"
     word: "手術"
     kana: "しゅじゅつ"
     furigana: "手[しゅ]術[じゅつ]"
@@ -11455,6 +11546,7 @@ lessons:
     id: "心配|しんぱい"
     level: 3
     new_kanji: {kanji: "配", meaning: "Distribute, Spouse, Exile, Rationing"}
+    draw: "配"
     word: "心配"
     kana: "しんぱい"
     furigana: "心[しん]配[ぱい]"
@@ -11476,6 +11568,7 @@ lessons:
     id: "警告|けいこく"
     level: 3
     new_kanji: {kanji: "警", meaning: "Admonish, Commandment"}
+    draw: "警"
     word: "警告"
     kana: "けいこく"
     furigana: "警[けい]告[こく]"
@@ -11487,6 +11580,7 @@ lessons:
     id: "警官|けいかん"
     level: 3
     new_kanji: {kanji: "官", meaning: "Bureaucrat, The Government, Organ"}
+    draw: "官"
     word: "警官"
     kana: "けいかん"
     furigana: "警[けい]官[かん]"
@@ -11635,6 +11729,7 @@ lessons:
     id: "思想|しそう"
     level: 3
     new_kanji: {kanji: "想", meaning: "Concept, Think, Idea, Thought"}
+    draw: "想"
     word: "思想"
     kana: "しそう"
     furigana: "思[し]想[そう]"
@@ -11675,6 +11770,7 @@ lessons:
     id: "残念|ざんねん"
     level: 3
     new_kanji: {kanji: "念", meaning: "Wish, Sense, Idea, Thought, Feeling, Desire, Attention"}
+    draw: "念"
     word: "残念"
     kana: "ざんねん"
     furigana: "残[ざん]念[ねん]"
@@ -11745,6 +11841,7 @@ lessons:
     id: "全然|ぜんぜん"
     level: 3
     new_kanji: {kanji: "然", meaning: "Sort Of Thing, So, If So, In That Case, Well"}
+    draw: "然"
     word: "全然"
     kana: "ぜんぜん"
     furigana: "全[ぜん]然[ぜん]"
@@ -11823,6 +11920,7 @@ lessons:
     id: "商人|しょうにん"
     level: 3
     new_kanji: {kanji: "商", meaning: "Make A Deal, Selling, Dealing In, Merchant"}
+    draw: "商"
     word: "商人"
     kana: "しょうにん"
     furigana: "商[しょう]人[にん]"
@@ -11925,6 +12023,7 @@ lessons:
     id: "労働|ろうどう"
     level: 3
     new_kanji: {kanji: "労", meaning: "Labor, Thank For, Reward For, Toil, Trouble"}
+    draw: "労"
     word: "労働"
     kana: "ろうどう"
     furigana: "労[ろう]働[どう]"
@@ -11957,6 +12056,7 @@ lessons:
     id: "景色|けしき"
     level: 3
     new_kanji: {kanji: "景", meaning: "Scenery, View"}
+    draw: "景"
     word: "景色"
     kana: "けしき"
     furigana: "景色[けしき]"
@@ -12057,6 +12157,7 @@ lessons:
     id: "退院|たいいん"
     level: 3
     new_kanji: {kanji: "退", meaning: "Retreat, Withdraw, Retire, Resign, Repel, Expel, Reject"}
+    draw: "退"
     word: "退院"
     kana: "たいいん"
     furigana: "退[たい]院[いん]"
@@ -12347,6 +12448,7 @@ lessons:
     id: "非常に|ひじょうに"
     level: 3
     new_kanji: {kanji: "非", meaning: "Un-, Mistake, Negative, Injustice, Non-"}
+    draw: "非"
     word: "非常に"
     kana: "ひじょうに"
     furigana: "非[ひ]常[じょう]に"
@@ -12377,6 +12479,7 @@ lessons:
     id: "警察|けいさつ"
     level: 3
     new_kanji: {kanji: "察", meaning: "Guess, Presume, Surmise, Judge, Understand"}
+    draw: "察"
     word: "警察"
     kana: "けいさつ"
     furigana: "警[けい]察[さつ]"
@@ -12511,6 +12614,7 @@ lessons:
     id: "財産|ざいさん"
     level: 3
     new_kanji: {kanji: "財", meaning: "Property, Money, Wealth, Assets"}
+    draw: "財"
     word: "財産"
     kana: "ざいさん"
     furigana: "財[ざい]産[さん]"
@@ -12543,6 +12647,7 @@ lessons:
     id: "意識|いしき"
     level: 3
     new_kanji: {kanji: "識", meaning: "Discriminating, Know, Write"}
+    draw: "識"
     word: "意識"
     kana: "いしき"
     furigana: "意[い]識[しき]"
@@ -12640,6 +12745,7 @@ lessons:
     id: "気候|きこう"
     level: 3
     new_kanji: {kanji: "候", meaning: "Climate, Season, Weather, Wait For, Expect"}
+    draw: "候"
     word: "気候"
     kana: "きこう"
     furigana: "気[き]候[こう]"
@@ -12660,6 +12766,7 @@ lessons:
     id: "程度|ていど"
     level: 3
     new_kanji: {kanji: "程", meaning: "Extent, Degree, Law, Formula, Distance, Limits, Amount"}
+    draw: "程"
     word: "程度"
     kana: "ていど"
     furigana: "程[てい]度[ど]"
@@ -12702,6 +12809,7 @@ lessons:
     id: "失敗|しっぱい"
     level: 3
     new_kanji: {kanji: "敗", meaning: "Failure, Defeat, Reversal"}
+    draw: "敗"
     word: "失敗"
     kana: "しっぱい"
     furigana: "失[しっ]敗[ぱい]"
@@ -12734,6 +12842,7 @@ lessons:
     id: "突然|とつぜん"
     level: 3
     new_kanji: {kanji: "突", meaning: "Stab, Protruding, Thrust, Pierce, Prick, Collision, Sudden"}
+    draw: "突"
     word: "突然"
     kana: "とつぜん"
     furigana: "突[とつ]然[ぜん]"
@@ -12794,6 +12903,7 @@ lessons:
     id: "道路|どうろ"
     level: 3
     new_kanji: {kanji: "路", meaning: "Path, Route, Road, Distance"}
+    draw: "路"
     word: "道路"
     kana: "どうろ"
     furigana: "道[どう]路[ろ]"
@@ -12805,6 +12915,7 @@ lessons:
     id: "科学|かがく"
     level: 3
     new_kanji: {kanji: "科", meaning: "Department, Course, Section"}
+    draw: "科"
     word: "科学"
     kana: "かがく"
     furigana: "科[か]学[がく]"
@@ -12874,6 +12985,7 @@ lessons:
     id: "処理|しょり"
     level: 3
     new_kanji: {kanji: "処", meaning: "Dispose, Manage, Deal With, Sentence, Condemn, Act, Behave, Place"}
+    draw: "処"
     word: "処理"
     kana: "しょり"
     furigana: "処[しょ]理[り]"
@@ -12933,6 +13045,7 @@ lessons:
     id: "否定|ひてい"
     level: 3
     new_kanji: {kanji: "否", meaning: "Negate, No, Noes, Refuse, Decline, Deny"}
+    draw: "否"
     word: "否定"
     kana: "ひてい"
     furigana: "否[ひ]定[てい]"
@@ -12944,6 +13057,7 @@ lessons:
     id: "医師|いし"
     level: 3
     new_kanji: {kanji: "師", meaning: "Expert, Teacher, Master, Model, Exemplar, Army (incl. Counter), War"}
+    draw: "師"
     word: "医師"
     kana: "いし"
     furigana: "医[い]師[し]"
@@ -12985,6 +13099,7 @@ lessons:
     id: "容易|ようい"
     level: 3
     new_kanji: {kanji: "易", meaning: "Easy, Ready To, Simple, Fortune-telling, Divination"}
+    draw: "易"
     word: "容易"
     kana: "ようい"
     furigana: "容[よう]易[い]"
@@ -13133,6 +13248,7 @@ lessons:
     id: "番号|ばんごう"
     level: 3
     new_kanji: {kanji: "号", meaning: "Nickname, Number, Item, Title, Pseudonym, Name, Call"}
+    draw: "号"
     word: "番号"
     kana: "ばんごう"
     furigana: "番[ばん]号[ごう]"
@@ -13244,6 +13360,7 @@ lessons:
     id: "完成|かんせい"
     level: 3
     new_kanji: {kanji: "完", meaning: "Perfect, Completion, End"}
+    draw: "完"
     word: "完成"
     kana: "かんせい"
     furigana: "完[かん]成[せい]"
@@ -13355,6 +13472,7 @@ lessons:
     id: "給料|きゅうりょう"
     level: 3
     new_kanji: {kanji: "給", meaning: "Salary, Wage, Gift, Allow, Grant, Bestow On"}
+    draw: "給"
     word: "給料"
     kana: "きゅうりょう"
     furigana: "給[きゅう]料[りょう]"
@@ -13454,6 +13572,7 @@ lessons:
     id: "公園|こうえん"
     level: 3
     new_kanji: {kanji: "園", meaning: "Park, Garden, Yard, Farm"}
+    draw: "園"
     word: "公園"
     kana: "こうえん"
     furigana: "公[こう]園[えん]"
@@ -13474,6 +13593,7 @@ lessons:
     id: "具合|ぐあい"
     level: 3
     new_kanji: {kanji: "具", meaning: "Tool, Utensil, Means, Possess, Ingredients, Counter For Armor, Suits, Sets Of Furniture"}
+    draw: "具"
     word: "具合"
     kana: "ぐあい"
     furigana: "具[ぐ]合[あい]"
@@ -13531,6 +13651,7 @@ lessons:
     id: "原因|げんいん"
     level: 3
     new_kanji: {kanji: "因", meaning: "Cause, Factor, Be Associated With, Depend On, Be Limited To"}
+    draw: "因"
     word: "原因"
     kana: "げんいん"
     furigana: "原[げん]因[いん]"
@@ -13611,6 +13732,7 @@ lessons:
     id: "未来|みらい"
     level: 3
     new_kanji: {kanji: "未", meaning: "Un-, Not Yet, Hitherto, Still, Even Now, Sign Of The Ram, 1-3pm, Eighth Sign Of Chinese Zodiac"}
+    draw: "未"
     word: "未来"
     kana: "みらい"
     furigana: "未[み]来[らい]"
@@ -13622,6 +13744,7 @@ lessons:
     id: "お見舞い|おみまい"
     level: 3
     new_kanji: {kanji: "舞", meaning: "Dance, Flit, Circle, Wheel"}
+    draw: "舞"
     word: "お見舞い"
     kana: "おみまい"
     furigana: "お見[み]舞[ま]い"
@@ -13750,6 +13873,7 @@ lessons:
     id: "主婦|しゅふ"
     level: 3
     new_kanji: {kanji: "婦", meaning: "Lady, Woman, Wife, Bride"}
+    draw: "婦"
     word: "主婦"
     kana: "しゅふ"
     furigana: "主[しゅ]婦[ふ]"
@@ -13842,6 +13966,7 @@ lessons:
     id: "種類|しゅるい"
     level: 3
     new_kanji: {kanji: "類", meaning: "Sort, Kind, Variety, Class, Genus"}
+    draw: "類"
     word: "種類"
     kana: "しゅるい"
     furigana: "種[しゅ]類[るい]"
@@ -14162,6 +14287,7 @@ lessons:
     id: "途中|とちゅう"
     level: 3
     new_kanji: {kanji: "途", meaning: "Route, Way, Road"}
+    draw: "途"
     word: "途中"
     kana: "とちゅう"
     furigana: "途[と]中[ちゅう]"
@@ -14315,6 +14441,7 @@ lessons:
     id: "精神|せいしん"
     level: 3
     new_kanji: {kanji: "精", meaning: "Refined, Ghost, Fairy, Energy, Vitality, Semen, Excellence, Purity, Skill"}
+    draw: "精"
     word: "精神"
     kana: "せいしん"
     furigana: "精[せい]神[しん]"
@@ -14358,6 +14485,7 @@ lessons:
     id: "婚約|こんやく"
     level: 3
     new_kanji: {kanji: "婚", meaning: "Marriage"}
+    draw: "婚"
     word: "婚約"
     kana: "こんやく"
     furigana: "婚[こん]約[やく]"
@@ -14439,6 +14567,7 @@ lessons:
     id: "幸福|こうふく"
     level: 3
     new_kanji: {kanji: "福", meaning: "Blessing, Fortune, Luck, Wealth"}
+    draw: "福"
     word: "幸福"
     kana: "こうふく"
     furigana: "幸[こう]福[ふく]"
@@ -14643,6 +14772,7 @@ lessons:
     id: "生徒|せいと"
     level: 3
     new_kanji: {kanji: "徒", meaning: "On Foot, Junior, Emptiness, Vanity, Futility, Uselessness, Ephemeral Thing, Gang, Set, Party, People"}
+    draw: "徒"
     word: "生徒"
     kana: "せいと"
     furigana: "生[せい]徒[と]"
@@ -14695,6 +14825,7 @@ lessons:
     id: "居間|いま"
     level: 3
     new_kanji: {kanji: "居", meaning: "Reside, To Be, Exist, Live With"}
+    draw: "居"
     word: "居間"
     kana: "いま"
     furigana: "居[い]間[ま]"
@@ -14819,6 +14950,7 @@ lessons:
     id: "賛成|さんせい"
     level: 3
     new_kanji: {kanji: "賛", meaning: "Approve, Praise, Title Or Inscription On Picture, Assist, Agree With"}
+    draw: "賛"
     word: "賛成"
     kana: "さんせい"
     furigana: "賛[さん]成[せい]"
@@ -14851,6 +14983,7 @@ lessons:
     id: "犯罪|はんざい"
     level: 3
     new_kanji: {kanji: "犯", meaning: "Crime, Sin, Offense"}
+    draw: "犯"
     word: "犯罪"
     kana: "はんざい"
     furigana: "犯[はん]罪[ざい]"
@@ -15103,6 +15236,7 @@ lessons:
     id: "笑顔|えがお"
     level: 3
     new_kanji: {kanji: "顔", meaning: "Face, Expression"}
+    draw: "顔"
     word: "笑顔"
     kana: "えがお"
     furigana: "笑[え]顔[がお]"
@@ -15249,6 +15383,7 @@ lessons:
     id: "迷子|まいご"
     level: 3
     new_kanji: {kanji: "迷", meaning: "Astray, Be Perplexed, In Doubt, Lost, Err, Illusion"}
+    draw: "迷"
     word: "迷子"
     kana: "まいご"
     furigana: "迷子[まいご]"
@@ -15333,6 +15468,7 @@ lessons:
     id: "一緒|いっしょ"
     level: 3
     new_kanji: {kanji: "緒", meaning: "Thong, Beginning, Inception, End, Cord, Strap, Mental Or Emotional State"}
+    draw: "緒"
     word: "一緒"
     kana: "いっしょ"
     furigana: "一[いっ]緒[しょ]"
@@ -15473,6 +15609,7 @@ lessons:
     id: "お目に掛かる|おめにかかる"
     level: 3
     new_kanji: {kanji: "掛", meaning: "Hang, Suspend, Depend, Arrive At, Tax, Pour"}
+    draw: "掛"
     word: "お目に掛かる"
     kana: "おめにかかる"
     furigana: "お目[め]に掛[か]かる"
@@ -15485,6 +15622,7 @@ lessons:
     id: "到着|とうちゃく"
     level: 3
     new_kanji: {kanji: "到", meaning: "Arrival, Proceed, Reach, Attain, Result In"}
+    draw: "到"
     word: "到着"
     kana: "とうちゃく"
     furigana: "到[とう]着[ちゃく]"
@@ -15589,6 +15727,7 @@ lessons:
     id: "太陽|たいよう"
     level: 3
     new_kanji: {kanji: "陽", meaning: "Sunshine, Yang Principle, Positive, Male, Heaven, Daytime"}
+    draw: "陽"
     word: "太陽"
     kana: "たいよう"
     furigana: "太[たい]陽[よう]"
@@ -15609,6 +15748,7 @@ lessons:
     id: "御飯|ごはん"
     level: 3
     new_kanji: {kanji: "御", meaning: "Honorable, Manipulate, Govern"}
+    draw: "御"
     word: "御飯"
     kana: "ごはん"
     furigana: "御[ご]飯[はん]"
@@ -15886,6 +16026,7 @@ lessons:
     id: "祖父|そふ"
     level: 3
     new_kanji: {kanji: "祖", meaning: "Ancestor, Pioneer, Founder"}
+    draw: "祖"
     word: "祖父"
     kana: "そふ"
     furigana: "祖[そ]父[ふ]"
@@ -15905,6 +16046,7 @@ lessons:
     id: "一杯|いっぱい"
     level: 3
     new_kanji: {kanji: "杯", meaning: "Counter For Cupfuls, Wine Glass, Glass, Toast"}
+    draw: "杯"
     word: "一杯"
     kana: "いっぱい"
     furigana: "一[いっ]杯[ぱい]"
@@ -16058,6 +16200,7 @@ lessons:
     id: "頂上|ちょうじょう"
     level: 3
     new_kanji: {kanji: "頂", meaning: "Place On The Head, Receive, Top Of Head, Top, Summit, Peak"}
+    draw: "頂"
     word: "頂上"
     kana: "ちょうじょう"
     furigana: "頂[ちょう]上[じょう]"
@@ -16151,6 +16294,7 @@ lessons:
     id: "才能|さいのう"
     level: 3
     new_kanji: {kanji: "才", meaning: "Genius, Years Old, Cubic Shaku"}
+    draw: "才"
     word: "才能"
     kana: "さいのう"
     furigana: "才[さい]能[のう]"
@@ -16162,6 +16306,7 @@ lessons:
     id: "化粧|けしょう"
     level: 3
     new_kanji: {kanji: "粧", meaning: "Cosmetics, Adorn (one's Person)", extra: true}
+    draw: "粧"
     word: "化粧"
     kana: "けしょう"
     furigana: "化[け]粧[しょう]"
@@ -16203,6 +16348,7 @@ lessons:
     id: "偶然|ぐうぜん"
     level: 3
     new_kanji: {kanji: "偶", meaning: "Accidentally, Even Number, Couple, Man & Wife, Same Kind"}
+    draw: "偶"
     word: "偶然"
     kana: "ぐうぜん"
     furigana: "偶[ぐう]然[ぜん]"
@@ -16280,6 +16426,7 @@ lessons:
     id: "近頃|ちかごろ"
     level: 3
     new_kanji: {kanji: "頃", meaning: "Time, About, Toward", extra: true}
+    draw: "頃"
     word: "近頃"
     kana: "ちかごろ"
     furigana: "近[ちか]頃[ごろ]"
@@ -16313,6 +16460,7 @@ lessons:
     id: "椅子|いす"
     level: 3
     new_kanji: {kanji: "椅", meaning: "Chair", extra: true}
+    draw: "椅"
     word: "椅子"
     kana: "いす"
     furigana: "椅[い]子[す]"
@@ -16346,6 +16494,7 @@ lessons:
     id: "頂戴|ちょうだい"
     level: 3
     new_kanji: {kanji: "戴", meaning: "Be Crowned With, Live Under (a Ruler), Receive", extra: true}
+    draw: "戴"
     word: "頂戴"
     kana: "ちょうだい"
     furigana: "頂[ちょう]戴[だい]"
@@ -16367,6 +16516,7 @@ lessons:
     id: "親戚|しんせき"
     level: 3
     new_kanji: {kanji: "戚", meaning: "Grieve, Relatives", extra: true}
+    draw: "戚"
     word: "親戚"
     kana: "しんせき"
     furigana: "親[しん]戚[せき]"
@@ -16425,6 +16575,7 @@ lessons:
     id: "挨拶|あいさつ"
     level: 3
     new_kanji: {kanji: "拶", meaning: "Be Imminent, Draw Close", extra: true}
+    draw: "拶"
     word: "挨拶"
     kana: "あいさつ"
     furigana: "挨[あい]拶[さつ]"
@@ -22139,6 +22290,7 @@ lessons:
     id: "協力|きょうりょく"
     level: 2
     new_kanji: {kanji: "協", meaning: "Co-, Cooperation"}
+    draw: "協"
     word: "協力"
     kana: "きょうりょく"
     furigana: "協[きょう]力[りょく]"
@@ -22150,6 +22302,7 @@ lessons:
     id: "区別|くべつ"
     level: 2
     new_kanji: {kanji: "区", meaning: "Ward, District"}
+    draw: "区"
     word: "区別"
     kana: "くべつ"
     furigana: "区[く]別[べつ]"
@@ -22188,6 +22341,7 @@ lessons:
     id: "要領|ようりょう"
     level: 2
     new_kanji: {kanji: "領", meaning: "Jurisdiction, Dominion, Territory, Fief, Reign"}
+    draw: "領"
     word: "要領"
     kana: "ようりょう"
     furigana: "要[よう]領[りょう]"
@@ -22226,6 +22380,7 @@ lessons:
     id: "建設|けんせつ"
     level: 2
     new_kanji: {kanji: "設", meaning: "Establishment, Provision, Prepare"}
+    draw: "設"
     word: "建設"
     kana: "けんせつ"
     furigana: "建[けん]設[せつ]"
@@ -22286,6 +22441,7 @@ lessons:
     id: "政府|せいふ"
     level: 2
     new_kanji: {kanji: "府", meaning: "Borough, Urban Prefecture, Govt Office, Representative Body, Storehouse"}
+    draw: "府"
     word: "政府"
     kana: "せいふ"
     furigana: "政[せい]府[ふ]"
@@ -22297,6 +22453,7 @@ lessons:
     id: "調査|ちょうさ"
     level: 2
     new_kanji: {kanji: "査", meaning: "Investigate"}
+    draw: "査"
     word: "調査"
     kana: "ちょうさ"
     furigana: "調[ちょう]査[さ]"
@@ -22308,6 +22465,7 @@ lessons:
     id: "委員|いいん"
     level: 2
     new_kanji: {kanji: "委", meaning: "Committee, Entrust To, Leave To, Devote, Discard"}
+    draw: "委"
     word: "委員"
     kana: "いいん"
     furigana: "委[い]員[いん]"
@@ -22330,6 +22488,7 @@ lessons:
     id: "集団|しゅうだん"
     level: 2
     new_kanji: {kanji: "団", meaning: "Group, Association"}
+    draw: "団"
     word: "集団"
     kana: "しゅうだん"
     furigana: "集[しゅう]団[だん]"
@@ -22576,6 +22735,7 @@ lessons:
     id: "営業|えいぎょう"
     level: 2
     new_kanji: {kanji: "営", meaning: "Occupation, Camp, Perform, Build, Conduct (business)"}
+    draw: "営"
     word: "営業"
     kana: "えいぎょう"
     furigana: "営[えい]業[ぎょう]"
@@ -22702,6 +22862,7 @@ lessons:
     id: "指導|しどう"
     level: 2
     new_kanji: {kanji: "導", meaning: "Guidance, Leading, Conduct, Usher"}
+    draw: "導"
     word: "指導"
     kana: "しどう"
     furigana: "指[し]導[どう]"
@@ -22713,6 +22874,7 @@ lessons:
     id: "計算|けいさん"
     level: 2
     new_kanji: {kanji: "算", meaning: "Calculate, Divining, Number, Abacus, Probability"}
+    draw: "算"
     word: "計算"
     kana: "けいさん"
     furigana: "計[けい]算[さん]"
@@ -22770,6 +22932,7 @@ lessons:
     id: "輸出|ゆしゅつ"
     level: 2
     new_kanji: {kanji: "輸", meaning: "Transport, Send, Be Inferior"}
+    draw: "輸"
     word: "輸出"
     kana: "ゆしゅつ"
     furigana: "輸[ゆ]出[しゅつ]"
@@ -22901,6 +23064,7 @@ lessons:
     id: "農家|のうか"
     level: 2
     new_kanji: {kanji: "農", meaning: "Agriculture, Farmers"}
+    draw: "農"
     word: "農家"
     kana: "のうか"
     furigana: "農[のう]家[か]"
@@ -22998,6 +23162,7 @@ lessons:
     id: "地域|ちいき"
     level: 2
     new_kanji: {kanji: "域", meaning: "Range, Region, Limits, Stage, Level"}
+    draw: "域"
     word: "地域"
     kana: "ちいき"
     furigana: "地[ち]域[いき]"
@@ -23057,6 +23222,7 @@ lessons:
     id: "欧米|おうべい"
     level: 2
     new_kanji: {kanji: "欧", meaning: "Europe"}
+    draw: "欧"
     word: "欧米"
     kana: "おうべい"
     furigana: "欧[おう]米[べい]"
@@ -23089,6 +23255,7 @@ lessons:
     id: "準備|じゅんび"
     level: 2
     new_kanji: {kanji: "準", meaning: "Semi-, Correspond To, Proportionate To, Conform, Imitate"}
+    draw: "準"
     word: "準備"
     kana: "じゅんび"
     furigana: "準[じゅん]備[び]"
@@ -23214,6 +23381,7 @@ lessons:
     id: "被害|ひがい"
     level: 2
     new_kanji: {kanji: "被", meaning: "Incur, Cover, Veil, Brood Over, Shelter, Wear, Put On, Be Exposed (film), Receiving"}
+    draw: "被"
     word: "被害"
     kana: "ひがい"
     furigana: "被[ひ]害[がい]"
@@ -23225,6 +23393,7 @@ lessons:
     id: "技術|ぎじゅつ"
     level: 2
     new_kanji: {kanji: "技", meaning: "Skill, Art, Craft, Ability, Feat, Performance, Vocation, Arts"}
+    draw: "技"
     word: "技術"
     kana: "ぎじゅつ"
     furigana: "技[ぎ]術[じゅつ]"
@@ -23282,6 +23451,7 @@ lessons:
     id: "復習|ふくしゅう"
     level: 2
     new_kanji: {kanji: "復", meaning: "Restore, Return To, Revert, Resume"}
+    draw: "復"
     word: "復習"
     kana: "ふくしゅう"
     furigana: "復[ふく]習[しゅう]"
@@ -23341,6 +23511,7 @@ lessons:
     id: "個人|こじん"
     level: 2
     new_kanji: {kanji: "個", meaning: "Individual, Counter For Articles"}
+    draw: "個"
     word: "個人"
     kana: "こじん"
     furigana: "個[こ]人[じん]"
@@ -23436,6 +23607,7 @@ lessons:
     id: "頭脳|ずのう"
     level: 2
     new_kanji: {kanji: "脳", meaning: "Brain, Memory"}
+    draw: "脳"
     word: "頭脳"
     kana: "ずのう"
     furigana: "頭[ず]脳[のう]"
@@ -23447,6 +23619,7 @@ lessons:
     id: "積極的|せっきょくてき"
     level: 2
     new_kanji: {kanji: "極", meaning: "Poles, Settlement, Conclusion, End, Highest Rank, Electric Poles, Very, Extremely, Most, Highly, 10**48"}
+    draw: "極"
     word: "積極的"
     kana: "せっきょくてき"
     furigana: "積[せっ]極[きょく]的[てき]"
@@ -23553,6 +23726,7 @@ lessons:
     id: "状況|じょうきょう"
     level: 2
     new_kanji: {kanji: "況", meaning: "Condition, Situation"}
+    draw: "況"
     word: "状況"
     kana: "じょうきょう"
     furigana: "状[じょう]況[きょう]"
@@ -23604,6 +23778,7 @@ lessons:
     id: "専制|せんせい"
     level: 2
     new_kanji: {kanji: "専", meaning: "Specialty, Exclusive, Mainly, Solely"}
+    draw: "専"
     word: "専制"
     kana: "せんせい"
     furigana: "専[せん]制[せい]"
@@ -23625,6 +23800,7 @@ lessons:
     id: "階段|かいだん"
     level: 2
     new_kanji: {kanji: "階", meaning: "Storey, Stair, Counter For Storeys Of A Building"}
+    draw: "階"
     word: "階段"
     kana: "かいだん"
     furigana: "階[かい]段[だん]"
@@ -23820,6 +23996,7 @@ lessons:
     id: "記録|きろく"
     level: 2
     new_kanji: {kanji: "録", meaning: "Record"}
+    draw: "録"
     word: "記録"
     kana: "きろく"
     furigana: "記[き]録[ろく]"
@@ -23933,6 +24110,7 @@ lessons:
     id: "材料|ざいりょう"
     level: 2
     new_kanji: {kanji: "材", meaning: "Lumber, Log, Timber, Wood, Materials, Ingredients, Talent"}
+    draw: "材"
     word: "材料"
     kana: "ざいりょう"
     furigana: "材[ざい]料[りょう]"
@@ -23983,6 +24161,7 @@ lessons:
     id: "中央|ちゅうおう"
     level: 2
     new_kanji: {kanji: "央", meaning: "Center, Middle"}
+    draw: "央"
     word: "中央"
     kana: "ちゅうおう"
     furigana: "中[ちゅう]央[おう]"
@@ -24141,6 +24320,7 @@ lessons:
     id: "医療|いりょう"
     level: 2
     new_kanji: {kanji: "療", meaning: "Heal, Cure"}
+    draw: "療"
     word: "医療"
     kana: "いりょう"
     furigana: "医[い]療[りょう]"
@@ -24183,6 +24363,7 @@ lessons:
     id: "競争|きょうそう"
     level: 2
     new_kanji: {kanji: "競", meaning: "Emulate, Compete With, Bid, Sell At Auction, Bout, Contest, Race"}
+    draw: "競"
     word: "競争"
     kana: "きょうそう"
     furigana: "競[きょう]争[そう]"
@@ -24233,6 +24414,7 @@ lessons:
     id: "販売|はんばい"
     level: 2
     new_kanji: {kanji: "販", meaning: "Marketing, Sell, Trade"}
+    draw: "販"
     word: "販売"
     kana: "はんばい"
     furigana: "販[はん]売[ばい]"
@@ -24244,6 +24426,7 @@ lessons:
     id: "将来|しょうらい"
     level: 2
     new_kanji: {kanji: "将", meaning: "Leader, Commander, General, Admiral, Or, And Again, Soon, From Now On, Just About"}
+    draw: "将"
     word: "将来"
     kana: "しょうらい"
     furigana: "将[しょう]来[らい]"
@@ -24265,6 +24448,7 @@ lessons:
     id: "一般|いっぱん"
     level: 2
     new_kanji: {kanji: "般", meaning: "Carrier, Carry, All, General, Sort, Kind"}
+    draw: "般"
     word: "一般"
     kana: "いっぱん"
     furigana: "一[いっ]般[ぱん]"
@@ -24285,6 +24469,7 @@ lessons:
     id: "貿易|ぼうえき"
     level: 2
     new_kanji: {kanji: "貿", meaning: "Trade, Exchange"}
+    draw: "貿"
     word: "貿易"
     kana: "ぼうえき"
     furigana: "貿[ぼう]易[えき]"
@@ -24296,6 +24481,7 @@ lessons:
     id: "講堂|こうどう"
     level: 2
     new_kanji: {kanji: "講", meaning: "Lecture, Club, Association"}
+    draw: "講"
     word: "講堂"
     kana: "こうどう"
     furigana: "講[こう]堂[どう]"
@@ -24364,6 +24550,7 @@ lessons:
     id: "装置|そうち"
     level: 2
     new_kanji: {kanji: "装", meaning: "Attire, Dress, Pretend, Disguise, Profess"}
+    draw: "装"
     word: "装置"
     kana: "そうち"
     furigana: "装[そう]置[ち]"
@@ -24443,6 +24630,7 @@ lessons:
     id: "航空|こうくう"
     level: 2
     new_kanji: {kanji: "航", meaning: "Navigate, Sail, Cruise, Fly"}
+    draw: "航"
     word: "航空"
     kana: "こうくう"
     furigana: "航[こう]空[くう]"
@@ -24501,6 +24689,7 @@ lessons:
     id: "育児|いくじ"
     level: 2
     new_kanji: {kanji: "児", meaning: "Newborn Babe, Child, Young Of Animals"}
+    draw: "児"
     word: "育児"
     kana: "いくじ"
     furigana: "育[いく]児[じ]"
@@ -24512,6 +24701,7 @@ lessons:
     id: "禁煙|きんえん"
     level: 2
     new_kanji: {kanji: "禁", meaning: "Prohibition, Ban, Forbid"}
+    draw: "禁"
     word: "禁煙"
     kana: "きんえん"
     furigana: "禁[きん]煙[えん]"
@@ -24872,6 +25062,7 @@ lessons:
     id: "平均|へいきん"
     level: 2
     new_kanji: {kanji: "均", meaning: "Level, Average"}
+    draw: "均"
     word: "平均"
     kana: "へいきん"
     furigana: "平[へい]均[きん]"
@@ -24893,6 +25084,7 @@ lessons:
     id: "気圧|きあつ"
     level: 2
     new_kanji: {kanji: "圧", meaning: "Pressure, Push, Overwhelm, Oppress, Dominate"}
+    draw: "圧"
     word: "気圧"
     kana: "きあつ"
     furigana: "気[き]圧[あつ]"
@@ -24904,6 +25096,7 @@ lessons:
     id: "芸術|げいじゅつ"
     level: 2
     new_kanji: {kanji: "芸", meaning: "Technique, Art, Craft, Performance, Acting, Trick, Stunt"}
+    draw: "芸"
     word: "芸術"
     kana: "げいじゅつ"
     furigana: "芸[げい]術[じゅつ]"
@@ -24949,6 +25142,7 @@ lessons:
     id: "署名|しょめい"
     level: 2
     new_kanji: {kanji: "署", meaning: "Signature, Govt Office, Police Station"}
+    draw: "署"
     word: "署名"
     kana: "しょめい"
     furigana: "署[しょ]名[めい]"
@@ -24989,6 +25183,7 @@ lessons:
     id: "停留所|ていりゅうじょ"
     level: 2
     new_kanji: {kanji: "停", meaning: "Halt, Stopping"}
+    draw: "停"
     word: "停留所"
     kana: "ていりゅうじょ"
     furigana: "停[てい]留[りゅう]所[じょ]"
@@ -25026,6 +25221,7 @@ lessons:
     id: "爆発|ばくはつ"
     level: 2
     new_kanji: {kanji: "爆", meaning: "Bomb, Burst Open, Pop, Split"}
+    draw: "爆"
     word: "爆発"
     kana: "ばくはつ"
     furigana: "爆[ばく]発[はつ]"
@@ -25224,6 +25420,7 @@ lessons:
     id: "規則|きそく"
     level: 2
     new_kanji: {kanji: "則", meaning: "Rule, Follow, Based On, Model After"}
+    draw: "則"
     word: "規則"
     kana: "きそく"
     furigana: "規[き]則[そく]"
@@ -25253,6 +25450,7 @@ lessons:
     id: "乱暴|らんぼう"
     level: 2
     new_kanji: {kanji: "乱", meaning: "Riot, War, Disorder, Disturb"}
+    draw: "乱"
     word: "乱暴"
     kana: "らんぼう"
     furigana: "乱[らん]暴[ぼう]"
@@ -25264,6 +25462,7 @@ lessons:
     id: "普通|ふつう"
     level: 2
     new_kanji: {kanji: "普", meaning: "Universal, Wide(ly), Generally, Prussia"}
+    draw: "普"
     word: "普通"
     kana: "ふつう"
     furigana: "普[ふ]通[つう]"
@@ -25371,6 +25570,7 @@ lessons:
     id: "年齢|ねんれい"
     level: 2
     new_kanji: {kanji: "齢", meaning: "Age"}
+    draw: "齢"
     word: "年齢"
     kana: "ねんれい"
     furigana: "年[ねん]齢[れい]"
@@ -25403,6 +25603,7 @@ lessons:
     id: "卒業|そつぎょう"
     level: 2
     new_kanji: {kanji: "卒", meaning: "Graduate, Soldier, Private, Die"}
+    draw: "卒"
     word: "卒業"
     kana: "そつぎょう"
     furigana: "卒[そつ]業[ぎょう]"
@@ -25523,6 +25724,7 @@ lessons:
     id: "練習|れんしゅう"
     level: 2
     new_kanji: {kanji: "練", meaning: "Practice, Gloss, Train, Drill, Polish, Refine"}
+    draw: "練"
     word: "練習"
     kana: "れんしゅう"
     furigana: "練[れん]習[しゅう]"
@@ -25544,6 +25746,7 @@ lessons:
     id: "完了|かんりょう"
     level: 2
     new_kanji: {kanji: "了", meaning: "Complete, Finish"}
+    draw: "了"
     word: "完了"
     kana: "かんりょう"
     furigana: "完[かん]了[りょう]"
@@ -25563,6 +25766,7 @@ lessons:
     id: "官庁|かんちょう"
     level: 2
     new_kanji: {kanji: "庁", meaning: "Government Office"}
+    draw: "庁"
     word: "官庁"
     kana: "かんちょう"
     furigana: "官[かん]庁[ちょう]"
@@ -25593,6 +25797,7 @@ lessons:
     id: "患者|かんじゃ"
     level: 2
     new_kanji: {kanji: "患", meaning: "Afflicted, Disease, Suffer From, Be Ill"}
+    draw: "患"
     word: "患者"
     kana: "かんじゃ"
     furigana: "患[かん]者[じゃ]"
@@ -25604,6 +25809,7 @@ lessons:
     id: "一層|いっそう"
     level: 2
     new_kanji: {kanji: "層", meaning: "Stratum, Social Class, Layer, Story, Floor"}
+    draw: "層"
     word: "一層"
     kana: "いっそう"
     furigana: "一[いっ]層[そう]"
@@ -25623,6 +25829,7 @@ lessons:
     id: "出版|しゅっぱん"
     level: 2
     new_kanji: {kanji: "版", meaning: "Printing Block, Printing Plate, Edition, Impression, Label"}
+    draw: "版"
     word: "出版"
     kana: "しゅっぱん"
     furigana: "出[しゅっ]版[ぱん]"
@@ -25634,6 +25841,7 @@ lessons:
     id: "命令|めいれい"
     level: 2
     new_kanji: {kanji: "令", meaning: "Orders, Ancient Laws, Command, Decree"}
+    draw: "令"
     word: "命令"
     kana: "めいれい"
     furigana: "命[めい]令[れい]"
@@ -25732,6 +25940,7 @@ lessons:
     id: "連絡|れんらく"
     level: 2
     new_kanji: {kanji: "絡", meaning: "Entwine, Coil Around, Get Caught In"}
+    draw: "絡"
     word: "連絡"
     kana: "れんらく"
     furigana: "連[れん]絡[らく]"
@@ -25772,6 +25981,7 @@ lessons:
     id: "募集|ぼしゅう"
     level: 2
     new_kanji: {kanji: "募", meaning: "Recruit, Campaign, Gather (contributions), Enlist, Grow Violent"}
+    draw: "募"
     word: "募集"
     kana: "ぼしゅう"
     furigana: "募[ぼ]集[しゅう]"
@@ -25833,6 +26043,7 @@ lessons:
     id: "成績|せいせき"
     level: 2
     new_kanji: {kanji: "績", meaning: "Exploits, Achievements, Unreeling Cocoons"}
+    draw: "績"
     word: "成績"
     kana: "せいせき"
     furigana: "成[せい]績[せき]"
@@ -25853,6 +26064,7 @@ lessons:
     id: "建築|けんちく"
     level: 2
     new_kanji: {kanji: "築", meaning: "Fabricate, Build, Construct"}
+    draw: "築"
     word: "建築"
     kana: "けんちく"
     furigana: "建[けん]築[ちく]"
@@ -25864,6 +26076,7 @@ lessons:
     id: "貨物|かもつ"
     level: 2
     new_kanji: {kanji: "貨", meaning: "Freight, Goods, Property"}
+    draw: "貨"
     word: "貨物"
     kana: "かもつ"
     furigana: "貨[か]物[もつ]"
@@ -26001,6 +26214,7 @@ lessons:
     id: "温度|おんど"
     level: 2
     new_kanji: {kanji: "温", meaning: "Warm"}
+    draw: "温"
     word: "温度"
     kana: "おんど"
     furigana: "温[おん]度[ど]"
@@ -26048,6 +26262,7 @@ lessons:
     id: "四季|しき"
     level: 2
     new_kanji: {kanji: "季", meaning: "Seasons"}
+    draw: "季"
     word: "四季"
     kana: "しき"
     furigana: "四[し]季[き]"
@@ -26121,6 +26336,7 @@ lessons:
     id: "雑誌|ざっし"
     level: 2
     new_kanji: {kanji: "誌", meaning: "Document, Records"}
+    draw: "誌"
     word: "雑誌"
     kana: "ざっし"
     furigana: "雑[ざっ]誌[し]"
@@ -26132,6 +26348,7 @@ lessons:
     id: "金庫|きんこ"
     level: 2
     new_kanji: {kanji: "庫", meaning: "Warehouse, Storehouse"}
+    draw: "庫"
     word: "金庫"
     kana: "きんこ"
     furigana: "金[きん]庫[こ]"
@@ -26152,6 +26369,7 @@ lessons:
     id: "冷蔵庫|れいぞうこ"
     level: 2
     new_kanji: {kanji: "蔵", meaning: "Storehouse, Hide, Own, Have, Possess"}
+    draw: "蔵"
     word: "冷蔵庫"
     kana: "れいぞうこ"
     furigana: "冷[れい]蔵[ぞう]庫[こ]"
@@ -26163,6 +26381,7 @@ lessons:
     id: "夕刊|ゆうかん"
     level: 2
     new_kanji: {kanji: "刊", meaning: "Publish, Carve, Engrave"}
+    draw: "刊"
     word: "夕刊"
     kana: "ゆうかん"
     furigana: "夕[ゆう]刊[かん]"
@@ -26174,6 +26393,7 @@ lessons:
     id: "想像|そうぞう"
     level: 2
     new_kanji: {kanji: "像", meaning: "Statue, Picture, Image, Figure, Portrait"}
+    draw: "像"
     word: "想像"
     kana: "そうぞう"
     furigana: "想[そう]像[ぞう]"
@@ -26299,6 +26519,7 @@ lessons:
     id: "巨大|きょだい"
     level: 2
     new_kanji: {kanji: "巨", meaning: "Gigantic, Big, Large, Great"}
+    draw: "巨"
     word: "巨大"
     kana: "きょだい"
     furigana: "巨[きょ]大[だい]"
@@ -26331,6 +26552,7 @@ lessons:
     id: "希望|きぼう"
     level: 2
     new_kanji: {kanji: "希", meaning: "Hope, Beg, Request, Pray, Beseech, Greece, Dilute (acid), Rare, Few, Phenomenal"}
+    draw: "希"
     word: "希望"
     kana: "きぼう"
     furigana: "希[き]望[ぼう]"
@@ -26363,6 +26585,7 @@ lessons:
     id: "依頼|いらい"
     level: 2
     new_kanji: {kanji: "依", meaning: "Reliant, Depend On, Consequently, Therefore, Due To"}
+    draw: "依"
     word: "依頼"
     kana: "いらい"
     furigana: "依[い]頼[らい]"
@@ -26374,6 +26597,7 @@ lessons:
     id: "国籍|こくせき"
     level: 2
     new_kanji: {kanji: "籍", meaning: "Enroll, Domiciliary Register, Membership"}
+    draw: "籍"
     word: "国籍"
     kana: "こくせき"
     furigana: "国[こく]籍[せき]"
@@ -26422,6 +26646,7 @@ lessons:
     id: "枚数|まいすう"
     level: 2
     new_kanji: {kanji: "枚", meaning: "Sheet Of..., Counter For Flat Thin Objects Or Sheets"}
+    draw: "枚"
     word: "枚数"
     kana: "まいすう"
     furigana: "枚[まい]数[すう]"
@@ -26432,6 +26657,7 @@ lessons:
     id: "複雑|ふくざつ"
     level: 2
     new_kanji: {kanji: "複", meaning: "Duplicate, Double, Compound, Multiple"}
+    draw: "複"
     word: "複雑"
     kana: "ふくざつ"
     furigana: "複[ふく]雑[ざつ]"
@@ -26460,6 +26686,7 @@ lessons:
     id: "郵便局|ゆうびんきょく"
     level: 2
     new_kanji: {kanji: "郵", meaning: "Mail, Stagecoach Stop"}
+    draw: "郵"
     word: "郵便局"
     kana: "ゆうびんきょく"
     furigana: "郵[ゆう]便[びん]局[きょく]"
@@ -26738,6 +26965,7 @@ lessons:
     id: "駐車場|ちゅうしゃじょう"
     level: 2
     new_kanji: {kanji: "駐", meaning: "Stop-over, Reside In, Resident"}
+    draw: "駐"
     word: "駐車場"
     kana: "ちゅうしゃじょう"
     furigana: "駐[ちゅう]車[しゃ]場[じょう]"
@@ -26879,6 +27107,7 @@ lessons:
     id: "簡単|かんたん"
     level: 2
     new_kanji: {kanji: "簡", meaning: "Simplicity, Brevity"}
+    draw: "簡"
     word: "簡単"
     kana: "かんたん"
     furigana: "簡[かん]単[たん]"
@@ -26909,6 +27138,7 @@ lessons:
     id: "心臓|しんぞう"
     level: 2
     new_kanji: {kanji: "臓", meaning: "Entrails, Viscera, Bowels"}
+    draw: "臓"
     word: "心臓"
     kana: "しんぞう"
     furigana: "心[しん]臓[ぞう]"
@@ -26920,6 +27150,7 @@ lessons:
     id: "法律|ほうりつ"
     level: 2
     new_kanji: {kanji: "律", meaning: "Rhythm, Law, Regulation, Gauge, Control"}
+    draw: "律"
     word: "法律"
     kana: "ほうりつ"
     furigana: "法[ほう]律[りつ]"
@@ -27081,6 +27312,7 @@ lessons:
     id: "双子|ふたご"
     level: 2
     new_kanji: {kanji: "双", meaning: "Pair, Set, Comparison, Counter For Pairs"}
+    draw: "双"
     word: "双子"
     kana: "ふたご"
     furigana: "双[ふた]子[ご]"
@@ -27091,6 +27323,7 @@ lessons:
     id: "孝行|こうこう"
     level: 2
     new_kanji: {kanji: "孝", meaning: "Filial Piety, Child's Respect", extra: true}
+    draw: "孝"
     word: "孝行"
     kana: "こうこう"
     furigana: "孝[こう]行[こう]"
@@ -27141,6 +27374,7 @@ lessons:
     id: "単純|たんじゅん"
     level: 2
     new_kanji: {kanji: "純", meaning: "Genuine, Purity, Innocence, Net (profit)"}
+    draw: "純"
     word: "単純"
     kana: "たんじゅん"
     furigana: "単[たん]純[じゅん]"
@@ -27161,6 +27395,7 @@ lessons:
     id: "快適|かいてき"
     level: 2
     new_kanji: {kanji: "快", meaning: "Cheerful, Pleasant, Agreeable, Comfortable"}
+    draw: "快"
     word: "快適"
     kana: "かいてき"
     furigana: "快[かい]適[てき]"
@@ -27182,6 +27417,7 @@ lessons:
     id: "片付ける|かたづける"
     level: 2
     new_kanji: {kanji: "片", meaning: "One-sided, Leaf, Sheet, Right-side Kata Radical (no. 91)"}
+    draw: "片"
     word: "片付ける"
     kana: "かたづける"
     furigana: "片[かた]付[づ]ける"
@@ -27312,6 +27548,7 @@ lessons:
     id: "漁業|ぎょぎょう"
     level: 2
     new_kanji: {kanji: "漁", meaning: "Fishing, Fishery"}
+    draw: "漁"
     word: "漁業"
     kana: "ぎょぎょう"
     furigana: "漁[ぎょ]業[ぎょう]"
@@ -27344,6 +27581,7 @@ lessons:
     id: "貯金|ちょきん"
     level: 2
     new_kanji: {kanji: "貯", meaning: "Savings, Store, Lay In, Keep, Wear Mustache"}
+    draw: "貯"
     word: "貯金"
     kana: "ちょきん"
     furigana: "貯[ちょ]金[きん]"
@@ -27395,6 +27633,7 @@ lessons:
     id: "電柱|でんちゅう"
     level: 2
     new_kanji: {kanji: "柱", meaning: "Pillar, Post, Cylinder, Support"}
+    draw: "柱"
     word: "電柱"
     kana: "でんちゅう"
     furigana: "電[でん]柱[ちゅう]"
@@ -27554,6 +27793,7 @@ lessons:
     id: "児童|じどう"
     level: 2
     new_kanji: {kanji: "童", meaning: "Juvenile, Child"}
+    draw: "童"
     word: "児童"
     kana: "じどう"
     furigana: "児[じ]童[どう]"
@@ -27747,6 +27987,7 @@ lessons:
     id: "尊敬|そんけい"
     level: 2
     new_kanji: {kanji: "尊", meaning: "Revered, Valuable, Precious, Noble, Exalted"}
+    draw: "尊"
     word: "尊敬"
     kana: "そんけい"
     furigana: "尊[そん]敬[けい]"
@@ -27867,6 +28108,7 @@ lessons:
     id: "衣服|いふく"
     level: 2
     new_kanji: {kanji: "衣", meaning: "Garment, Clothes, Dressing"}
+    draw: "衣"
     word: "衣服"
     kana: "いふく"
     furigana: "衣[い]服[ふく]"
@@ -27989,6 +28231,7 @@ lessons:
     id: "黄色|きいろ"
     level: 2
     new_kanji: {kanji: "黄", meaning: "Yellow"}
+    draw: "黄"
     word: "黄色"
     kana: "きいろ"
     furigana: "黄[き]色[いろ]"
@@ -28008,6 +28251,7 @@ lessons:
     id: "寿命|じゅみょう"
     level: 2
     new_kanji: {kanji: "寿", meaning: "Longevity, Congratulations, One's Natural Life", extra: true}
+    draw: "寿"
     word: "寿命"
     kana: "じゅみょう"
     furigana: "寿[じゅ]命[みょう]"
@@ -28039,6 +28283,7 @@ lessons:
     id: "大臣|だいじん"
     level: 2
     new_kanji: {kanji: "臣", meaning: "Retainer, Subject"}
+    draw: "臣"
     word: "大臣"
     kana: "だいじん"
     furigana: "大[だい]臣[じん]"
@@ -28248,6 +28493,7 @@ lessons:
     id: "紅茶|こうちゃ"
     level: 2
     new_kanji: {kanji: "紅", meaning: "Crimson, Deep Red"}
+    draw: "紅"
     word: "紅茶"
     kana: "こうちゃ"
     furigana: "紅[こう]茶[ちゃ]"
@@ -28289,6 +28535,7 @@ lessons:
     id: "郊外|こうがい"
     level: 2
     new_kanji: {kanji: "郊", meaning: "Outskirts, Suburbs, Rural Area"}
+    draw: "郊"
     word: "郊外"
     kana: "こうがい"
     furigana: "郊[こう]外[がい]"
@@ -28329,6 +28576,7 @@ lessons:
     id: "石炭|せきたん"
     level: 2
     new_kanji: {kanji: "炭", meaning: "Charcoal, Coal"}
+    draw: "炭"
     word: "石炭"
     kana: "せきたん"
     furigana: "石[せき]炭[たん]"
@@ -28380,6 +28628,7 @@ lessons:
     id: "機械|きかい"
     level: 2
     new_kanji: {kanji: "械", meaning: "Contraption, Fetter, Machine, Instrument"}
+    draw: "械"
     word: "機械"
     kana: "きかい"
     furigana: "機[き]械[かい]"
@@ -28391,6 +28640,7 @@ lessons:
     id: "野菜|やさい"
     level: 2
     new_kanji: {kanji: "菜", meaning: "Vegetable, Side Dish, Greens"}
+    draw: "菜"
     word: "野菜"
     kana: "やさい"
     furigana: "野[や]菜[さい]"
@@ -28435,6 +28685,7 @@ lessons:
     id: "喫茶店|きっさてん"
     level: 2
     new_kanji: {kanji: "喫", meaning: "Consume, Eat, Drink, Smoke, Receive (a Blow)"}
+    draw: "喫"
     word: "喫茶店"
     kana: "きっさてん"
     furigana: "喫[きっ]茶[さ]店[てん]"
@@ -28575,6 +28826,7 @@ lessons:
     id: "鉱物|こうぶつ"
     level: 2
     new_kanji: {kanji: "鉱", meaning: "Mineral, Ore"}
+    draw: "鉱"
     word: "鉱物"
     kana: "こうぶつ"
     furigana: "鉱[こう]物[ぶつ]"
@@ -28974,6 +29226,7 @@ lessons:
     id: "召し上がる|めしあがる"
     level: 2
     new_kanji: {kanji: "召", meaning: "Seduce, Call, Send For, Wear, Put On, Ride In, Buy, Eat, Drink, Catch (cold)"}
+    draw: "召"
     word: "召し上がる"
     kana: "めしあがる"
     furigana: "召[め]し上[あ]がる"
@@ -29211,6 +29464,7 @@ lessons:
     id: "小麦|こむぎ"
     level: 2
     new_kanji: {kanji: "麦", meaning: "Barley, Wheat"}
+    draw: "麦"
     word: "小麦"
     kana: "こむぎ"
     furigana: "小[こ]麦[むぎ]"
@@ -29276,6 +29530,7 @@ lessons:
     id: "動詞|どうし"
     level: 2
     new_kanji: {kanji: "詞", meaning: "Part Of Speech, Words, Poetry"}
+    draw: "詞"
     word: "動詞"
     kana: "どうし"
     furigana: "動[どう]詞[し]"
@@ -29322,6 +29577,7 @@ lessons:
     id: "副詞|ふくし"
     level: 2
     new_kanji: {kanji: "副", meaning: "Vice-, Assistant, Aide, Duplicate, Copy"}
+    draw: "副"
     word: "副詞"
     kana: "ふくし"
     furigana: "副[ふく]詞[し]"
@@ -29365,6 +29621,7 @@ lessons:
     id: "皮膚|ひふ"
     level: 2
     new_kanji: {kanji: "膚", meaning: "Skin, Body, Grain, Texture, Disposition"}
+    draw: "膚"
     word: "皮膚"
     kana: "ひふ"
     furigana: "皮[ひ]膚[ふ]"
@@ -29376,6 +29633,7 @@ lessons:
     id: "洗濯|せんたく"
     level: 2
     new_kanji: {kanji: "濯", meaning: "Laundry, Wash, Pour On, Rinse"}
+    draw: "濯"
     word: "洗濯"
     kana: "せんたく"
     furigana: "洗[せん]濯[たく]"
@@ -29436,6 +29694,7 @@ lessons:
     id: "お菓子|おかし"
     level: 2
     new_kanji: {kanji: "菓", meaning: "Candy, Cakes, Fruit"}
+    draw: "菓"
     word: "お菓子"
     kana: "おかし"
     furigana: "お菓[か]子[し]"
@@ -29456,6 +29715,7 @@ lessons:
     id: "帽子|ぼうし"
     level: 2
     new_kanji: {kanji: "帽", meaning: "Cap, Headgear"}
+    draw: "帽"
     word: "帽子"
     kana: "ぼうし"
     furigana: "帽[ぼう]子[し]"
@@ -29529,6 +29789,7 @@ lessons:
     id: "切符|きっぷ"
     level: 2
     new_kanji: {kanji: "符", meaning: "Token, Sign, Mark, Tally, Charm"}
+    draw: "符"
     word: "切符"
     kana: "きっぷ"
     furigana: "切[きっ]符[ぷ]"
@@ -29607,6 +29868,7 @@ lessons:
     id: "肯定|こうてい"
     level: 2
     new_kanji: {kanji: "肯", meaning: "Agreement, Consent, Comply With"}
+    draw: "肯"
     word: "肯定"
     kana: "こうてい"
     furigana: "肯[こう]定[てい]"
@@ -29618,6 +29880,7 @@ lessons:
     id: "乾燥|かんそう"
     level: 2
     new_kanji: {kanji: "燥", meaning: "Parch, Dry Up"}
+    draw: "燥"
     word: "乾燥"
     kana: "かんそう"
     furigana: "乾[かん]燥[そう]"
@@ -29689,6 +29952,7 @@ lessons:
     id: "水滴|すいてき"
     level: 2
     new_kanji: {kanji: "滴", meaning: "Drip, Drop"}
+    draw: "滴"
     word: "水滴"
     kana: "すいてき"
     furigana: "水[すい]滴[てき]"
@@ -29786,6 +30050,7 @@ lessons:
     id: "稽古|けいこ"
     level: 2
     new_kanji: {kanji: "稽", meaning: "Think, Consider", extra: true}
+    draw: "稽"
     word: "稽古"
     kana: "けいこ"
     furigana: "稽[けい]古[こ]"
@@ -29883,6 +30148,7 @@ lessons:
     id: "雑巾|ぞうきん"
     level: 2
     new_kanji: {kanji: "巾", meaning: "Towel, Hanging Scroll, Width, Cloth Radical (no. 50)", extra: true}
+    draw: "巾"
     word: "雑巾"
     kana: "ぞうきん"
     furigana: "雑[ぞう]巾[きん]"
@@ -29922,6 +30188,7 @@ lessons:
     id: "便箋|びんせん"
     level: 2
     new_kanji: {kanji: "箋", meaning: "Paper, Label, Letter, Composition", extra: true}
+    draw: "箋"
     word: "便箋"
     kana: "びんせん"
     furigana: "便[びん]箋[せん]"
@@ -29965,6 +30232,7 @@ lessons:
     id: "隙間|すきま"
     level: 2
     new_kanji: {kanji: "隙", meaning: "Crevice, Fissure, Discord, Opportunity, Leisure", extra: true}
+    draw: "隙"
     word: "隙間"
     kana: "すきま"
     furigana: "隙[すき]間[ま]"
@@ -29986,6 +30254,7 @@ lessons:
     id: "歴史|れきし"
     level: 2
     new_kanji: {kanji: "歴", meaning: "Curriculum, Continuation, Passage Of Time"}
+    draw: "歴"
     word: "歴史"
     kana: "れきし"
     furigana: "歴[れき]史[し]"
@@ -30007,6 +30276,7 @@ lessons:
     id: "紹介|しょうかい"
     level: 2
     new_kanji: {kanji: "紹", meaning: "Introduce, Inherit, Help"}
+    draw: "紹"
     word: "紹介"
     kana: "しょうかい"
     furigana: "紹[しょう]介[かい]"
@@ -30074,6 +30344,7 @@ lessons:
     id: "曖昧|あいまい"
     level: 2
     new_kanji: {kanji: "曖", meaning: "Dark, Not Clear", extra: true}
+    draw: "曖"
     word: "曖昧"
     kana: "あいまい"
     furigana: "曖[あい]昧[まい]"
@@ -45892,6 +46163,7 @@ lessons:
     id: "伝統|でんとう"
     level: 1
     new_kanji: {kanji: "統", meaning: "Overall, Relationship, Ruling, Governing"}
+    draw: "統"
     word: "伝統"
     kana: "でんとう"
     furigana: "伝[でん]統[とう]"
@@ -46423,6 +46695,7 @@ lessons:
     id: "価格|かかく"
     level: 1
     new_kanji: {kanji: "価", meaning: "Value, Price"}
+    draw: "価"
     word: "価格"
     kana: "かかく"
     furigana: "価[か]格[かく]"
@@ -46471,6 +46744,7 @@ lessons:
     id: "提案|ていあん"
     level: 1
     new_kanji: {kanji: "提", meaning: "Propose, Take Along, Carry In Hand"}
+    draw: "提"
     word: "提案"
     kana: "ていあん"
     furigana: "提[てい]案[あん]"
@@ -46656,6 +46930,7 @@ lessons:
     id: "企業|きぎょう"
     level: 1
     new_kanji: {kanji: "企", meaning: "Undertake, Scheme, Design, Attempt, Plan"}
+    draw: "企"
     word: "企業"
     kana: "きぎょう"
     furigana: "企[き]業[ぎょう]"
@@ -46676,6 +46951,7 @@ lessons:
     id: "検査|けんさ"
     level: 1
     new_kanji: {kanji: "検", meaning: "Examination, Investigate"}
+    draw: "検"
     word: "検査"
     kana: "けんさ"
     furigana: "検[けん]査[さ]"
@@ -46715,6 +46991,7 @@ lessons:
     id: "光沢|こうたく"
     level: 1
     new_kanji: {kanji: "沢", meaning: "Swamp, Marsh, Brilliance, Grace"}
+    draw: "沢"
     word: "光沢"
     kana: "こうたく"
     furigana: "光[こう]沢[たく]"
@@ -46811,6 +47088,7 @@ lessons:
     id: "援助|えんじょ"
     level: 1
     new_kanji: {kanji: "援", meaning: "Abet, Help, Save"}
+    draw: "援"
     word: "援助"
     kana: "えんじょ"
     furigana: "援[えん]助[じょ]"
@@ -46870,6 +47148,7 @@ lessons:
     id: "井戸|いど"
     level: 1
     new_kanji: {kanji: "井", meaning: "Well, Well Crib, Town, Community"}
+    draw: "井"
     word: "井戸"
     kana: "いど"
     furigana: "井[い]戸[ど]"
@@ -46891,6 +47170,7 @@ lessons:
     id: "介護|かいご"
     level: 1
     new_kanji: {kanji: "護", meaning: "Safeguard, Protect"}
+    draw: "護"
     word: "介護"
     kana: "かいご"
     furigana: "介[かい]護[ご]"
@@ -46911,6 +47191,7 @@ lessons:
     id: "発展|はってん"
     level: 1
     new_kanji: {kanji: "展", meaning: "Unfold, Expand"}
+    draw: "展"
     word: "発展"
     kana: "はってん"
     furigana: "発[はっ]展[てん]"
@@ -46958,6 +47239,7 @@ lessons:
     id: "事態|じたい"
     level: 1
     new_kanji: {kanji: "態", meaning: "Attitude, Condition, Figure, Appearance, Voice (of Verbs)"}
+    draw: "態"
     word: "事態"
     kana: "じたい"
     furigana: "事[じ]態[たい]"
@@ -47034,6 +47316,7 @@ lessons:
     id: "重視|じゅうし"
     level: 1
     new_kanji: {kanji: "視", meaning: "Inspection, Regard As, See, Look At"}
+    draw: "視"
     word: "重視"
     kana: "じゅうし"
     furigana: "重[じゅう]視[し]"
@@ -47099,6 +47382,7 @@ lessons:
     id: "条件|じょうけん"
     level: 1
     new_kanji: {kanji: "条", meaning: "Article, Clause, Item, Stripe, Streak"}
+    draw: "条"
     word: "条件"
     kana: "じょうけん"
     furigana: "条[じょう]件[けん]"
@@ -47354,6 +47638,7 @@ lessons:
     id: "衛星|えいせい"
     level: 1
     new_kanji: {kanji: "衛", meaning: "Defense, Protection"}
+    draw: "衛"
     word: "衛星"
     kana: "えいせい"
     furigana: "衛[えい]星[せい]"
@@ -47484,6 +47769,7 @@ lessons:
     id: "監視|かんし"
     level: 1
     new_kanji: {kanji: "監", meaning: "Oversee, Official, Govt Office, Rule, Administer"}
+    draw: "監"
     word: "監視"
     kana: "かんし"
     furigana: "監[かん]視[し]"
@@ -47495,6 +47781,7 @@ lessons:
     id: "環境|かんきょう"
     level: 1
     new_kanji: {kanji: "環", meaning: "Ring, Circle, Link, Wheel"}
+    draw: "環"
     word: "環境"
     kana: "かんきょう"
     furigana: "環[かん]境[きょう]"
@@ -47506,6 +47793,7 @@ lessons:
     id: "審判|しんぱん"
     level: 1
     new_kanji: {kanji: "審", meaning: "Hearing, Judge, Trial"}
+    draw: "審"
     word: "審判"
     kana: "しんぱん"
     furigana: "審[しん]判[ぱん]"
@@ -47550,6 +47838,7 @@ lessons:
     id: "講義|こうぎ"
     level: 1
     new_kanji: {kanji: "義", meaning: "Righteousness, Justice, Morality, Honor, Loyalty, Meaning"}
+    draw: "義"
     word: "講義"
     kana: "こうぎ"
     furigana: "講[こう]義[ぎ]"
@@ -47676,6 +47965,7 @@ lessons:
     id: "内閣|ないかく"
     level: 1
     new_kanji: {kanji: "閣", meaning: "Tower, Tall Building, Palace"}
+    draw: "閣"
     word: "内閣"
     kana: "ないかく"
     furigana: "内[ない]閣[かく]"
@@ -47733,6 +48023,7 @@ lessons:
     id: "評価|ひょうか"
     level: 1
     new_kanji: {kanji: "評", meaning: "Evaluate, Criticism, Comment"}
+    draw: "評"
     word: "評価"
     kana: "ひょうか"
     furigana: "評[ひょう]価[か]"
@@ -47944,6 +48235,7 @@ lessons:
     id: "金融|きんゆう"
     level: 1
     new_kanji: {kanji: "融", meaning: "Dissolve, Melt"}
+    draw: "融"
     word: "金融"
     kana: "きんゆう"
     furigana: "金[きん]融[ゆう]"
@@ -48058,6 +48350,7 @@ lessons:
     id: "干渉|かんしょう"
     level: 1
     new_kanji: {kanji: "渉", meaning: "Ford, Go Cross, Transit, Ferry, Import, Involve"}
+    draw: "渉"
     word: "干渉"
     kana: "かんしょう"
     furigana: "干[かん]渉[しょう]"
@@ -48115,6 +48408,7 @@ lessons:
     id: "推定|すいてい"
     level: 1
     new_kanji: {kanji: "推", meaning: "Conjecture, Infer, Guess, Suppose, Support, Push (for)"}
+    draw: "推"
     word: "推定"
     kana: "すいてい"
     furigana: "推[すい]定[てい]"
@@ -48322,6 +48616,7 @@ lessons:
     id: "武士|ぶし"
     level: 1
     new_kanji: {kanji: "士", meaning: "Gentleman, Scholar, Samurai, Samurai Radical (no. 33)"}
+    draw: "士"
     word: "武士"
     kana: "ぶし"
     furigana: "武[ぶ]士[し]"
@@ -48435,6 +48730,7 @@ lessons:
     id: "監督|かんとく"
     level: 1
     new_kanji: {kanji: "督", meaning: "Coach, Command, Urge, Lead, Supervise"}
+    draw: "督"
     word: "監督"
     kana: "かんとく"
     furigana: "監[かん]督[とく]"
@@ -48572,6 +48868,7 @@ lessons:
     id: "憲法|けんぽう"
     level: 1
     new_kanji: {kanji: "憲", meaning: "Constitution, Law"}
+    draw: "憲"
     word: "憲法"
     kana: "けんぽう"
     furigana: "憲[けん]法[ぽう]"
@@ -48669,6 +48966,7 @@ lessons:
     id: "指摘|してき"
     level: 1
     new_kanji: {kanji: "摘", meaning: "Pinch, Pick, Pluck, Trim, Clip, Summarize"}
+    draw: "摘"
     word: "指摘"
     kana: "してき"
     furigana: "指[し]摘[てき]"
@@ -48708,6 +49006,7 @@ lessons:
     id: "批判|ひはん"
     level: 1
     new_kanji: {kanji: "批", meaning: "Criticism, Strike"}
+    draw: "批"
     word: "批判"
     kana: "ひはん"
     furigana: "批[ひ]判[はん]"
@@ -48766,6 +49065,7 @@ lessons:
     id: "同盟|どうめい"
     level: 1
     new_kanji: {kanji: "盟", meaning: "Alliance, Oath"}
+    draw: "盟"
     word: "同盟"
     kana: "どうめい"
     furigana: "同[どう]盟[めい]"
@@ -48825,6 +49125,7 @@ lessons:
     id: "修正|しゅうせい"
     level: 1
     new_kanji: {kanji: "修", meaning: "Discipline, Conduct Oneself Well, Study, Master"}
+    draw: "修"
     word: "修正"
     kana: "しゅうせい"
     furigana: "修[しゅう]正[せい]"
@@ -48914,6 +49215,7 @@ lessons:
     id: "軍隊|ぐんたい"
     level: 1
     new_kanji: {kanji: "隊", meaning: "Regiment, Party, Company, Squad"}
+    draw: "隊"
     word: "軍隊"
     kana: "ぐんたい"
     furigana: "軍[ぐん]隊[たい]"
@@ -48973,6 +49275,7 @@ lessons:
     id: "拡大|かくだい"
     level: 1
     new_kanji: {kanji: "拡", meaning: "Broaden, Extend, Expand, Enlarge"}
+    draw: "拡"
     word: "拡大"
     kana: "かくだい"
     furigana: "拡[かく]大[だい]"
@@ -49106,6 +49409,7 @@ lessons:
     id: "お弁当|おべんとう"
     level: 1
     new_kanji: {kanji: "弁", meaning: "Valve, Petal, Braid, Speech, Dialect, Discrimination, Dispose Of, Distinguish, Conical Cap"}
+    draw: "弁"
     word: "お弁当"
     kana: "おべんとう"
     furigana: "お弁[べん]当[とう]"
@@ -49274,6 +49578,7 @@ lessons:
     id: "献立|こんだて"
     level: 1
     new_kanji: {kanji: "献", meaning: "Offering, Counter For Drinks, Present, Offer"}
+    draw: "献"
     word: "献立"
     kana: "こんだて"
     furigana: "献[こん]立[だて]"
@@ -49324,6 +49629,7 @@ lessons:
     id: "維持|いじ"
     level: 1
     new_kanji: {kanji: "維", meaning: "Fiber, Tie, Rope"}
+    draw: "維"
     word: "維持"
     kana: "いじ"
     furigana: "維[い]持[じ]"
@@ -49356,6 +49662,7 @@ lessons:
     id: "遺跡|いせき"
     level: 1
     new_kanji: {kanji: "遺", meaning: "Bequeath, Leave Behind, Reserve"}
+    draw: "遺"
     word: "遺跡"
     kana: "いせき"
     furigana: "遺[い]跡[せき]"
@@ -49367,6 +49674,7 @@ lessons:
     id: "連邦|れんぽう"
     level: 1
     new_kanji: {kanji: "邦", meaning: "Home Country, Country, Japan"}
+    draw: "邦"
     word: "連邦"
     kana: "れんぽう"
     furigana: "連[れん]邦[ぽう]"
@@ -49552,6 +49860,7 @@ lessons:
     id: "反抗|はんこう"
     level: 1
     new_kanji: {kanji: "抗", meaning: "Confront, Resist, Defy, Oppose"}
+    draw: "抗"
     word: "反抗"
     kana: "はんこう"
     furigana: "反[はん]抗[こう]"
@@ -49590,6 +49899,7 @@ lessons:
     id: "模様|もよう"
     level: 1
     new_kanji: {kanji: "模", meaning: "Imitation, Copy, Mock"}
+    draw: "模"
     word: "模様"
     kana: "もよう"
     furigana: "模[も]様[よう]"
@@ -49621,6 +49931,7 @@ lessons:
     id: "英雄|えいゆう"
     level: 1
     new_kanji: {kanji: "雄", meaning: "Masculine, Male, Hero, Leader, Superiority, Excellence"}
+    draw: "雄"
     word: "英雄"
     kana: "えいゆう"
     furigana: "英[えい]雄[ゆう]"
@@ -49632,6 +49943,7 @@ lessons:
     id: "利益|りえき"
     level: 1
     new_kanji: {kanji: "益", meaning: "Benefit, Gain, Profit, Advantage"}
+    draw: "益"
     word: "利益"
     kana: "りえき"
     furigana: "利[り]益[えき]"
@@ -49661,6 +49973,7 @@ lessons:
     id: "緊張|きんちょう"
     level: 1
     new_kanji: {kanji: "緊", meaning: "Tense, Solid, Hard, Reliable, Tight"}
+    draw: "緊"
     word: "緊張"
     kana: "きんちょう"
     furigana: "緊[きん]張[ちょう]"
@@ -49681,6 +49994,7 @@ lessons:
     id: "目標|もくひょう"
     level: 1
     new_kanji: {kanji: "標", meaning: "Signpost, Seal, Mark, Stamp, Imprint, Symbol, Emblem, Trademark, Evidence, Souvenir, Target"}
+    draw: "標"
     word: "目標"
     kana: "もくひょう"
     furigana: "目[もく]標[ひょう]"
@@ -49736,6 +50050,7 @@ lessons:
     id: "宣伝|せんでん"
     level: 1
     new_kanji: {kanji: "宣", meaning: "Proclaim, Say, Announce"}
+    draw: "宣"
     word: "宣伝"
     kana: "せんでん"
     furigana: "宣[せん]伝[でん]"
@@ -49805,6 +50120,7 @@ lessons:
     id: "同僚|どうりょう"
     level: 1
     new_kanji: {kanji: "僚", meaning: "Colleague, Official, Companion"}
+    draw: "僚"
     word: "同僚"
     kana: "どうりょう"
     furigana: "同[どう]僚[りょう]"
@@ -49825,6 +50141,7 @@ lessons:
     id: "不吉|ふきつ"
     level: 1
     new_kanji: {kanji: "吉", meaning: "Good Luck, Joy, Congratulations"}
+    draw: "吉"
     word: "不吉"
     kana: "ふきつ"
     furigana: "不[ふ]吉[きつ]"
@@ -49923,6 +50240,7 @@ lessons:
     id: "天皇|てんのう"
     level: 1
     new_kanji: {kanji: "皇", meaning: "Emperor"}
+    draw: "皇"
     word: "天皇"
     kana: "てんのう"
     furigana: "天皇[てんのう]"
@@ -50036,6 +50354,7 @@ lessons:
     id: "負債|ふさい"
     level: 1
     new_kanji: {kanji: "債", meaning: "Bond, Loan, Debt"}
+    draw: "債"
     word: "負債"
     kana: "ふさい"
     furigana: "負[ふ]債[さい]"
@@ -50176,6 +50495,7 @@ lessons:
     id: "行儀|ぎょうぎ"
     level: 1
     new_kanji: {kanji: "儀", meaning: "Ceremony, Rule, Affair, Case, A Matter"}
+    draw: "儀"
     word: "行儀"
     kana: "ぎょうぎ"
     furigana: "行[ぎょう]儀[ぎ]"
@@ -50215,6 +50535,7 @@ lessons:
     id: "創作|そうさく"
     level: 1
     new_kanji: {kanji: "創", meaning: "Genesis, Wound, Injury, Hurt, Start, Originate"}
+    draw: "創"
     word: "創作"
     kana: "そうさく"
     furigana: "創[そう]作[さく]"
@@ -50400,6 +50721,7 @@ lessons:
     id: "戦闘|せんとう"
     level: 1
     new_kanji: {kanji: "闘", meaning: "Fight, War"}
+    draw: "闘"
     word: "戦闘"
     kana: "せんとう"
     furigana: "戦[せん]闘[とう]"
@@ -50490,6 +50812,7 @@ lessons:
     id: "健康|けんこう"
     level: 1
     new_kanji: {kanji: "康", meaning: "Ease, Peace"}
+    draw: "康"
     word: "健康"
     kana: "けんこう"
     furigana: "健[けん]康[こう]"
@@ -50556,6 +50879,7 @@ lessons:
     id: "逮捕|たいほ"
     level: 1
     new_kanji: {kanji: "逮", meaning: "Apprehend, Chase"}
+    draw: "逮"
     word: "逮捕"
     kana: "たいほ"
     furigana: "逮[たい]捕[ほ]"
@@ -50597,6 +50921,7 @@ lessons:
     id: "迷惑|めいわく"
     level: 1
     new_kanji: {kanji: "惑", meaning: "Beguile, Delusion, Perplexity"}
+    draw: "惑"
     word: "迷惑"
     kana: "めいわく"
     furigana: "迷[めい]惑[わく]"
@@ -50667,6 +50992,7 @@ lessons:
     id: "世紀|せいき"
     level: 1
     new_kanji: {kanji: "紀", meaning: "Chronicle, Account, Narrative, History, Annals, Geologic Period"}
+    draw: "紀"
     word: "世紀"
     kana: "せいき"
     furigana: "世[せい]紀[き]"
@@ -50678,6 +51004,7 @@ lessons:
     id: "聴覚|ちょうかく"
     level: 1
     new_kanji: {kanji: "聴", meaning: "Listen, Headstrong, Naughty, Careful Inquiry"}
+    draw: "聴"
     word: "聴覚"
     kana: "ちょうかく"
     furigana: "聴[ちょう]覚[かく]"
@@ -50818,6 +51145,7 @@ lessons:
     id: "博士|はかせ"
     level: 1
     new_kanji: {kanji: "博", meaning: "Dr., Command, Esteem, Win Acclaim, Ph.d., Exposition, Fair"}
+    draw: "博"
     word: "博士"
     kana: "はかせ"
     furigana: "博士[はかせ]"
@@ -50951,6 +51279,7 @@ lessons:
     id: "執筆|しっぴつ"
     level: 1
     new_kanji: {kanji: "執", meaning: "Tenacious, Take Hold, Grasp, Take To Heart"}
+    draw: "執"
     word: "執筆"
     kana: "しっぴつ"
     furigana: "執[しっ]筆[ぴつ]"
@@ -50971,6 +51300,7 @@ lessons:
     id: "冷房|れいぼう"
     level: 1
     new_kanji: {kanji: "房", meaning: "Tassel, Tuft, Fringe, Bunch, Lock (hair), Segment (orange), House, Room"}
+    draw: "房"
     word: "冷房"
     kana: "れいぼう"
     furigana: "冷[れい]房[ぼう]"
@@ -51106,6 +51436,7 @@ lessons:
     id: "措置|そち"
     level: 1
     new_kanji: {kanji: "措", meaning: "Set Aside, Give Up, Suspend, Discontinue, Lay Aside, Except"}
+    draw: "措"
     word: "措置"
     kana: "そち"
     furigana: "措[そ]置[ち]"
@@ -51226,6 +51557,7 @@ lessons:
     id: "為替|かわせ"
     level: 1
     new_kanji: {kanji: "為", meaning: "Do, Change, Make, Benefit, Welfare, Be Of Use, Reach To, Try, Practice, Cost, Serve As, Good, Advantage, As A Result Of"}
+    draw: "為"
     word: "為替"
     kana: "かわせ"
     furigana: "為替[かわせ]"
@@ -51247,6 +51579,7 @@ lessons:
     id: "抑圧|よくあつ"
     level: 1
     new_kanji: {kanji: "抑", meaning: "Repress, Well, Now, In The First Place, Push, Shove, Press, Seal, Do In Spite Of"}
+    draw: "抑"
     word: "抑圧"
     kana: "よくあつ"
     furigana: "抑[よく]圧[あつ]"
@@ -51383,6 +51716,7 @@ lessons:
     id: "選択|せんたく"
     level: 1
     new_kanji: {kanji: "択", meaning: "Choose, Select, Elect, Prefer"}
+    draw: "択"
     word: "選択"
     kana: "せんたく"
     furigana: "選[せん]択[たく]"
@@ -51402,6 +51736,7 @@ lessons:
     id: "優秀|ゆうしゅう"
     level: 1
     new_kanji: {kanji: "秀", meaning: "Excel, Excellence, Beauty, Surpass"}
+    draw: "秀"
     word: "優秀"
     kana: "ゆうしゅう"
     furigana: "優[ゆう]秀[しゅう]"
@@ -51413,6 +51748,7 @@ lessons:
     id: "特徴|とくちょう"
     level: 1
     new_kanji: {kanji: "徴", meaning: "Indications, Sign, Omen, Symptom, Collect, Seek, Refer To, Question"}
+    draw: "徴"
     word: "特徴"
     kana: "とくちょう"
     furigana: "特[とく]徴[ちょう]"
@@ -51490,6 +51826,7 @@ lessons:
     id: "弁償|べんしょう"
     level: 1
     new_kanji: {kanji: "償", meaning: "Reparation, Make Up For, Recompense, Redeem"}
+    draw: "償"
     word: "弁償"
     kana: "べんしょう"
     furigana: "弁[べん]償[しょう]"
@@ -51510,6 +51847,7 @@ lessons:
     id: "成功|せいこう"
     level: 1
     new_kanji: {kanji: "功", meaning: "Achievement, Merits, Success, Honor, Credit"}
+    draw: "功"
     word: "成功"
     kana: "せいこう"
     furigana: "成[せい]功[こう]"
@@ -51530,6 +51868,7 @@ lessons:
     id: "根拠|こんきょ"
     level: 1
     new_kanji: {kanji: "拠", meaning: "Foothold, Based On, Follow, Therefore"}
+    draw: "拠"
     word: "根拠"
     kana: "こんきょ"
     furigana: "根[こん]拠[きょ]"
@@ -51551,6 +51890,7 @@ lessons:
     id: "秘密|ひみつ"
     level: 1
     new_kanji: {kanji: "秘", meaning: "Secret, Conceal"}
+    draw: "秘"
     word: "秘密"
     kana: "ひみつ"
     furigana: "秘[ひ]密[みつ]"
@@ -51581,6 +51921,7 @@ lessons:
     id: "拒絶|きょぜつ"
     level: 1
     new_kanji: {kanji: "拒", meaning: "Repel, Refuse, Reject, Decline"}
+    draw: "拒"
     word: "拒絶"
     kana: "きょぜつ"
     furigana: "拒[きょ]絶[ぜつ]"
@@ -51630,6 +51971,7 @@ lessons:
     id: "一致|いっち"
     level: 1
     new_kanji: {kanji: "致", meaning: "Doth, Do, Send, Forward, Cause, Exert, Incur, Engage"}
+    draw: "致"
     word: "一致"
     kana: "いっち"
     furigana: "一[いっ]致[ち]"
@@ -51651,6 +51993,7 @@ lessons:
     id: "繰り返す|くりかえす"
     level: 1
     new_kanji: {kanji: "繰", meaning: "Winding, Reel, Spin, Turn (pages), Look Up, Refer To"}
+    draw: "繰"
     word: "繰り返す"
     kana: "くりかえす"
     furigana: "繰[く]り返[かえ]す"
@@ -51732,6 +52075,7 @@ lessons:
     id: "基盤|きばん"
     level: 1
     new_kanji: {kanji: "盤", meaning: "Tray, Shallow Bowl, Platter, Tub, Board, Phonograph Record"}
+    draw: "盤"
     word: "基盤"
     kana: "きばん"
     furigana: "基[き]盤[ばん]"
@@ -51751,6 +52095,7 @@ lessons:
     id: "項目|こうもく"
     level: 1
     new_kanji: {kanji: "項", meaning: "Paragraph, Nape Of Neck, Clause, Item, Term (expression)"}
+    draw: "項"
     word: "項目"
     kana: "こうもく"
     furigana: "項[こう]目[もく]"
@@ -51855,6 +52200,7 @@ lessons:
     id: "一生懸命|いっしょうけんめい"
     level: 1
     new_kanji: {kanji: "懸", meaning: "State Of Suspension, Hang, Depend, Consult, Distant, Far Apart"}
+    draw: "懸"
     word: "一生懸命"
     kana: "いっしょうけんめい"
     furigana: "一[いっ]生[しょう]懸[けん]命[めい]"
@@ -51992,6 +52338,7 @@ lessons:
     id: "活躍|かつやく"
     level: 1
     new_kanji: {kanji: "躍", meaning: "Leap, Dance, Skip"}
+    draw: "躍"
     word: "活躍"
     kana: "かつやく"
     furigana: "活[かつ]躍[やく]"
@@ -52003,6 +52350,7 @@ lessons:
     id: "棄権|きけん"
     level: 1
     new_kanji: {kanji: "棄", meaning: "Abandon, Throw Away, Discard, Resign, Reject, Sacrifice"}
+    draw: "棄"
     word: "棄権"
     kana: "きけん"
     furigana: "棄[き]権[けん]"
@@ -52041,6 +52389,7 @@ lessons:
     id: "邸宅|ていたく"
     level: 1
     new_kanji: {kanji: "邸", meaning: "Residence, Mansion"}
+    draw: "邸"
     word: "邸宅"
     kana: "ていたく"
     furigana: "邸[てい]宅[たく]"
@@ -52124,6 +52473,7 @@ lessons:
     id: "還元|かんげん"
     level: 1
     new_kanji: {kanji: "還", meaning: "Send Back, Return"}
+    draw: "還"
     word: "還元"
     kana: "かんげん"
     furigana: "還[かん]元[げん]"
@@ -52181,6 +52531,7 @@ lessons:
     id: "遠慮|えんりょ"
     level: 1
     new_kanji: {kanji: "慮", meaning: "Prudence, Thought, Concern, Consider, Deliberate, Fear"}
+    draw: "慮"
     word: "遠慮"
     kana: "えんりょ"
     furigana: "遠[えん]慮[りょ]"
@@ -52396,6 +52747,7 @@ lessons:
     id: "需要|じゅよう"
     level: 1
     new_kanji: {kanji: "需", meaning: "Demand, Request, Need"}
+    draw: "需"
     word: "需要"
     kana: "じゅよう"
     furigana: "需[じゅ]要[よう]"
@@ -52472,6 +52824,7 @@ lessons:
     id: "購読|こうどく"
     level: 1
     new_kanji: {kanji: "購", meaning: "Subscription, Buy"}
+    draw: "購"
     word: "購読"
     kana: "こうどく"
     furigana: "購[こう]読[どく]"
@@ -52501,6 +52854,7 @@ lessons:
     id: "発揮|はっき"
     level: 1
     new_kanji: {kanji: "揮", meaning: "Brandish, Wave, Wag, Swing, Shake"}
+    draw: "揮"
     word: "発揮"
     kana: "はっき"
     furigana: "発[はっ]揮[き]"
@@ -52521,6 +52875,7 @@ lessons:
     id: "拡充|かくじゅう"
     level: 1
     new_kanji: {kanji: "充", meaning: "Allot, Fill"}
+    draw: "充"
     word: "拡充"
     kana: "かくじゅう"
     furigana: "拡[かく]充[じゅう]"
@@ -52550,6 +52905,7 @@ lessons:
     id: "貢献|こうけん"
     level: 1
     new_kanji: {kanji: "貢", meaning: "Tribute, Support, Finance"}
+    draw: "貢"
     word: "貢献"
     kana: "こうけん"
     furigana: "貢[こう]献[けん]"
@@ -52561,6 +52917,7 @@ lessons:
     id: "馬鹿らしい|ばからしい"
     level: 1
     new_kanji: {kanji: "鹿", meaning: "Deer"}
+    draw: "鹿"
     word: "馬鹿らしい"
     kana: "ばからしい"
     furigana: "馬[ば]鹿[か]らしい"
@@ -52621,6 +52978,7 @@ lessons:
     id: "家賃|やちん"
     level: 1
     new_kanji: {kanji: "賃", meaning: "Fare, Fee, Hire, Rent, Wages, Charge"}
+    draw: "賃"
     word: "家賃"
     kana: "やちん"
     furigana: "家[や]賃[ちん]"
@@ -52650,6 +53008,7 @@ lessons:
     id: "獲物|えもの"
     level: 1
     new_kanji: {kanji: "獲", meaning: "Seize, Get, Find, Earn, Acquire, Can, May, Able To"}
+    draw: "獲"
     word: "獲物"
     kana: "えもの"
     furigana: "獲[え]物[もの]"
@@ -52690,6 +53049,7 @@ lessons:
     id: "合併|がっぺい"
     level: 1
     new_kanji: {kanji: "併", meaning: "Join, Get Together, Unite, Collective"}
+    draw: "併"
     word: "合併"
     kana: "がっぺい"
     furigana: "合[がっ]併[ぺい]"
@@ -52760,6 +53120,7 @@ lessons:
     id: "衝突|しょうとつ"
     level: 1
     new_kanji: {kanji: "衝", meaning: "Collide, Brunt, Highway, Opposition (astronomy), Thrust, Pierce, Stab, Prick"}
+    draw: "衝"
     word: "衝突"
     kana: "しょうとつ"
     furigana: "衝[しょう]突[とつ]"
@@ -52850,6 +53211,7 @@ lessons:
     id: "火災|かさい"
     level: 1
     new_kanji: {kanji: "災", meaning: "Disaster, Calamity, Woe, Curse, Evil"}
+    draw: "災"
     word: "火災"
     kana: "かさい"
     furigana: "火[か]災[さい]"
@@ -52896,6 +53258,7 @@ lessons:
     id: "分析|ぶんせき"
     level: 1
     new_kanji: {kanji: "析", meaning: "Chop, Divide, Tear, Analyze"}
+    draw: "析"
     word: "分析"
     kana: "ぶんせき"
     furigana: "分[ぶん]析[せき]"
@@ -52985,6 +53348,7 @@ lessons:
     id: "樹木|じゅもく"
     level: 1
     new_kanji: {kanji: "樹", meaning: "Timber, Trees, Wood, Establish, Set Up"}
+    draw: "樹"
     word: "樹木"
     kana: "じゅもく"
     furigana: "樹[じゅ]木[もく]"
@@ -53123,6 +53487,7 @@ lessons:
     id: "宗教|しゅうきょう"
     level: 1
     new_kanji: {kanji: "宗", meaning: "Religion, Sect, Denomination, Main Point, Origin, Essence"}
+    draw: "宗"
     word: "宗教"
     kana: "しゅうきょう"
     furigana: "宗[しゅう]教[きょう]"
@@ -53236,6 +53601,7 @@ lessons:
     id: "宇宙|うちゅう"
     level: 1
     new_kanji: {kanji: "宙", meaning: "Mid-air, Air, Space, Sky, Memorization, Interval Of Time"}
+    draw: "宙"
     word: "宇宙"
     kana: "うちゅう"
     furigana: "宇[う]宙[ちゅう]"
@@ -53256,6 +53622,7 @@ lessons:
     id: "金銭|きんせん"
     level: 1
     new_kanji: {kanji: "銭", meaning: "Coin, .01 Yen, Money"}
+    draw: "銭"
     word: "金銭"
     kana: "きんせん"
     furigana: "金[きん]銭[せん]"
@@ -53407,6 +53774,7 @@ lessons:
     id: "委託|いたく"
     level: 1
     new_kanji: {kanji: "託", meaning: "Consign, Requesting, Entrusting With, Pretend, Hint"}
+    draw: "託"
     word: "委託"
     kana: "いたく"
     furigana: "委[い]託[たく]"
@@ -53439,6 +53807,7 @@ lessons:
     id: "誕生日|たんじょうび"
     level: 1
     new_kanji: {kanji: "誕", meaning: "Nativity, Be Born, Declension, Lie, Be Arbitrary"}
+    draw: "誕"
     word: "誕生日"
     kana: "たんじょうび"
     furigana: "誕[たん]生[じょう]日[び]"
@@ -53489,6 +53858,7 @@ lessons:
     id: "一括|いっかつ"
     level: 1
     new_kanji: {kanji: "括", meaning: "Fasten, Tie Up, Arrest, Constrict"}
+    draw: "括"
     word: "一括"
     kana: "いっかつ"
     furigana: "一[いっ]括[かつ]"
@@ -53557,6 +53927,7 @@ lessons:
     id: "透明|とうめい"
     level: 1
     new_kanji: {kanji: "透", meaning: "Transparent, Permeate, Filter, Penetrate"}
+    draw: "透"
     word: "透明"
     kana: "とうめい"
     furigana: "透[とう]明[めい]"
@@ -53577,6 +53948,7 @@ lessons:
     id: "津波|つなみ"
     level: 1
     new_kanji: {kanji: "津", meaning: "Haven, Port, Harbor, Ferry"}
+    draw: "津"
     word: "津波"
     kana: "つなみ"
     furigana: "津[つ]波[なみ]"
@@ -53714,6 +54086,7 @@ lessons:
     id: "敏感|びんかん"
     level: 1
     new_kanji: {kanji: "敏", meaning: "Cleverness, Agile, Alert"}
+    draw: "敏"
     word: "敏感"
     kana: "びんかん"
     furigana: "敏[びん]感[かん]"
@@ -53725,6 +54098,7 @@ lessons:
     id: "是非|ぜひ"
     level: 1
     new_kanji: {kanji: "是", meaning: "Just So, This, Right, Justice"}
+    draw: "是"
     word: "是非"
     kana: "ぜひ"
     furigana: "是[ぜ]非[ひ]"
@@ -53753,6 +54127,7 @@ lessons:
     id: "排除|はいじょ"
     level: 1
     new_kanji: {kanji: "排", meaning: "Repudiate, Exclude, Expel, Reject, Line Up, Arrange"}
+    draw: "排"
     word: "排除"
     kana: "はいじょ"
     furigana: "排[はい]除[じょ]"
@@ -53773,6 +54148,7 @@ lessons:
     id: "余裕|よゆう"
     level: 1
     new_kanji: {kanji: "裕", meaning: "Abundant, Rich, Fertile"}
+    draw: "裕"
     word: "余裕"
     kana: "よゆう"
     furigana: "余[よ]裕[ゆう]"
@@ -53920,6 +54296,7 @@ lessons:
     id: "辞典|じてん"
     level: 1
     new_kanji: {kanji: "典", meaning: "Code, Ceremony, Law, Rule"}
+    draw: "典"
     word: "辞典"
     kana: "じてん"
     furigana: "辞[じ]典[てん]"
@@ -53977,6 +54354,7 @@ lessons:
     id: "祝賀|しゅくが"
     level: 1
     new_kanji: {kanji: "賀", meaning: "Congratulations, Joy"}
+    draw: "賀"
     word: "祝賀"
     kana: "しゅくが"
     furigana: "祝[しゅく]賀[が]"
@@ -54036,6 +54414,7 @@ lessons:
     id: "看護婦|かんごふ"
     level: 1
     new_kanji: {kanji: "看", meaning: "Watch Over, See"}
+    draw: "看"
     word: "看護婦"
     kana: "かんごふ"
     furigana: "看[かん]護[ご]婦[ふ]"
@@ -54074,6 +54453,7 @@ lessons:
     id: "訴訟|そしょう"
     level: 1
     new_kanji: {kanji: "訟", meaning: "Sue, Accuse"}
+    draw: "訟"
     word: "訴訟"
     kana: "そしょう"
     furigana: "訴[そ]訟[しょう]"
@@ -54085,6 +54465,7 @@ lessons:
     id: "警戒|けいかい"
     level: 1
     new_kanji: {kanji: "戒", meaning: "Commandment"}
+    draw: "戒"
     word: "警戒"
     kana: "けいかい"
     furigana: "警[けい]戒[かい]"
@@ -54096,6 +54477,7 @@ lessons:
     id: "福祉|ふくし"
     level: 1
     new_kanji: {kanji: "祉", meaning: "Welfare, Happiness"}
+    draw: "祉"
     word: "福祉"
     kana: "ふくし"
     furigana: "福[ふく]祉[し]"
@@ -54106,6 +54488,7 @@ lessons:
     id: "名誉|めいよ"
     level: 1
     new_kanji: {kanji: "誉", meaning: "Reputation, Praise, Honor, Glory"}
+    draw: "誉"
     word: "名誉"
     kana: "めいよ"
     furigana: "名[めい]誉[よ]"
@@ -54117,6 +54500,7 @@ lessons:
     id: "歓迎|かんげい"
     level: 1
     new_kanji: {kanji: "歓", meaning: "Delight, Joy"}
+    draw: "歓"
     word: "歓迎"
     kana: "かんげい"
     furigana: "歓[かん]迎[げい]"
@@ -54137,6 +54521,7 @@ lessons:
     id: "演奏|えんそう"
     level: 1
     new_kanji: {kanji: "奏", meaning: "Play Music, Speak To A Ruler, Complete"}
+    draw: "奏"
     word: "演奏"
     kana: "えんそう"
     furigana: "演[えん]奏[そう]"
@@ -54284,6 +54669,7 @@ lessons:
     id: "故郷|こきょう"
     level: 1
     new_kanji: {kanji: "郷", meaning: "Home Town, Village, Native Place, District"}
+    draw: "郷"
     word: "故郷"
     kana: "こきょう"
     furigana: "故[こ]郷[きょう]"
@@ -54371,6 +54757,7 @@ lessons:
     id: "既婚|きこん"
     level: 1
     new_kanji: {kanji: "既", meaning: "Previously, Already, Long Ago"}
+    draw: "既"
     word: "既婚"
     kana: "きこん"
     furigana: "既[き]婚[こん]"
@@ -54381,6 +54768,7 @@ lessons:
     id: "推薦|すいせん"
     level: 1
     new_kanji: {kanji: "薦", meaning: "Recommend, Mat, Advise, Encourage, Offer"}
+    draw: "薦"
     word: "推薦"
     kana: "すいせん"
     furigana: "推[すい]薦[せん]"
@@ -54432,6 +54820,7 @@ lessons:
     id: "範囲|はんい"
     level: 1
     new_kanji: {kanji: "範", meaning: "Pattern, Example, Model"}
+    draw: "範"
     word: "範囲"
     kana: "はんい"
     furigana: "範[はん]囲[い]"
@@ -54490,6 +54879,7 @@ lessons:
     id: "道徳|どうとく"
     level: 1
     new_kanji: {kanji: "徳", meaning: "Benevolence, Virtue, Goodness, Commanding Respect"}
+    draw: "徳"
     word: "道徳"
     kana: "どうとく"
     furigana: "道[どう]徳[とく]"
@@ -54501,6 +54891,7 @@ lessons:
     id: "哲学|てつがく"
     level: 1
     new_kanji: {kanji: "哲", meaning: "Philosophy, Clear"}
+    draw: "哲"
     word: "哲学"
     kana: "てつがく"
     furigana: "哲[てつ]学[がく]"
@@ -54522,6 +54913,7 @@ lessons:
     id: "郷里|きょうり"
     level: 1
     new_kanji: {kanji: "里", meaning: "Ri, Village, Parent's Home, League", extra: true}
+    draw: "里"
     word: "郷里"
     kana: "きょうり"
     furigana: "郷[きょう]里[り]"
@@ -54532,6 +54924,7 @@ lessons:
     id: "解釈|かいしゃく"
     level: 1
     new_kanji: {kanji: "釈", meaning: "Explanation"}
+    draw: "釈"
     word: "解釈"
     kana: "かいしゃく"
     furigana: "解[かい]釈[しゃく]"
@@ -54543,6 +54936,7 @@ lessons:
     id: "自己|じこ"
     level: 1
     new_kanji: {kanji: "己", meaning: "Self"}
+    draw: "己"
     word: "自己"
     kana: "じこ"
     furigana: "自[じ]己[こ]"
@@ -54554,6 +54948,7 @@ lessons:
     id: "妥当|だとう"
     level: 1
     new_kanji: {kanji: "妥", meaning: "Gentle, Peace, Depravity"}
+    draw: "妥"
     word: "妥当"
     kana: "だとう"
     furigana: "妥[だ]当[とう]"
@@ -54582,6 +54977,7 @@ lessons:
     id: "威張る|いばる"
     level: 1
     new_kanji: {kanji: "威", meaning: "Intimidate, Dignity, Majesty, Menace, Threaten"}
+    draw: "威"
     word: "威張る"
     kana: "いばる"
     furigana: "威[い]張[ば]る"
@@ -54609,6 +55005,7 @@ lessons:
     id: "豪華|ごうか"
     level: 1
     new_kanji: {kanji: "豪", meaning: "Overpowering, Great, Powerful, Excelling, Australia"}
+    draw: "豪"
     word: "豪華"
     kana: "ごうか"
     furigana: "豪[ごう]華[か]"
@@ -54678,6 +55075,7 @@ lessons:
     id: "微笑む|ほほえむ"
     level: 1
     new_kanji: {kanji: "微", meaning: "Delicate, Minuteness, Insignificance"}
+    draw: "微"
     word: "微笑む"
     kana: "ほほえむ"
     furigana: "微笑[ほほえ]む"
@@ -54727,6 +55125,7 @@ lessons:
     id: "忠告|ちゅうこく"
     level: 1
     new_kanji: {kanji: "忠", meaning: "Loyalty, Fidelity, Faithfulness"}
+    draw: "忠"
     word: "忠告"
     kana: "ちゅうこく"
     furigana: "忠[ちゅう]告[こく]"
@@ -54747,6 +55146,7 @@ lessons:
     id: "倉庫|そうこ"
     level: 1
     new_kanji: {kanji: "倉", meaning: "Godown, Warehouse, Storehouse, Cellar, Treasury"}
+    draw: "倉"
     word: "倉庫"
     kana: "そうこ"
     furigana: "倉[そう]庫[こ]"
@@ -54758,6 +55158,7 @@ lessons:
     id: "肝心|かんじん"
     level: 1
     new_kanji: {kanji: "肝", meaning: "Liver, Pluck, Nerve, Chutzpah"}
+    draw: "肝"
     word: "肝心"
     kana: "かんじん"
     furigana: "肝[かん]心[じん]"
@@ -54850,6 +55251,7 @@ lessons:
     id: "索引|さくいん"
     level: 1
     new_kanji: {kanji: "索", meaning: "Cord, Rope, Searching, Inquiring"}
+    draw: "索"
     word: "索引"
     kana: "さくいん"
     furigana: "索[さく]引[いん]"
@@ -54920,6 +55322,7 @@ lessons:
     id: "俳優|はいゆう"
     level: 1
     new_kanji: {kanji: "俳", meaning: "Haiku, Actor"}
+    draw: "俳"
     word: "俳優"
     kana: "はいゆう"
     furigana: "俳[はい]優[ゆう]"
@@ -55047,6 +55450,7 @@ lessons:
     id: "洗剤|せんざい"
     level: 1
     new_kanji: {kanji: "剤", meaning: "Dose, Medicine, Drug"}
+    draw: "剤"
     word: "洗剤"
     kana: "せんざい"
     furigana: "洗[せん]剤[ざい]"
@@ -55058,6 +55462,7 @@ lessons:
     id: "瀬戸物|せともの"
     level: 1
     new_kanji: {kanji: "瀬", meaning: "Rapids, Current, Torrent, Shallows, Shoal"}
+    draw: "瀬"
     word: "瀬戸物"
     kana: "せともの"
     furigana: "瀬[せ]戸[と]物[もの]"
@@ -55089,6 +55494,7 @@ lessons:
     id: "欠陥|けっかん"
     level: 1
     new_kanji: {kanji: "陥", meaning: "Collapse, Fall Into, Cave In, Fall (castle), Slide Into"}
+    draw: "陥"
     word: "欠陥"
     kana: "けっかん"
     furigana: "欠[けっ]陥[かん]"
@@ -55100,6 +55506,7 @@ lessons:
     id: "書斎|しょさい"
     level: 1
     new_kanji: {kanji: "斎", meaning: "Purification, Buddhist Food, Room, Worship, Avoid, Alike"}
+    draw: "斎"
     word: "書斎"
     kana: "しょさい"
     furigana: "書[しょ]斎[さい]"
@@ -55144,6 +55551,7 @@ lessons:
     id: "順序|じゅんじょ"
     level: 1
     new_kanji: {kanji: "序", meaning: "Preface, Beginning, Order, Precedence, Occasion, Chance, Incidentally"}
+    draw: "序"
     word: "順序"
     kana: "じゅんじょ"
     furigana: "順[じゅん]序[じょ]"
@@ -55155,6 +55563,7 @@ lessons:
     id: "下旬|げじゅん"
     level: 1
     new_kanji: {kanji: "旬", meaning: "Decameron, Ten-day Period, Season (for Specific Products)"}
+    draw: "旬"
     word: "下旬"
     kana: "げじゅん"
     furigana: "下[げ]旬[じゅん]"
@@ -55192,6 +55601,7 @@ lessons:
     id: "兼業|けんぎょう"
     level: 1
     new_kanji: {kanji: "兼", meaning: "Concurrently, And, Beforehand, In Advance"}
+    draw: "兼"
     word: "兼業"
     kana: "けんぎょう"
     furigana: "兼[けん]業[ぎょう]"
@@ -55221,6 +55631,7 @@ lessons:
     id: "神聖|しんせい"
     level: 1
     new_kanji: {kanji: "聖", meaning: "Holy, Saint, Sage, Master, Priest"}
+    draw: "聖"
     word: "神聖"
     kana: "しんせい"
     furigana: "神[しん]聖[せい]"
@@ -55241,6 +55652,7 @@ lessons:
     id: "要旨|ようし"
     level: 1
     new_kanji: {kanji: "旨", meaning: "Delicious, Relish, Show A Liking For, Purport, Will, Clever, Expert"}
+    draw: "旨"
     word: "要旨"
     kana: "ようし"
     furigana: "要[よう]旨[し]"
@@ -55281,6 +55693,7 @@ lessons:
     id: "田舎|いなか"
     level: 1
     new_kanji: {kanji: "舎", meaning: "Cottage, Inn, Hut, House, Mansion"}
+    draw: "舎"
     word: "田舎"
     kana: "いなか"
     furigana: "田舎[いなか]"
@@ -55302,6 +55715,7 @@ lessons:
     id: "偽造|ぎぞう"
     level: 1
     new_kanji: {kanji: "偽", meaning: "Falsehood, Lie, Deceive, Pretend, Counterfeit, Forgery"}
+    draw: "偽"
     word: "偽造"
     kana: "ぎぞう"
     furigana: "偽[ぎ]造[ぞう]"
@@ -55313,6 +55727,7 @@ lessons:
     id: "比較|ひかく"
     level: 1
     new_kanji: {kanji: "較", meaning: "Contrast, Compare"}
+    draw: "較"
     word: "比較"
     kana: "ひかく"
     furigana: "比[ひ]較[かく]"
@@ -55354,6 +55769,7 @@ lessons:
     id: "抵抗|ていこう"
     level: 1
     new_kanji: {kanji: "抵", meaning: "Resist, Reach, Touch"}
+    draw: "抵"
     word: "抵抗"
     kana: "ていこう"
     furigana: "抵[てい]抗[こう]"
@@ -55417,6 +55833,7 @@ lessons:
     id: "距離|きょり"
     level: 1
     new_kanji: {kanji: "距", meaning: "Long-distance, Spur, Fetlock"}
+    draw: "距"
     word: "距離"
     kana: "きょり"
     furigana: "距[きょ]離[り]"
@@ -55428,6 +55845,7 @@ lessons:
     id: "雅致|がち"
     level: 1
     new_kanji: {kanji: "雅", meaning: "Gracious, Elegant, Graceful, Refined"}
+    draw: "雅"
     word: "雅致"
     kana: "がち"
     furigana: "雅[が]致[ち]"
@@ -55527,6 +55945,7 @@ lessons:
     id: "繁栄|はんえい"
     level: 1
     new_kanji: {kanji: "繁", meaning: "Luxuriant, Thick, Overgrown, Frequency, Complexity, Trouble"}
+    draw: "繁"
     word: "繁栄"
     kana: "はんえい"
     furigana: "繁[はん]栄[えい]"
@@ -55597,6 +56016,7 @@ lessons:
     id: "魅力|みりょく"
     level: 1
     new_kanji: {kanji: "魅", meaning: "Fascination, Charm, Bewitch"}
+    draw: "魅"
     word: "魅力"
     kana: "みりょく"
     furigana: "魅[み]力[りょく]"
@@ -55664,6 +56084,7 @@ lessons:
     id: "一斉|いっせい"
     level: 1
     new_kanji: {kanji: "斉", meaning: "Adjusted, Alike, Equal, Similar Variety Of"}
+    draw: "斉"
     word: "一斉"
     kana: "いっせい"
     furigana: "一[いっ]斉[せい]"
@@ -55868,6 +56289,7 @@ lessons:
     id: "基礎|きそ"
     level: 1
     new_kanji: {kanji: "礎", meaning: "Cornerstone, Foundation Stone"}
+    draw: "礎"
     word: "基礎"
     kana: "きそ"
     furigana: "基[き]礎[そ]"
@@ -55900,6 +56322,7 @@ lessons:
     id: "脚色|きゃくしょく"
     level: 1
     new_kanji: {kanji: "脚", meaning: "Skids, Leg, Undercarriage, Lower Part, Base"}
+    draw: "脚"
     word: "脚色"
     kana: "きゃくしょく"
     furigana: "脚[きゃく]色[しょく]"
@@ -56049,6 +56472,7 @@ lessons:
     id: "孤児|こじ"
     level: 1
     new_kanji: {kanji: "孤", meaning: "Orphan, Alone"}
+    draw: "孤"
     word: "孤児"
     kana: "こじ"
     furigana: "孤[こ]児[じ]"
@@ -56088,6 +56512,7 @@ lessons:
     id: "賠償|ばいしょう"
     level: 1
     new_kanji: {kanji: "賠", meaning: "Compensation, Indemnify"}
+    draw: "賠"
     word: "賠償"
     kana: "ばいしょう"
     furigana: "賠[ばい]償[しょう]"
@@ -56146,6 +56571,7 @@ lessons:
     id: "鉄鋼|てっこう"
     level: 1
     new_kanji: {kanji: "鋼", meaning: "Steel"}
+    draw: "鋼"
     word: "鉄鋼"
     kana: "てっこう"
     furigana: "鉄[てっ]鋼[こう]"
@@ -56157,6 +56583,7 @@ lessons:
     id: "頑固|がんこ"
     level: 1
     new_kanji: {kanji: "頑", meaning: "Stubborn, Foolish, Firmly"}
+    draw: "頑"
     word: "頑固"
     kana: "がんこ"
     furigana: "頑[がん]固[こ]"
@@ -56207,6 +56634,7 @@ lessons:
     id: "色彩|しきさい"
     level: 1
     new_kanji: {kanji: "彩", meaning: "Coloring, Paint, Makeup"}
+    draw: "彩"
     word: "色彩"
     kana: "しきさい"
     furigana: "色[しき]彩[さい]"
@@ -56392,6 +56820,7 @@ lessons:
     id: "鉄砲|てっぽう"
     level: 1
     new_kanji: {kanji: "砲", meaning: "Cannon, Gun"}
+    draw: "砲"
     word: "鉄砲"
     kana: "てっぽう"
     furigana: "鉄[てっ]砲[ぽう]"
@@ -56403,6 +56832,7 @@ lessons:
     id: "噴火|ふんか"
     level: 1
     new_kanji: {kanji: "噴", meaning: "Erupt, Spout, Emit, Flush Out"}
+    draw: "噴"
     word: "噴火"
     kana: "ふんか"
     furigana: "噴[ふん]火[か]"
@@ -56462,6 +56892,7 @@ lessons:
     id: "秩序|ちつじょ"
     level: 1
     new_kanji: {kanji: "秩", meaning: "Regularity, Salary, Order"}
+    draw: "秩"
     word: "秩序"
     kana: "ちつじょ"
     furigana: "秩[ちつ]序[じょ]"
@@ -56494,6 +56925,7 @@ lessons:
     id: "相撲|すもう"
     level: 1
     new_kanji: {kanji: "撲", meaning: "Slap, Strike, Hit, Beat, Tell, Speak"}
+    draw: "撲"
     word: "相撲"
     kana: "すもう"
     furigana: "相撲[すもう]"
@@ -56563,6 +56995,7 @@ lessons:
     id: "唯一|ゆいいつ"
     level: 1
     new_kanji: {kanji: "唯", meaning: "Solely, Only, Merely, Simply"}
+    draw: "唯"
     word: "唯一"
     kana: "ゆいいつ"
     furigana: "唯[ゆい]一[いつ]"
@@ -56693,6 +57126,7 @@ lessons:
     id: "真剣|しんけん"
     level: 1
     new_kanji: {kanji: "剣", meaning: "Sabre, Sword, Blade, Clock Hand"}
+    draw: "剣"
     word: "真剣"
     kana: "しんけん"
     furigana: "真[しん]剣[けん]"
@@ -56704,6 +57138,7 @@ lessons:
     id: "将棋|しょうぎ"
     level: 1
     new_kanji: {kanji: "棋", meaning: "Chess Piece, Japanese Chess, Shogi"}
+    draw: "棋"
     word: "将棋"
     kana: "しょうぎ"
     furigana: "将[しょう]棋[ぎ]"
@@ -56748,6 +57183,7 @@ lessons:
     id: "冒険|ぼうけん"
     level: 1
     new_kanji: {kanji: "冒", meaning: "Risk, Face, Defy, Dare, Damage, Assume (a Name)"}
+    draw: "冒"
     word: "冒険"
     kana: "ぼうけん"
     furigana: "冒[ぼう]険[けん]"
@@ -56768,6 +57204,7 @@ lessons:
     id: "陳列|ちんれつ"
     level: 1
     new_kanji: {kanji: "陳", meaning: "Exhibit, State, Relate, Explain"}
+    draw: "陳"
     word: "陳列"
     kana: "ちんれつ"
     furigana: "陳[ちん]列[れつ]"
@@ -56779,6 +57216,7 @@ lessons:
     id: "記憶|きおく"
     level: 1
     new_kanji: {kanji: "憶", meaning: "Recollection, Think, Remember"}
+    draw: "憶"
     word: "記憶"
     kana: "きおく"
     furigana: "記[き]憶[おく]"
@@ -56821,6 +57259,7 @@ lessons:
     id: "克服|こくふく"
     level: 1
     new_kanji: {kanji: "克", meaning: "Overcome, Kindly, Skillfully"}
+    draw: "克"
     word: "克服"
     kana: "こくふく"
     furigana: "克[こく]服[ふく]"
@@ -56832,6 +57271,7 @@ lessons:
     id: "山岳|さんがく"
     level: 1
     new_kanji: {kanji: "岳", meaning: "Point, Peak, Mountain"}
+    draw: "岳"
     word: "山岳"
     kana: "さんがく"
     furigana: "山[さん]岳[がく]"
@@ -56843,6 +57283,7 @@ lessons:
     id: "概論|がいろん"
     level: 1
     new_kanji: {kanji: "概", meaning: "Outline, Condition, Approximation, Generally"}
+    draw: "概"
     word: "概論"
     kana: "がいろん"
     furigana: "概[がい]論[ろん]"
@@ -56898,6 +57339,7 @@ lessons:
     id: "拘束|こうそく"
     level: 1
     new_kanji: {kanji: "拘", meaning: "Arrest, Seize, Concerned, Adhere To, Despite"}
+    draw: "拘"
     word: "拘束"
     kana: "こうそく"
     furigana: "拘[こう]束[そく]"
@@ -56979,6 +57421,7 @@ lessons:
     id: "雰囲気|ふんいき"
     level: 1
     new_kanji: {kanji: "雰", meaning: "Atmosphere, Fog"}
+    draw: "雰"
     word: "雰囲気"
     kana: "ふんいき"
     furigana: "雰[ふん]囲[い]気[き]"
@@ -56989,6 +57432,7 @@ lessons:
     id: "境遇|きょうぐう"
     level: 1
     new_kanji: {kanji: "遇", meaning: "Meet, Encounter, Interview, Treat, Entertain, Receive, Deal With"}
+    draw: "遇"
     word: "境遇"
     kana: "きょうぐう"
     furigana: "境[きょう]遇[ぐう]"
@@ -57030,6 +57474,7 @@ lessons:
     id: "食卓|しょくたく"
     level: 1
     new_kanji: {kanji: "卓", meaning: "Eminent, Table, Desk, High"}
+    draw: "卓"
     word: "食卓"
     kana: "しょくたく"
     furigana: "食[しょく]卓[たく]"
@@ -57041,6 +57486,7 @@ lessons:
     id: "食糧|しょくりょう"
     level: 1
     new_kanji: {kanji: "糧", meaning: "Provisions, Food, Bread"}
+    draw: "糧"
     word: "食糧"
     kana: "しょくりょう"
     furigana: "食[しょく]糧[りょう]"
@@ -57052,6 +57498,7 @@ lessons:
     id: "名簿|めいぼ"
     level: 1
     new_kanji: {kanji: "簿", meaning: "Register, Record Book"}
+    draw: "簿"
     word: "名簿"
     kana: "めいぼ"
     furigana: "名[めい]簿[ぼ]"
@@ -57063,6 +57510,7 @@ lessons:
     id: "牧場|ぼくじょう"
     level: 1
     new_kanji: {kanji: "牧", meaning: "Breed, Care For, Shepherd, Feed, Pasture"}
+    draw: "牧"
     word: "牧場"
     kana: "ぼくじょう"
     furigana: "牧[ぼく]場[じょう]"
@@ -57138,6 +57586,7 @@ lessons:
     id: "軍艦|ぐんかん"
     level: 1
     new_kanji: {kanji: "艦", meaning: "Warship"}
+    draw: "艦"
     word: "軍艦"
     kana: "ぐんかん"
     furigana: "軍[ぐん]艦[かん]"
@@ -57149,6 +57598,7 @@ lessons:
     id: "先輩|せんぱい"
     level: 1
     new_kanji: {kanji: "輩", meaning: "Comrade, Fellow, People, Companions"}
+    draw: "輩"
     word: "先輩"
     kana: "せんぱい"
     furigana: "先[せん]輩[ぱい]"
@@ -57181,6 +57631,7 @@ lessons:
     id: "奇妙|きみょう"
     level: 1
     new_kanji: {kanji: "奇", meaning: "Strange, Strangeness, Curiosity"}
+    draw: "奇"
     word: "奇妙"
     kana: "きみょう"
     furigana: "奇[き]妙[みょう]"
@@ -57201,6 +57652,7 @@ lessons:
     id: "我慢|がまん"
     level: 1
     new_kanji: {kanji: "慢", meaning: "Ridicule, Laziness"}
+    draw: "慢"
     word: "我慢"
     kana: "がまん"
     furigana: "我[が]慢[まん]"
@@ -57266,6 +57718,7 @@ lessons:
     id: "拍手|はくしゅ"
     level: 1
     new_kanji: {kanji: "拍", meaning: "Clap, Beat (music)"}
+    draw: "拍"
     word: "拍手"
     kana: "はくしゅ"
     furigana: "拍[はく]手[しゅ]"
@@ -57306,6 +57759,7 @@ lessons:
     id: "寛容|かんよう"
     level: 1
     new_kanji: {kanji: "寛", meaning: "Tolerant, Leniency, Generosity, Relax, Feel At Home, Be At Ease, Broadminded"}
+    draw: "寛"
     word: "寛容"
     kana: "かんよう"
     furigana: "寛[かん]容[よう]"
@@ -57347,6 +57801,7 @@ lessons:
     id: "細胞|さいぼう"
     level: 1
     new_kanji: {kanji: "胞", meaning: "Placenta, Sac, Sheath"}
+    draw: "胞"
     word: "細胞"
     kana: "さいぼう"
     furigana: "細[さい]胞[ぼう]"
@@ -57406,6 +57861,7 @@ lessons:
     id: "沈没|ちんぼつ"
     level: 1
     new_kanji: {kanji: "没", meaning: "Drown, Sink, Hide, Fall Into, Disappear, Die"}
+    draw: "没"
     word: "沈没"
     kana: "ちんぼつ"
     furigana: "沈[ちん]没[ぼつ]"
@@ -57477,6 +57933,7 @@ lessons:
     id: "鑑賞|かんしょう"
     level: 1
     new_kanji: {kanji: "鑑", meaning: "Specimen, Take Warning From, Learn From"}
+    draw: "鑑"
     word: "鑑賞"
     kana: "かんしょう"
     furigana: "鑑[かん]賞[しょう]"
@@ -57565,6 +58022,7 @@ lessons:
     id: "随筆|ずいひつ"
     level: 1
     new_kanji: {kanji: "随", meaning: "Follow, Though, Notwithstanding, While, During, Both, All, Obey, Submit To, Comply, At The Mercy Of (the Waves)"}
+    draw: "随"
     word: "随筆"
     kana: "ずいひつ"
     furigana: "随[ずい]筆[ひつ]"
@@ -57576,6 +58034,7 @@ lessons:
     id: "強烈|きょうれつ"
     level: 1
     new_kanji: {kanji: "烈", meaning: "Ardent, Violent, Vehement, Furious, Severe, Extreme"}
+    draw: "烈"
     word: "強烈"
     kana: "きょうれつ"
     furigana: "強[きょう]烈[れつ]"
@@ -57587,6 +58046,7 @@ lessons:
     id: "猛烈|もうれつ"
     level: 1
     new_kanji: {kanji: "猛", meaning: "Fierce, Rave, Rush, Become Furious, Wildness, Strength"}
+    draw: "猛"
     word: "猛烈"
     kana: "もうれつ"
     furigana: "猛[もう]烈[れつ]"
@@ -57609,6 +58069,7 @@ lessons:
     id: "原稿|げんこう"
     level: 1
     new_kanji: {kanji: "稿", meaning: "Draft, Copy, Manuscript, Straw"}
+    draw: "稿"
     word: "原稿"
     kana: "げんこう"
     furigana: "原[げん]稿[こう]"
@@ -57620,6 +58081,7 @@ lessons:
     id: "拝啓|はいけい"
     level: 1
     new_kanji: {kanji: "啓", meaning: "Disclose, Open, Say"}
+    draw: "啓"
     word: "拝啓"
     kana: "はいけい"
     furigana: "拝[はい]啓[けい]"
@@ -57652,6 +58114,7 @@ lessons:
     id: "漫画|まんが"
     level: 1
     new_kanji: {kanji: "漫", meaning: "Cartoon, Involuntarily, Unrestrained, In Spite Of Oneself, Corrupt"}
+    draw: "漫"
     word: "漫画"
     kana: "まんが"
     furigana: "漫[まん]画[が]"
@@ -57663,6 +58126,7 @@ lessons:
     id: "玄関|げんかん"
     level: 1
     new_kanji: {kanji: "玄", meaning: "Mysterious, Occultness, Black, Deep, Profound"}
+    draw: "玄"
     word: "玄関"
     kana: "げんかん"
     furigana: "玄[げん]関[かん]"
@@ -57723,6 +58187,7 @@ lessons:
     id: "舗装|ほそう"
     level: 1
     new_kanji: {kanji: "舗", meaning: "Shop, Store, Pave"}
+    draw: "舗"
     word: "舗装"
     kana: "ほそう"
     furigana: "舗[ほ]装[そう]"
@@ -57734,6 +58199,7 @@ lessons:
     id: "熟語|じゅくご"
     level: 1
     new_kanji: {kanji: "熟", meaning: "Mellow, Ripen, Mature, Acquire Skill"}
+    draw: "熟"
     word: "熟語"
     kana: "じゅくご"
     furigana: "熟[じゅく]語[ご]"
@@ -57784,6 +58250,7 @@ lessons:
     id: "沸騰|ふっとう"
     level: 1
     new_kanji: {kanji: "騰", meaning: "Leaping Up, Jumping Up, Rising, Advancing, Going"}
+    draw: "騰"
     word: "沸騰"
     kana: "ふっとう"
     furigana: "沸[ふっ]騰[とう]"
@@ -57795,6 +58262,7 @@ lessons:
     id: "往復|おうふく"
     level: 1
     new_kanji: {kanji: "往", meaning: "Journey, Travel, Chase Away, Let Go, Going, Before, Formerly"}
+    draw: "往"
     word: "往復"
     kana: "おうふく"
     furigana: "往[おう]復[ふく]"
@@ -57849,6 +58317,7 @@ lessons:
     id: "緯度|いど"
     level: 1
     new_kanji: {kanji: "緯", meaning: "Horizontal, Woof, Left & Right, (parallels Of) Latitude, Prediction"}
+    draw: "緯"
     word: "緯度"
     kana: "いど"
     furigana: "緯[い]度[ど]"
@@ -57890,6 +58359,7 @@ lessons:
     id: "退屈|たいくつ"
     level: 1
     new_kanji: {kanji: "屈", meaning: "Yield, Bend, Flinch, Submit"}
+    draw: "屈"
     word: "退屈"
     kana: "たいくつ"
     furigana: "退[たい]屈[くつ]"
@@ -57919,6 +58389,7 @@ lessons:
     id: "直径|ちょっけい"
     level: 1
     new_kanji: {kanji: "径", meaning: "Diameter, Path, Method"}
+    draw: "径"
     word: "直径"
     kana: "ちょっけい"
     furigana: "直[ちょっ]径[けい]"
@@ -57938,6 +58409,7 @@ lessons:
     id: "淡水|たんすい"
     level: 1
     new_kanji: {kanji: "淡", meaning: "Thin, Faint, Pale, Fleeting"}
+    draw: "淡"
     word: "淡水"
     kana: "たんすい"
     furigana: "淡[たん]水[すい]"
@@ -57958,6 +58430,7 @@ lessons:
     id: "抽象|ちゅうしょう"
     level: 1
     new_kanji: {kanji: "抽", meaning: "Pluck, Pull, Extract, Excel"}
+    draw: "抽"
     word: "抽象"
     kana: "ちゅうしょう"
     furigana: "抽[ちゅう]象[しょう]"
@@ -57976,6 +58449,7 @@ lessons:
     id: "法廷|ほうてい"
     level: 1
     new_kanji: {kanji: "廷", meaning: "Courts, Imperial Court, Government Office"}
+    draw: "廷"
     word: "法廷"
     kana: "ほうてい"
     furigana: "法[ほう]廷[てい]"
@@ -58006,6 +58480,7 @@ lessons:
     id: "奨学金|しょうがくきん"
     level: 1
     new_kanji: {kanji: "奨", meaning: "Exhort, Urge, Encourage"}
+    draw: "奨"
     word: "奨学金"
     kana: "しょうがくきん"
     furigana: "奨[しょう]学[がく]金[きん]"
@@ -58047,6 +58522,7 @@ lessons:
     id: "過剰|かじょう"
     level: 1
     new_kanji: {kanji: "剰", meaning: "Surplus, Besides"}
+    draw: "剰"
     word: "過剰"
     kana: "かじょう"
     furigana: "過[か]剰[じょう]"
@@ -58058,6 +58534,7 @@ lessons:
     id: "大胆|だいたん"
     level: 1
     new_kanji: {kanji: "胆", meaning: "Gall Bladder, Courage, Pluck, Nerve"}
+    draw: "胆"
     word: "大胆"
     kana: "だいたん"
     furigana: "大[だい]胆[たん]"
@@ -58069,6 +58546,7 @@ lessons:
     id: "化繊|かせん"
     level: 1
     new_kanji: {kanji: "繊", meaning: "Slender, Fine, Thin Kimono"}
+    draw: "繊"
     word: "化繊"
     kana: "かせん"
     furigana: "化[か]繊[せん]"
@@ -58169,6 +58647,7 @@ lessons:
     id: "翻訳|ほんやく"
     level: 1
     new_kanji: {kanji: "翻", meaning: "Flip, Turn Over, Wave, Flutter, Change (mind)"}
+    draw: "翻"
     word: "翻訳"
     kana: "ほんやく"
     furigana: "翻[ほん]訳[やく]"
@@ -58180,6 +58659,7 @@ lessons:
     id: "墜落|ついらく"
     level: 1
     new_kanji: {kanji: "墜", meaning: "Crash, Fall (down)"}
+    draw: "墜"
     word: "墜落"
     kana: "ついらく"
     furigana: "墜[つい]落[らく]"
@@ -58221,6 +58701,7 @@ lessons:
     id: "肥料|ひりょう"
     level: 1
     new_kanji: {kanji: "肥", meaning: "Fertilizer, Get Fat, Fertile, Manure, Pamper"}
+    draw: "肥"
     word: "肥料"
     kana: "ひりょう"
     furigana: "肥[ひ]料[りょう]"
@@ -58251,6 +58732,7 @@ lessons:
     id: "砂糖|さとう"
     level: 1
     new_kanji: {kanji: "糖", meaning: "Sugar"}
+    draw: "糖"
     word: "砂糖"
     kana: "さとう"
     furigana: "砂[さ]糖[とう]"
@@ -58313,6 +58795,7 @@ lessons:
     id: "軌道|きどう"
     level: 1
     new_kanji: {kanji: "軌", meaning: "Rut, Wheel, Track, Model, Way Of Doing"}
+    draw: "軌"
     word: "軌道"
     kana: "きどう"
     furigana: "軌[き]道[どう]"
@@ -58324,6 +58807,7 @@ lessons:
     id: "土俵|どひょう"
     level: 1
     new_kanji: {kanji: "俵", meaning: "Bag, Bale, Sack, Counter For Bags"}
+    draw: "俵"
     word: "土俵"
     kana: "どひょう"
     furigana: "土[ど]俵[ひょう]"
@@ -58375,6 +58859,7 @@ lessons:
     id: "摩擦|まさつ"
     level: 1
     new_kanji: {kanji: "摩", meaning: "Chafe, Rub, Polish, Grind, Scrape"}
+    draw: "摩"
     word: "摩擦"
     kana: "まさつ"
     furigana: "摩[ま]擦[さつ]"
@@ -58386,6 +58871,7 @@ lessons:
     id: "捕鯨|ほげい"
     level: 1
     new_kanji: {kanji: "鯨", meaning: "Whale"}
+    draw: "鯨"
     word: "捕鯨"
     kana: "ほげい"
     furigana: "捕[ほ]鯨[げい]"
@@ -58397,6 +58883,7 @@ lessons:
     id: "別荘|べっそう"
     level: 1
     new_kanji: {kanji: "荘", meaning: "Villa, Inn, Cottage, Feudal Manor, Solemn, Dignified"}
+    draw: "荘"
     word: "別荘"
     kana: "べっそう"
     furigana: "別[べっ]荘[そう]"
@@ -58408,6 +58895,7 @@ lessons:
     id: "承諾|しょうだく"
     level: 1
     new_kanji: {kanji: "諾", meaning: "Consent, Assent, Agreement"}
+    draw: "諾"
     word: "承諾"
     kana: "しょうだく"
     furigana: "承[しょう]諾[だく]"
@@ -58499,6 +58987,7 @@ lessons:
     id: "無駄|むだ"
     level: 1
     new_kanji: {kanji: "駄", meaning: "Burdensome, Pack Horse, Horse Load, Send By Horse, Trivial, Worthless"}
+    draw: "駄"
     word: "無駄"
     kana: "むだ"
     furigana: "無[む]駄[だ]"
@@ -58637,6 +59126,7 @@ lessons:
     id: "浪費|ろうひ"
     level: 1
     new_kanji: {kanji: "浪", meaning: "Wandering, Waves, Billows, Reckless, Unrestrained"}
+    draw: "浪"
     word: "浪費"
     kana: "ろうひ"
     furigana: "浪[ろう]費[ひ]"
@@ -58648,6 +59138,7 @@ lessons:
     id: "亜科|あか"
     level: 1
     new_kanji: {kanji: "亜", meaning: "Asia, Rank Next, Come After, -ous"}
+    draw: "亜"
     word: "亜科"
     kana: "あか"
     furigana: "亜[あ]科[か]"
@@ -58659,6 +59150,7 @@ lessons:
     id: "展覧会|てんらんかい"
     level: 1
     new_kanji: {kanji: "覧", meaning: "Perusal, See"}
+    draw: "覧"
     word: "展覧会"
     kana: "てんらんかい"
     furigana: "展[てん]覧[らん]会[かい]"
@@ -58715,6 +59207,7 @@ lessons:
     id: "悪魔|あくま"
     level: 1
     new_kanji: {kanji: "魔", meaning: "Witch, Demon, Evil Spirit"}
+    draw: "魔"
     word: "悪魔"
     kana: "あくま"
     furigana: "悪[あく]魔[ま]"
@@ -58726,6 +59219,7 @@ lessons:
     id: "報酬|ほうしゅう"
     level: 1
     new_kanji: {kanji: "酬", meaning: "Repay, Reward, Retribution"}
+    draw: "酬"
     word: "報酬"
     kana: "ほうしゅう"
     furigana: "報[ほう]酬[しゅう]"
@@ -58758,6 +59252,7 @@ lessons:
     id: "興奮|こうふん"
     level: 1
     new_kanji: {kanji: "奮", meaning: "Stirred Up, Be Invigorated, Flourish"}
+    draw: "奮"
     word: "興奮"
     kana: "こうふん"
     furigana: "興[こう]奮[ふん]"
@@ -58788,6 +59283,7 @@ lessons:
     id: "開拓|かいたく"
     level: 1
     new_kanji: {kanji: "拓", meaning: "Clear (the Land), Open, Break Up (land)"}
+    draw: "拓"
     word: "開拓"
     kana: "かいたく"
     furigana: "開[かい]拓[たく]"
@@ -58799,6 +59295,7 @@ lessons:
     id: "眼科|がんか"
     level: 1
     new_kanji: {kanji: "眼", meaning: "Eyeball"}
+    draw: "眼"
     word: "眼科"
     kana: "がんか"
     furigana: "眼[がん]科[か]"
@@ -58835,6 +59332,7 @@ lessons:
     id: "地獄|じごく"
     level: 1
     new_kanji: {kanji: "獄", meaning: "Prison, Jail"}
+    draw: "獄"
     word: "地獄"
     kana: "じごく"
     furigana: "地[じ]獄[ごく]"
@@ -58846,6 +59344,7 @@ lessons:
     id: "高尚|こうしょう"
     level: 1
     new_kanji: {kanji: "尚", meaning: "Esteem, Furthermore, Still, Yet"}
+    draw: "尚"
     word: "高尚"
     kana: "こうしょう"
     furigana: "高[こう]尚[しょう]"
@@ -58888,6 +59387,7 @@ lessons:
     id: "顕微鏡|けんびきょう"
     level: 1
     new_kanji: {kanji: "顕", meaning: "Appear, Existing"}
+    draw: "顕"
     word: "顕微鏡"
     kana: "けんびきょう"
     furigana: "顕[けん]微[び]鏡[きょう]"
@@ -58929,6 +59429,7 @@ lessons:
     id: "矛盾|むじゅん"
     level: 1
     new_kanji: {kanji: "矛", meaning: "Halberd, Arms, Festival Float"}
+    draw: "矛"
     word: "矛盾"
     kana: "むじゅん"
     furigana: "矛[む]盾[じゅん]"
@@ -58940,6 +59441,7 @@ lessons:
     id: "垣根|かきね"
     level: 1
     new_kanji: {kanji: "垣", meaning: "Hedge, Fence, Wall"}
+    draw: "垣"
     word: "垣根"
     kana: "かきね"
     furigana: "垣[かき]根[ね]"
@@ -58962,6 +59464,7 @@ lessons:
     id: "詐欺|さぎ"
     level: 1
     new_kanji: {kanji: "詐", meaning: "Lie, Falsehood, Deceive, Pretend"}
+    draw: "詐"
     word: "詐欺"
     kana: "さぎ"
     furigana: "詐[さ]欺[ぎ]"
@@ -59043,6 +59546,7 @@ lessons:
     id: "架空|かくう"
     level: 1
     new_kanji: {kanji: "架", meaning: "Erect, Frame, Mount, Support, Shelf, Construct"}
+    draw: "架"
     word: "架空"
     kana: "かくう"
     furigana: "架[か]空[くう]"
@@ -59071,6 +59575,7 @@ lessons:
     id: "庶民|しょみん"
     level: 1
     new_kanji: {kanji: "庶", meaning: "Commoner, All, Bastard"}
+    draw: "庶"
     word: "庶民"
     kana: "しょみん"
     furigana: "庶[しょ]民[みん]"
@@ -59090,6 +59595,7 @@ lessons:
     id: "幼稚|ようち"
     level: 1
     new_kanji: {kanji: "稚", meaning: "Immature, Young"}
+    draw: "稚"
     word: "幼稚"
     kana: "ようち"
     furigana: "幼[よう]稚[ち]"
@@ -59141,6 +59647,7 @@ lessons:
     id: "把握|はあく"
     level: 1
     new_kanji: {kanji: "把", meaning: "Grasp, Faggot, Bunch, Counter For Bundles"}
+    draw: "把"
     word: "把握"
     kana: "はあく"
     furigana: "把[は]握[あく]"
@@ -59152,6 +59659,7 @@ lessons:
     id: "実践|じっせん"
     level: 1
     new_kanji: {kanji: "践", meaning: "Tread, Step On, Trample, Practice, Carry Through"}
+    draw: "践"
     word: "実践"
     kana: "じっせん"
     furigana: "実[じっ]践[せん]"
@@ -59163,6 +59671,7 @@ lessons:
     id: "進呈|しんてい"
     level: 1
     new_kanji: {kanji: "呈", meaning: "Display, Offer, Present, Send, Exhibit"}
+    draw: "呈"
     word: "進呈"
     kana: "しんてい"
     furigana: "進[しん]呈[てい]"
@@ -59173,6 +59682,7 @@ lessons:
     id: "過疎|かそ"
     level: 1
     new_kanji: {kanji: "疎", meaning: "Alienate, Rough, Neglect, Shun, Sparse, Penetrate"}
+    draw: "疎"
     word: "過疎"
     kana: "かそ"
     furigana: "過[か]疎[そ]"
@@ -59204,6 +59714,7 @@ lessons:
     id: "征服|せいふく"
     level: 1
     new_kanji: {kanji: "征", meaning: "Subjugate, Attack The Rebellious, Collect Taxes"}
+    draw: "征"
     word: "征服"
     kana: "せいふく"
     furigana: "征[せい]服[ふく]"
@@ -59235,6 +59746,7 @@ lessons:
     id: "歌謡|かよう"
     level: 1
     new_kanji: {kanji: "謡", meaning: "Song, Sing, Ballad, Noh Chanting"}
+    draw: "謡"
     word: "歌謡"
     kana: "かよう"
     furigana: "歌[か]謡[よう]"
@@ -59273,6 +59785,7 @@ lessons:
     id: "謙遜|けんそん"
     level: 1
     new_kanji: {kanji: "謙", meaning: "Self-effacing, Humble Oneself, Condescend, Be Modest"}
+    draw: "謙"
     word: "謙遜"
     kana: "けんそん"
     furigana: "謙[けん]遜[そん]"
@@ -59284,6 +59797,7 @@ lessons:
     id: "謙虚|けんきょ"
     level: 1
     new_kanji: {kanji: "虚", meaning: "Void, Emptiness, Unpreparedness, Crack, Fissure, Untruth"}
+    draw: "虚"
     word: "謙虚"
     kana: "けんきょ"
     furigana: "謙[けん]虚[きょ]"
@@ -59306,6 +59820,7 @@ lessons:
     id: "細菌|さいきん"
     level: 1
     new_kanji: {kanji: "菌", meaning: "Germ, Fungus, Bacteria"}
+    draw: "菌"
     word: "細菌"
     kana: "さいきん"
     furigana: "細[さい]菌[きん]"
@@ -59328,6 +59843,7 @@ lessons:
     id: "頻繁|ひんぱん"
     level: 1
     new_kanji: {kanji: "頻", meaning: "Repeatedly, Recur"}
+    draw: "頻"
     word: "頻繁"
     kana: "ひんぱん"
     furigana: "頻[ひん]繁[ぱん]"
@@ -59391,6 +59907,7 @@ lessons:
     id: "清潔|せいけつ"
     level: 1
     new_kanji: {kanji: "潔", meaning: "Undefiled, Pure, Clean, Righteous, Gallant"}
+    draw: "潔"
     word: "清潔"
     kana: "せいけつ"
     furigana: "清[せい]潔[けつ]"
@@ -59420,6 +59937,7 @@ lessons:
     id: "残酷|ざんこく"
     level: 1
     new_kanji: {kanji: "酷", meaning: "Cruel, Severe, Atrocious, Unjust"}
+    draw: "酷"
     word: "残酷"
     kana: "ざんこく"
     furigana: "残[ざん]酷[こく]"
@@ -59440,6 +59958,7 @@ lessons:
     id: "廊下|ろうか"
     level: 1
     new_kanji: {kanji: "廊", meaning: "Corridor, Hall, Tower"}
+    draw: "廊"
     word: "廊下"
     kana: "ろうか"
     furigana: "廊[ろう]下[か]"
@@ -59461,6 +59980,7 @@ lessons:
     id: "起伏|きふく"
     level: 1
     new_kanji: {kanji: "伏", meaning: "Prostrated, Bend Down, Bow, Cover, Lay (pipes)"}
+    draw: "伏"
     word: "起伏"
     kana: "きふく"
     furigana: "起[き]伏[ふく]"
@@ -59499,6 +60019,7 @@ lessons:
     id: "風俗|ふうぞく"
     level: 1
     new_kanji: {kanji: "俗", meaning: "Vulgar, Customs, Manners, Worldliness, Mundane Things"}
+    draw: "俗"
     word: "風俗"
     kana: "ふうぞく"
     furigana: "風[ふう]俗[ぞく]"
@@ -59517,6 +60038,7 @@ lessons:
     id: "砂漠|さばく"
     level: 1
     new_kanji: {kanji: "漠", meaning: "Vague, Obscure, Desert, Wide"}
+    draw: "漠"
     word: "砂漠"
     kana: "さばく"
     furigana: "砂[さ]漠[ばく]"
@@ -59536,6 +60058,7 @@ lessons:
     id: "風邪|かぜ"
     level: 1
     new_kanji: {kanji: "邪", meaning: "Wicked, Injustice, Wrong"}
+    draw: "邪"
     word: "風邪"
     kana: "かぜ"
     furigana: "風邪[かぜ]"
@@ -59575,6 +60098,7 @@ lessons:
     id: "結晶|けっしょう"
     level: 1
     new_kanji: {kanji: "晶", meaning: "Sparkle, Clear, Crystal"}
+    draw: "晶"
     word: "結晶"
     kana: "けっしょう"
     furigana: "結[けっ]晶[しょう]"
@@ -59671,6 +60195,7 @@ lessons:
     id: "素朴|そぼく"
     level: 1
     new_kanji: {kanji: "朴", meaning: "Crude, Simple, Plain, Docile"}
+    draw: "朴"
     word: "素朴"
     kana: "そぼく"
     furigana: "素[そ]朴[ぼく]"
@@ -59753,6 +60278,7 @@ lessons:
     id: "収穫|しゅうかく"
     level: 1
     new_kanji: {kanji: "穫", meaning: "Harvest, Reap"}
+    draw: "穫"
     word: "収穫"
     kana: "しゅうかく"
     furigana: "収[しゅう]穫[かく]"
@@ -59764,6 +60290,7 @@ lessons:
     id: "佳句|かく"
     level: 1
     new_kanji: {kanji: "佳", meaning: "Excellent, Beautiful, Good, Pleasing, Skilled"}
+    draw: "佳"
     word: "佳句"
     kana: "かく"
     furigana: "佳[か]句[く]"
@@ -59825,6 +60352,7 @@ lessons:
     id: "該当|がいとう"
     level: 1
     new_kanji: {kanji: "該", meaning: "Above-stated, The Said, That Specific"}
+    draw: "該"
     word: "該当"
     kana: "がいとう"
     furigana: "該[がい]当[とう]"
@@ -59895,6 +60423,7 @@ lessons:
     id: "壮大|そうだい"
     level: 1
     new_kanji: {kanji: "壮", meaning: "Robust, Manhood, Prosperity"}
+    draw: "壮"
     word: "壮大"
     kana: "そうだい"
     furigana: "壮[そう]大[だい]"
@@ -59906,6 +60435,7 @@ lessons:
     id: "堤防|ていぼう"
     level: 1
     new_kanji: {kanji: "堤", meaning: "Dike, Bank, Embankment"}
+    draw: "堤"
     word: "堤防"
     kana: "ていぼう"
     furigana: "堤[てい]防[ぼう]"
@@ -59938,6 +60468,7 @@ lessons:
     id: "愚痴|ぐち"
     level: 1
     new_kanji: {kanji: "痴", meaning: "Stupid, Foolish"}
+    draw: "痴"
     word: "愚痴"
     kana: "ぐち"
     furigana: "愚[ぐ]痴[ち]"
@@ -59949,6 +60480,7 @@ lessons:
     id: "運搬|うんぱん"
     level: 1
     new_kanji: {kanji: "搬", meaning: "Conveyor, Carry, Transport"}
+    draw: "搬"
     word: "運搬"
     kana: "うんぱん"
     furigana: "運[うん]搬[ぱん]"
@@ -59970,6 +60502,7 @@ lessons:
     id: "寸法|すんぽう"
     level: 1
     new_kanji: {kanji: "寸", meaning: "Measurement, Tenth Of A Shaku, A Little, Small"}
+    draw: "寸"
     word: "寸法"
     kana: "すんぽう"
     furigana: "寸[すん]法[ぽう]"
@@ -59992,6 +60525,7 @@ lessons:
     id: "凶作|きょうさく"
     level: 1
     new_kanji: {kanji: "凶", meaning: "Villain, Evil, Bad Luck, Disaster"}
+    draw: "凶"
     word: "凶作"
     kana: "きょうさく"
     furigana: "凶[きょう]作[さく]"
@@ -60021,6 +60555,7 @@ lessons:
     id: "宴会|えんかい"
     level: 1
     new_kanji: {kanji: "宴", meaning: "Banquet, Feast, Party"}
+    draw: "宴"
     word: "宴会"
     kana: "えんかい"
     furigana: "宴[えん]会[かい]"
@@ -60032,6 +60567,7 @@ lessons:
     id: "捕虜|ほりょ"
     level: 1
     new_kanji: {kanji: "虜", meaning: "Captive, Barbarian, Low Epithet For The Enemy"}
+    draw: "虜"
     word: "捕虜"
     kana: "ほりょ"
     furigana: "捕[ほ]虜[りょ]"
@@ -60043,6 +60579,7 @@ lessons:
     id: "陶器|とうき"
     level: 1
     new_kanji: {kanji: "陶", meaning: "Pottery, Porcelain"}
+    draw: "陶"
     word: "陶器"
     kana: "とうき"
     furigana: "陶[とう]器[き]"
@@ -60075,6 +60612,7 @@ lessons:
     id: "磁石|じしゃく"
     level: 1
     new_kanji: {kanji: "磁", meaning: "Magnet, Porcelain"}
+    draw: "磁"
     word: "磁石"
     kana: "じしゃく"
     furigana: "磁[じ]石[しゃく]"
@@ -60102,6 +60640,7 @@ lessons:
     id: "昆虫|こんちゅう"
     level: 1
     new_kanji: {kanji: "昆", meaning: "Descendants, Elder Brother, Insect"}
+    draw: "昆"
     word: "昆虫"
     kana: "こんちゅう"
     furigana: "昆[こん]虫[ちゅう]"
@@ -60134,6 +60673,7 @@ lessons:
     id: "改訂|かいてい"
     level: 1
     new_kanji: {kanji: "訂", meaning: "Revise, Correct, Decide"}
+    draw: "訂"
     word: "改訂"
     kana: "かいてい"
     furigana: "改[かい]訂[てい]"
@@ -60185,6 +60725,7 @@ lessons:
     id: "丁寧|ていねい"
     level: 1
     new_kanji: {kanji: "寧", meaning: "Rather, Preferably, Peaceful, Quiet, Tranquility"}
+    draw: "寧"
     word: "丁寧"
     kana: "ていねい"
     furigana: "丁[てい]寧[ねい]"
@@ -60196,6 +60737,7 @@ lessons:
     id: "循環|じゅんかん"
     level: 1
     new_kanji: {kanji: "循", meaning: "Sequential, Follow"}
+    draw: "循"
     word: "循環"
     kana: "じゅんかん"
     furigana: "循[じゅん]環[かん]"
@@ -60238,6 +60780,7 @@ lessons:
     id: "突如|とつじょ"
     level: 1
     new_kanji: {kanji: "如", meaning: "Likeness, Like, Such As, As If, Better, Best, Equal"}
+    draw: "如"
     word: "突如"
     kana: "とつじょ"
     furigana: "突[とつ]如[じょ]"
@@ -60280,6 +60823,7 @@ lessons:
     id: "真珠|しんじゅ"
     level: 1
     new_kanji: {kanji: "珠", meaning: "Pearl, Gem, Jewel"}
+    draw: "珠"
     word: "真珠"
     kana: "しんじゅ"
     furigana: "真[しん]珠[じゅ]"
@@ -60385,6 +60929,7 @@ lessons:
     id: "蛇口|じゃぐち"
     level: 1
     new_kanji: {kanji: "蛇", meaning: "Snake, Serpent, Hard Drinker"}
+    draw: "蛇"
     word: "蛇口"
     kana: "じゃぐち"
     furigana: "蛇[じゃ]口[ぐち]"
@@ -60468,6 +61013,7 @@ lessons:
     id: "平凡|へいぼん"
     level: 1
     new_kanji: {kanji: "凡", meaning: "Commonplace, Ordinary, Mediocre"}
+    draw: "凡"
     word: "平凡"
     kana: "へいぼん"
     furigana: "平[へい]凡[ぼん]"
@@ -60479,6 +61025,7 @@ lessons:
     id: "休憩|きゅうけい"
     level: 1
     new_kanji: {kanji: "憩", meaning: "Recess, Rest, Relax, Repose"}
+    draw: "憩"
     word: "休憩"
     kana: "きゅうけい"
     furigana: "休[きゅう]憩[けい]"
@@ -60512,6 +61059,7 @@ lessons:
     id: "睡眠|すいみん"
     level: 1
     new_kanji: {kanji: "睡", meaning: "Drowsy, Sleep, Die"}
+    draw: "睡"
     word: "睡眠"
     kana: "すいみん"
     furigana: "睡[すい]眠[みん]"
@@ -60523,6 +61071,7 @@ lessons:
     id: "錯誤|さくご"
     level: 1
     new_kanji: {kanji: "錯", meaning: "Confused, Mix, Be In Disorder"}
+    draw: "錯"
     word: "錯誤"
     kana: "さくご"
     furigana: "錯[さく]誤[ご]"
@@ -60543,6 +61092,7 @@ lessons:
     id: "穀物|こくもつ"
     level: 1
     new_kanji: {kanji: "穀", meaning: "Cereals, Grain"}
+    draw: "穀"
     word: "穀物"
     kana: "こくもつ"
     furigana: "穀[こく]物[もつ]"
@@ -60554,6 +61104,7 @@ lessons:
     id: "丘陵|きゅうりょう"
     level: 1
     new_kanji: {kanji: "陵", meaning: "Mausoleum, Imperial Tomb, Mound, Hill"}
+    draw: "陵"
     word: "丘陵"
     kana: "きゅうりょう"
     furigana: "丘[きゅう]陵[りょう]"
@@ -60587,6 +61138,7 @@ lessons:
     id: "船舶|せんぱく"
     level: 1
     new_kanji: {kanji: "舶", meaning: "Liner, Ship"}
+    draw: "舶"
     word: "船舶"
     kana: "せんぱく"
     furigana: "船[せん]舶[ぱく]"
@@ -60597,6 +61149,7 @@ lessons:
     id: "窮屈|きゅうくつ"
     level: 1
     new_kanji: {kanji: "窮", meaning: "Hard Up, Destitute, Suffer, Perplexed, Cornered"}
+    draw: "窮"
     word: "窮屈"
     kana: "きゅうくつ"
     furigana: "窮[きゅう]屈[くつ]"
@@ -60637,6 +61190,7 @@ lessons:
     id: "奇麗|きれい"
     level: 1
     new_kanji: {kanji: "麗", meaning: "Lovely, Beautiful, Graceful, Resplendent"}
+    draw: "麗"
     word: "奇麗"
     kana: "きれい"
     furigana: "奇[き]麗[れい]"
@@ -60728,6 +61282,7 @@ lessons:
     id: "適宜|てきぎ"
     level: 1
     new_kanji: {kanji: "宜", meaning: "Best Regards, Good"}
+    draw: "宜"
     word: "適宜"
     kana: "てきぎ"
     furigana: "適[てき]宜[ぎ]"
@@ -60746,6 +61301,7 @@ lessons:
     id: "盲点|もうてん"
     level: 1
     new_kanji: {kanji: "盲", meaning: "Blind, Blind Man, Ignoramus"}
+    draw: "盲"
     word: "盲点"
     kana: "もうてん"
     furigana: "盲[もう]点[てん]"
@@ -60777,6 +61333,7 @@ lessons:
     id: "窒息|ちっそく"
     level: 1
     new_kanji: {kanji: "窒", meaning: "Plug Up, Obstruct"}
+    draw: "窒"
     word: "窒息"
     kana: "ちっそく"
     furigana: "窒[ちっ]息[そく]"
@@ -60809,6 +61366,7 @@ lessons:
     id: "洪水|こうずい"
     level: 1
     new_kanji: {kanji: "洪", meaning: "Deluge, Flood, Vast"}
+    draw: "洪"
     word: "洪水"
     kana: "こうずい"
     furigana: "洪[こう]水[ずい]"
@@ -60840,6 +61398,7 @@ lessons:
     id: "冗談|じょうだん"
     level: 1
     new_kanji: {kanji: "冗", meaning: "Superfluous, Uselessness"}
+    draw: "冗"
     word: "冗談"
     kana: "じょうだん"
     furigana: "冗[じょう]談[だん]"
@@ -60861,6 +61420,7 @@ lessons:
     id: "紳士|しんし"
     level: 1
     new_kanji: {kanji: "紳", meaning: "Sire, Good Belt, Gentleman"}
+    draw: "紳"
     word: "紳士"
     kana: "しんし"
     furigana: "紳[しん]士[し]"
@@ -60872,6 +61432,7 @@ lessons:
     id: "中枢|ちゅうすう"
     level: 1
     new_kanji: {kanji: "枢", meaning: "Hinge, Pivot, Door"}
+    draw: "枢"
     word: "中枢"
     kana: "ちゅうすう"
     furigana: "中[ちゅう]枢[すう]"
@@ -60914,6 +61475,7 @@ lessons:
     id: "太鼓|たいこ"
     level: 1
     new_kanji: {kanji: "鼓", meaning: "Drum, Beat, Rouse, Muster"}
+    draw: "鼓"
     word: "太鼓"
     kana: "たいこ"
     furigana: "太[たい]鼓[こ]"
@@ -60967,6 +61529,7 @@ lessons:
     id: "紙幣|しへい"
     level: 1
     new_kanji: {kanji: "幣", meaning: "Cash, Bad Habit, Humble Prefix, Gift, Shinto Offerings Of Cloth, Rope, Cut Paper"}
+    draw: "幣"
     word: "紙幣"
     kana: "しへい"
     furigana: "紙[し]幣[へい]"
@@ -61089,6 +61652,7 @@ lessons:
     id: "娯楽|ごらく"
     level: 1
     new_kanji: {kanji: "娯", meaning: "Recreation, Pleasure"}
+    draw: "娯"
     word: "娯楽"
     kana: "ごらく"
     furigana: "娯[ご]楽[らく]"
@@ -61111,6 +61675,7 @@ lessons:
     id: "海峡|かいきょう"
     level: 1
     new_kanji: {kanji: "峡", meaning: "Gorge, Ravine"}
+    draw: "峡"
     word: "海峡"
     kana: "かいきょう"
     furigana: "海[かい]峡[きょう]"
@@ -61154,6 +61719,7 @@ lessons:
     id: "普遍|ふへん"
     level: 1
     new_kanji: {kanji: "遍", meaning: "Everywhere, Times, Widely, Generally"}
+    draw: "遍"
     word: "普遍"
     kana: "ふへん"
     furigana: "普[ふ]遍[へん]"
@@ -61164,6 +61730,7 @@ lessons:
     id: "均衡|きんこう"
     level: 1
     new_kanji: {kanji: "衡", meaning: "Equilibrium, Measuring Rod, Scale"}
+    draw: "衡"
     word: "均衡"
     kana: "きんこう"
     furigana: "均[きん]衡[こう]"
@@ -61175,6 +61742,7 @@ lessons:
     id: "羊毛|ようもう"
     level: 1
     new_kanji: {kanji: "羊", meaning: "Sheep"}
+    draw: "羊"
     word: "羊毛"
     kana: "ようもう"
     furigana: "羊[よう]毛[もう]"
@@ -61186,6 +61754,7 @@ lessons:
     id: "閲覧|えつらん"
     level: 1
     new_kanji: {kanji: "閲", meaning: "Review, Inspection, Revision"}
+    draw: "閲"
     word: "閲覧"
     kana: "えつらん"
     furigana: "閲[えつ]覧[らん]"
@@ -61196,6 +61765,7 @@ lessons:
     id: "勇敢|ゆうかん"
     level: 1
     new_kanji: {kanji: "敢", meaning: "Daring, Brave, Bold, Sad, Tragic, Pitiful"}
+    draw: "敢"
     word: "勇敢"
     kana: "ゆうかん"
     furigana: "勇[ゆう]敢[かん]"
@@ -61207,6 +61777,7 @@ lessons:
     id: "豚肉|ぶたにく"
     level: 1
     new_kanji: {kanji: "豚", meaning: "Pork, Pig"}
+    draw: "豚"
     word: "豚肉"
     kana: "ぶたにく"
     furigana: "豚[ぶた]肉[にく]"
@@ -61249,6 +61820,7 @@ lessons:
     id: "感慨|かんがい"
     level: 1
     new_kanji: {kanji: "慨", meaning: "Rue, Be Sad, Sigh, Lament"}
+    draw: "慨"
     word: "感慨"
     kana: "かんがい"
     furigana: "感[かん]慨[がい]"
@@ -61259,6 +61831,7 @@ lessons:
     id: "憤慨|ふんがい"
     level: 1
     new_kanji: {kanji: "憤", meaning: "Aroused, Resent, Be Indignant, Anger"}
+    draw: "憤"
     word: "憤慨"
     kana: "ふんがい"
     furigana: "憤[ふん]慨[がい]"
@@ -61270,6 +61843,7 @@ lessons:
     id: "紡績|ぼうせき"
     level: 1
     new_kanji: {kanji: "紡", meaning: "Spinning"}
+    draw: "紡"
     word: "紡績"
     kana: "ぼうせき"
     furigana: "紡[ぼう]績[せき]"
@@ -61300,6 +61874,7 @@ lessons:
     id: "脂肪|しぼう"
     level: 1
     new_kanji: {kanji: "肪", meaning: "Obese, Fat"}
+    draw: "肪"
     word: "脂肪"
     kana: "しぼう"
     furigana: "脂[し]肪[ぼう]"
@@ -61311,6 +61886,7 @@ lessons:
     id: "扶養|ふよう"
     level: 1
     new_kanji: {kanji: "扶", meaning: "Aid, Help, Assist"}
+    draw: "扶"
     word: "扶養"
     kana: "ふよう"
     furigana: "扶[ふ]養[よう]"
@@ -61322,6 +61898,7 @@ lessons:
     id: "戯曲|ぎきょく"
     level: 1
     new_kanji: {kanji: "戯", meaning: "Frolic, Play, Sport"}
+    draw: "戯"
     word: "戯曲"
     kana: "ぎきょく"
     furigana: "戯[ぎ]曲[きょく]"
@@ -61354,6 +61931,7 @@ lessons:
     id: "迅速|じんそく"
     level: 1
     new_kanji: {kanji: "迅", meaning: "Swift, Fast"}
+    draw: "迅"
     word: "迅速"
     kana: "じんそく"
     furigana: "迅[じん]速[そく]"
@@ -61409,6 +61987,7 @@ lessons:
     id: "享受|きょうじゅ"
     level: 1
     new_kanji: {kanji: "享", meaning: "Enjoy, Receive, Undergo, Answer (phone), Take, Get, Catch"}
+    draw: "享"
     word: "享受"
     kana: "きょうじゅ"
     furigana: "享[きょう]受[じゅ]"
@@ -61475,6 +62054,7 @@ lessons:
     id: "解剖|かいぼう"
     level: 1
     new_kanji: {kanji: "剖", meaning: "Divide"}
+    draw: "剖"
     word: "解剖"
     kana: "かいぼう"
     furigana: "解[かい]剖[ぼう]"
@@ -61486,6 +62066,7 @@ lessons:
     id: "楽譜|がくふ"
     level: 1
     new_kanji: {kanji: "譜", meaning: "Musical Score, Music, Note, Staff, Table, Genealogy"}
+    draw: "譜"
     word: "楽譜"
     kana: "がくふ"
     furigana: "楽[がく]譜[ふ]"
@@ -61549,6 +62130,7 @@ lessons:
     id: "手錠|てじょう"
     level: 1
     new_kanji: {kanji: "錠", meaning: "Lock, Fetters, Shackles"}
+    draw: "錠"
     word: "手錠"
     kana: "てじょう"
     furigana: "手[て]錠[じょう]"
@@ -61570,6 +62152,7 @@ lessons:
     id: "変遷|へんせん"
     level: 1
     new_kanji: {kanji: "遷", meaning: "Transition, Move, Change"}
+    draw: "遷"
     word: "変遷"
     kana: "へんせん"
     furigana: "変[へん]遷[せん]"
@@ -61646,6 +62229,7 @@ lessons:
     id: "吟味|ぎんみ"
     level: 1
     new_kanji: {kanji: "吟", meaning: "Versify, Singing, Recital"}
+    draw: "吟"
     word: "吟味"
     kana: "ぎんみ"
     furigana: "吟[ぎん]味[み]"
@@ -61687,6 +62271,7 @@ lessons:
     id: "崇拝|すうはい"
     level: 1
     new_kanji: {kanji: "崇", meaning: "Adore, Respect, Revere, Worship"}
+    draw: "崇"
     word: "崇拝"
     kana: "すうはい"
     furigana: "崇[すう]拝[はい]"
@@ -61719,6 +62304,7 @@ lessons:
     id: "愉快|ゆかい"
     level: 1
     new_kanji: {kanji: "愉", meaning: "Pleasure, Happy, Rejoice"}
+    draw: "愉"
     word: "愉快"
     kana: "ゆかい"
     furigana: "愉[ゆ]快[かい]"
@@ -61805,6 +62391,7 @@ lessons:
     id: "酪農|らくのう"
     level: 1
     new_kanji: {kanji: "酪", meaning: "Dairy Products, Whey, Broth, Fruit Juice"}
+    draw: "酪"
     word: "酪農"
     kana: "らくのう"
     furigana: "酪[らく]農[のう]"
@@ -61825,6 +62412,7 @@ lessons:
     id: "汽車|きしゃ"
     level: 1
     new_kanji: {kanji: "汽", meaning: "Vapor, Steam"}
+    draw: "汽"
     word: "汽車"
     kana: "きしゃ"
     furigana: "汽[き]車[しゃ]"
@@ -61856,6 +62444,7 @@ lessons:
     id: "蛍光灯|けいこうとう"
     level: 1
     new_kanji: {kanji: "蛍", meaning: "Lightning-bug, Firefly"}
+    draw: "蛍"
     word: "蛍光灯"
     kana: "けいこうとう"
     furigana: "蛍[けい]光[こう]灯[とう]"
@@ -61867,6 +62456,7 @@ lessons:
     id: "下痢|げり"
     level: 1
     new_kanji: {kanji: "痢", meaning: "Diarrhea"}
+    draw: "痢"
     word: "下痢"
     kana: "げり"
     furigana: "下[げ]痢[り]"
@@ -61878,6 +62468,7 @@ lessons:
     id: "風呂|ふろ"
     level: 1
     new_kanji: {kanji: "呂", meaning: "Spine, Backbone"}
+    draw: "呂"
     word: "風呂"
     kana: "ふろ"
     furigana: "風[ふ]呂[ろ]"
@@ -61992,6 +62583,7 @@ lessons:
     id: "桟橋|さんきょう"
     level: 1
     new_kanji: {kanji: "桟", meaning: "Scaffold, Cleat, Frame, Jetty, Bolt (door)"}
+    draw: "桟"
     word: "桟橋"
     kana: "さんきょう"
     furigana: "桟[さん]橋[きょう]"
@@ -62065,6 +62657,7 @@ lessons:
     id: "厄介|やっかい"
     level: 1
     new_kanji: {kanji: "厄", meaning: "Unlucky, Misfortune, Bad Luck, Disaster"}
+    draw: "厄"
     word: "厄介"
     kana: "やっかい"
     furigana: "厄[やっ]介[かい]"
@@ -62076,6 +62669,7 @@ lessons:
     id: "貫禄|かんろく"
     level: 1
     new_kanji: {kanji: "禄", meaning: "Fief, Allowance, Pension, Grant, Happiness"}
+    draw: "禄"
     word: "貫禄"
     kana: "かんろく"
     furigana: "貫[かん]禄[ろく]"
@@ -62110,6 +62704,7 @@ lessons:
     id: "郷愁|きょうしゅう"
     level: 1
     new_kanji: {kanji: "愁", meaning: "Distress, Grieve, Lament, Be Anxious"}
+    draw: "愁"
     word: "郷愁"
     kana: "きょうしゅう"
     furigana: "郷[きょう]愁[しゅう]"
@@ -62194,6 +62789,7 @@ lessons:
     id: "凸凹|でこぼこ"
     level: 1
     new_kanji: {kanji: "凸", meaning: "Convex, Beetle Brow, Uneven"}
+    draw: "凸"
     word: "凸凹"
     kana: "でこぼこ"
     furigana: "凸[でこ]凹[ぼこ]"
@@ -62234,6 +62830,7 @@ lessons:
     id: "折衷|せっちゅう"
     level: 1
     new_kanji: {kanji: "衷", meaning: "Inmost, Heart, Mind, Inside"}
+    draw: "衷"
     word: "折衷"
     kana: "せっちゅう"
     furigana: "折[せっ]衷[ちゅう]"
@@ -62349,6 +62946,7 @@ lessons:
     id: "附属|ふぞく"
     level: 1
     new_kanji: {kanji: "附", meaning: "Affixed, Attach, Refer To, Append"}
+    draw: "附"
     word: "附属"
     kana: "ふぞく"
     furigana: "附[ふ]属[ぞく]"
@@ -62409,6 +63007,7 @@ lessons:
     id: "倹約|けんやく"
     level: 1
     new_kanji: {kanji: "倹", meaning: "Frugal, Economy, Thrifty"}
+    draw: "倹"
     word: "倹約"
     kana: "けんやく"
     furigana: "倹[けん]約[やく]"
@@ -62420,6 +63019,7 @@ lessons:
     id: "軽蔑|けいべつ"
     level: 1
     new_kanji: {kanji: "蔑", meaning: "Ignore, Despise, Neglect, Ridicule", extra: true}
+    draw: "蔑"
     word: "軽蔑"
     kana: "けいべつ"
     furigana: "軽[けい]蔑[べつ]"
@@ -62442,6 +63042,7 @@ lessons:
     id: "下吏|かり"
     level: 1
     new_kanji: {kanji: "吏", meaning: "Officer, An Official"}
+    draw: "吏"
     word: "下吏"
     kana: "かり"
     furigana: "下[か]吏[り]"
@@ -62483,6 +63084,7 @@ lessons:
     id: "嫉妬|しっと"
     level: 1
     new_kanji: {kanji: "嫉", meaning: "Jealous, Envy", extra: true}
+    draw: "嫉"
     word: "嫉妬"
     kana: "しっと"
     furigana: "嫉[しっ]妬[と]"
@@ -62505,6 +63107,7 @@ lessons:
     id: "語彙|ごい"
     level: 1
     new_kanji: {kanji: "彙", meaning: "Same Kind, Collect, Classify, Category, Hedgehog", extra: true}
+    draw: "彙"
     word: "語彙"
     kana: "ごい"
     furigana: "語[ご]彙[い]"
@@ -62538,6 +63141,7 @@ lessons:
     id: "濫用|らんよう"
     level: 1
     new_kanji: {kanji: "濫", meaning: "Excessive, Overflow, Spread Out"}
+    draw: "濫"
     word: "濫用"
     kana: "らんよう"
     furigana: "濫[らん]用[よう]"
@@ -62549,6 +63153,7 @@ lessons:
     id: "氾濫|はんらん"
     level: 1
     new_kanji: {kanji: "氾", meaning: "Spread Out, Wide", extra: true}
+    draw: "氾"
     word: "氾濫"
     kana: "はんらん"
     furigana: "氾[はん]濫[らん]"
@@ -62560,6 +63165,7 @@ lessons:
     id: "完璧|かんぺき"
     level: 1
     new_kanji: {kanji: "璧", meaning: "Sphere, Ball", extra: true}
+    draw: "璧"
     word: "完璧"
     kana: "かんぺき"
     furigana: "完[かん]璧[ぺき]"
@@ -62571,6 +63177,7 @@ lessons:
     id: "明瞭|めいりょう"
     level: 1
     new_kanji: {kanji: "瞭", meaning: "Clear"}
+    draw: "瞭"
     word: "明瞭"
     kana: "めいりょう"
     furigana: "明[めい]瞭[りょう]"
@@ -62612,6 +63219,7 @@ lessons:
     id: "消耗|しょうもう"
     level: 1
     new_kanji: {kanji: "耗", meaning: "Decrease"}
+    draw: "耗"
     word: "消耗"
     kana: "しょうもう"
     furigana: "消[しょう]耗[もう]"
@@ -62631,6 +63239,7 @@ lessons:
     id: "膨脹|ぼうちょう"
     level: 1
     new_kanji: {kanji: "脹", meaning: "Dilate, Distend, Bulge, Fill Out, Swell"}
+    draw: "脹"
     word: "膨脹"
     kana: "ぼうちょう"
     furigana: "膨[ぼう]脹[ちょう]"
@@ -62642,6 +63251,7 @@ lessons:
     id: "臆病|おくびょう"
     level: 1
     new_kanji: {kanji: "臆", meaning: "Timidity, Heart, Mind, Fear, Cowardly", extra: true}
+    draw: "臆"
     word: "臆病"
     kana: "おくびょう"
     furigana: "臆[おく]病[びょう]"
@@ -62653,6 +63263,7 @@ lessons:
     id: "月賦|げっぷ"
     level: 1
     new_kanji: {kanji: "賦", meaning: "Levy, Ode, Prose, Poem, Tribute, Installment"}
+    draw: "賦"
     word: "月賦"
     kana: "げっぷ"
     furigana: "月[げっ]賦[ぷ]"
@@ -62831,6 +63442,7 @@ lessons:
     id: "犠牲|ぎせい"
     level: 1
     new_kanji: {kanji: "牲", meaning: "Animal Sacrifice, Offering"}
+    draw: "牲"
     word: "犠牲"
     kana: "ぎせい"
     furigana: "犠[ぎ]牲[せい]"
@@ -63002,6 +63614,7 @@ lessons:
     id: "妊娠|にんしん"
     level: 1
     new_kanji: {kanji: "娠", meaning: "With Child, Pregnancy"}
+    draw: "娠"
     word: "妊娠"
     kana: "にんしん"
     furigana: "妊[にん]娠[しん]"
@@ -63033,6 +63646,7 @@ lessons:
     id: "栽培|さいばい"
     level: 1
     new_kanji: {kanji: "栽", meaning: "Plantation, Planting"}
+    draw: "栽"
     word: "栽培"
     kana: "さいばい"
     furigana: "栽[さい]培[ばい]"
@@ -63079,6 +63693,7 @@ lessons:
     id: "幽霊|ゆうれい"
     level: 1
     new_kanji: {kanji: "幽", meaning: "Seclude, Confine To A Room, Deep, Profound, Secluded, Faint, Dark, Tranquil, Calm"}
+    draw: "幽"
     word: "幽霊"
     kana: "ゆうれい"
     furigana: "幽[ゆう]霊[れい]"
@@ -63225,6 +63840,7 @@ lessons:
     id: "旦那|だんな"
     level: 1
     new_kanji: {kanji: "旦", meaning: "Daybreak, Dawn, Morning"}
+    draw: "旦"
     word: "旦那"
     kana: "だんな"
     furigana: "旦[だん]那[な]"
@@ -63240,6 +63856,7 @@ lessons:
     id: "憂鬱|ゆううつ"
     level: 1
     new_kanji: {kanji: "鬱", meaning: "Gloom, Depression, Melancholy, Luxuriant", extra: true}
+    draw: "鬱"
     word: "憂鬱"
     kana: "ゆううつ"
     furigana: "憂[ゆう]鬱[うつ]"
@@ -63441,6 +64058,7 @@ lessons:
     id: "侮辱|ぶじょく"
     level: 1
     new_kanji: {kanji: "侮", meaning: "Scorn, Despise, Make Light Of, Contempt"}
+    draw: "侮"
     word: "侮辱"
     kana: "ぶじょく"
     furigana: "侮[ぶ]辱[じょく]"
@@ -63702,6 +64320,7 @@ lessons:
     id: "御無沙汰|ごぶさた"
     level: 1
     new_kanji: {kanji: "汰", meaning: "Washing, Sieving, Filtering, Weeding Out, Luxury"}
+    draw: "汰"
     word: "御無沙汰"
     kana: "ごぶさた"
     furigana: "御[ご]無[ぶ]沙[さ]汰[た]"
