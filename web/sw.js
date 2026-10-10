@@ -40,6 +40,7 @@ const PRECACHE = [
   'js/screens/practice.js',
   'js/screens/review.js',
   'js/screens/settings.js',
+  'js/screens/welcome.js',
   'js/session.js',
   'js/settings.js',
   'js/srs/fsrs.js',

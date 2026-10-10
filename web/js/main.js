@@ -12,6 +12,8 @@ import { settingsScreen } from './screens/settings.js';
 import { practiceScreen } from './screens/practice.js';
 import { importScreen } from './screens/import.js';
 import { freePracticeScreen } from './screens/free.js';
+import { welcomeScreen, welcomePending } from './screens/welcome.js';
+import { local } from './store.js';
 
 const ROUTES = [
   [/^$/, homeScreen, 'home'],
@@ -46,8 +48,18 @@ async function main() {
   window.app = app; // handy for debugging from the console
 
   let cleanup = null;
+  let welcome = await welcomePending(app);
   function route() {
     const path = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+    // First launch: Home is replaced by the welcome screen until one of its buttons is used.
+    if (welcome && path === '' && !local.get('welcomed', false)) {
+      if (typeof cleanup === 'function') cleanup();
+      document.body.dataset.screen = 'welcome';
+      const body = h('main.screen');
+      clear(root).appendChild(body);
+      cleanup = welcomeScreen(body, app, () => { welcome = false; route(); });
+      return;
+    }
     const [re, screen, tab] = ROUTES.find(([r]) => r.test(path)) || ROUTES[0];
     const params = path.match(re)?.slice(1) || [];
     if (typeof cleanup === 'function') cleanup();

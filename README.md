@@ -1,5 +1,7 @@
 # suckless-kanji
 
+*Like any other kanji learning app, but doesn't suck.*
+
 A kanji/vocabulary trainer: a fixed JLPT curriculum (N5→N1), spaced repetition (FSRS-5 or Anki's SM-2), and minigames where you draw kanji stroke by stroke. The client has no framework, no bundler and no runtime dependencies, and works offline. A thin Cloudflare Worker adds Google sign-in and sync between devices.
 
 The name is borrowed from the [suckless.org](https://suckless.org) philosophy (small, simple, no bloat). This project is not affiliated with suckless.org.
@@ -51,6 +53,7 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
   - Missed cards come back later in the same session.
 - **Practice** (from a lesson or a kanji page) never changes the schedule.
 - **Next lesson** is the next N *unlearned* items in curriculum order, so gaps (items skipped by an import or by learning lessons out of order) are filled first, in full-size lessons.
+- **Welcome screen:** shown once per device, on first launch with no progress. It offers *Start learning*, *I already know some kanji* (the import) and *Sign in to sync* (only where the sync server is reachable); any of them dismisses it for good. Links into the app skip it.
 - **Mobile first:** every exercise fits one screen, down to 360×640. The drawing pad sizes itself to the viewport height, many-option questions switch to compact layouts, and a new kanji gets its own intro screen.
 
 ## Importing prior knowledge
