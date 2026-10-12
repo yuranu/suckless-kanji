@@ -80,15 +80,32 @@ export function applyEvent(state, e) {
       const c = state.cards.get(d.card);
       if (!c) break;
       const elapsed = Math.max(0, day - c.lastDay);
+      // The interval the rating button showed, which may be longer than the model's own.
+      const floor = d.rating === 1 ? 0 : ratedIntervals(state, c, elapsed)[d.rating];
       c.sm2 = sm2Next(c.sm2, d.rating, elapsed, sm2Options(state.settings));
       c.fsrs = fsrsNext(c.fsrs, d.rating, elapsed);
       c.reps++;
+      c.floor = floor;
+      // Again: due again today, until answered correctly (a `relearn` event).
+      c.relearning = d.rating === 1;
       if (d.rating === 1) c.lapses++;
       c.lastDay = day;
       const st = dayStats(state, day);
       st.reviews++;
       st.ms += d.ms || 0;
       if (d.rating === 1) st.again++;
+      break;
+    }
+    case 'relearn': {
+      // A failed card answered correctly again (Anki's relearning step). Not a review: it
+      // only gives FSRS the same-day evidence that the card was relearned. SM-2 keeps its
+      // lapse interval, as in Anki.
+      const c = state.cards.get(d.card);
+      if (!c?.relearning) break;
+      c.fsrs = fsrsNext(c.fsrs, 3, Math.max(0, day - c.lastDay));
+      c.relearning = false;
+      c.floor = 0;
+      c.lastDay = day;
       break;
     }
     case 'seed':
@@ -144,10 +161,27 @@ export function intervalOf(card, settings) {
     : fsrsInterval(card.fsrs.s, settings.retention, settings.maxInterval);
   // Imported cards keep their planned first due day exactly (fuzz could make them overdue).
   if (card.seeded && card.reps === 1) return Math.min(settings.maxInterval, raw);
-  return Math.min(settings.maxInterval, fuzz(raw, card.id + ':' + card.reps));
+  return Math.min(settings.maxInterval, Math.max(fuzz(raw, card.id + ':' + card.reps), card.floor || 0));
 }
 
-export const dueDay = (card, settings) => card.lastDay + intervalOf(card, settings);
+// Intervals for Hard / Good / Easy if `card` is answered `elapsed` days after its last
+// review. As in Anki, each is at least a day longer than the previous one: a weak card
+// would otherwise get 1 day for all three.
+function ratedIntervals(state, card, elapsed) {
+  const raw = (r) => intervalOf({
+    ...card, reps: card.reps + 1, floor: 0,
+    sm2: sm2Next(card.sm2, r, elapsed, sm2Options(state.settings)),
+    fsrs: fsrsNext(card.fsrs, r, elapsed),
+  }, state.settings);
+  const max = state.settings.maxInterval;
+  const hard = raw(2);
+  const good = Math.min(max, Math.max(raw(3), hard + 1));
+  const easy = Math.min(max, Math.max(raw(4), good + 1));
+  return { 2: hard, 3: good, 4: easy };
+}
+
+// A card failed with Again is due from the day it failed until it is relearned.
+export const dueDay = (card, settings) => card.lastDay + (card.relearning ? 0 : intervalOf(card, settings));
 
 export function today(state, now = Date.now()) {
   return dayIndex(now, new Date(now).getTimezoneOffset(), state.settings.rolloverHour);
@@ -157,13 +191,16 @@ export function today(state, now = Date.now()) {
 export function dueCards(state, now = Date.now()) {
   const t = today(state, now);
   const done = state.days.get(t)?.reviews || 0;
-  const due = [];
+  const due = [], relearning = [];
   for (const c of state.cards.values()) {
+    if (c.relearning) { relearning.push(c); continue; }
     const dd = dueDay(c, state.settings);
     if (dd <= t) due.push({ c, dd });
   }
   due.sort((a, b) => a.dd - b.dd || (a.c.id < b.c.id ? -1 : 1));
-  return due.slice(0, Math.max(0, state.settings.maxReviews - done)).map((x) => x.c);
+  // Cards failed earlier (Again) stay due until relearned, outside the daily limit.
+  relearning.sort((a, b) => (a.id < b.id ? -1 : 1));
+  return [...relearning, ...due.slice(0, Math.max(0, state.settings.maxReviews - done)).map((x) => x.c)];
 }
 
 // Learned / mature status of a card, for coloring.
@@ -173,17 +210,8 @@ export function cardStage(card, settings) {
 }
 
 // Interval each rating would give if the card were answered now (for the rating buttons).
+// Again is 0: the card comes back today until it is answered correctly.
 export function previewIntervals(state, card, now = Date.now()) {
   const elapsed = Math.max(0, today(state, now) - card.lastDay);
-  const out = {};
-  for (const r of [1, 2, 3, 4]) {
-    const next = {
-      ...card,
-      reps: card.reps + 1,
-      sm2: sm2Next(card.sm2, r, elapsed, sm2Options(state.settings)),
-      fsrs: fsrsNext(card.fsrs, r, elapsed),
-    };
-    out[r] = intervalOf(next, state.settings);
-  }
-  return out;
+  return { 1: 0, ...ratedIntervals(state, card, elapsed) };
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { replay, dayIndex, dueCards, intervalOf, DAY } from '../web/js/state.js';
+import { replay, dayIndex, dueCards, dueDay, intervalOf, previewIntervals, DAY } from '../web/js/state.js';
 import { makeEvent, MemoryBackend } from '../web/js/store.js';
 
 const T0 = Date.UTC(2026, 0, 10, 12); // noon UTC
@@ -94,4 +94,49 @@ test('a second learn of the same card (another device) keeps the existing schedu
   const c = s.cards.get('x#r');
   assert.equal(c.reps, 2);
   assert.equal(s.items.size, 1);
+});
+
+test('Again makes a card due today until relearned; relearning is not a review', () => {
+  const card = '一|いち#r';
+  const events = [
+    ev('learn', { cards: { [card]: 3 } }, T0),
+    ev('review', { card, rating: 1, ms: 1000 }, T0 + 3 * DAY),
+  ];
+  let s = replay(events);
+  const t = dayIndex(T0 + 3 * DAY, 0, s.settings.rolloverHour);
+  assert.deepEqual(dueCards(s, T0 + 3 * DAY + 3600000).map((c) => c.id), [card]); // same day
+  // Still due the next day (the app was closed before relearning it), outside the limit.
+  s.settings.maxReviews = 0;
+  assert.deepEqual(dueCards(s, T0 + 4 * DAY).map((c) => c.id), [card]);
+  const before = s.cards.get(card).fsrs.s;
+
+  events.push(ev('relearn', { card }, T0 + 3 * DAY + 600000));
+  s = replay(events);
+  const c = s.cards.get(card);
+  assert.equal(c.relearning, false);
+  assert.ok(c.fsrs.s > before, 'relearning raises FSRS stability');
+  assert.equal(c.reps, 2);
+  assert.equal(s.days.get(t).reviews, 1);
+  assert.deepEqual(dueCards(s, T0 + 3 * DAY + 3600000), []);
+  assert.ok(dueDay(c, s.settings) > t);
+  // A relearn of a card that is not relearning changes nothing.
+  events.push(ev('relearn', { card }, T0 + 3 * DAY + 700000));
+  assert.deepEqual(replay(events).cards.get(card), c);
+});
+
+test('rating buttons: Again today, then each at least a day longer; review keeps the shown interval', () => {
+  const card = '一|いち#r';
+  // A weak card: learned with Hard, then failed three times.
+  const events = [ev('learn', { cards: { [card]: 2 } }, T0)];
+  for (let i = 1; i <= 3; i++) events.push(ev('review', { card, rating: 1, ms: 1 }, T0 + i * DAY));
+  const now = T0 + 4 * DAY;
+  for (const rating of [2, 3, 4]) {
+    const s = replay(events);
+    const p = previewIntervals(s, s.cards.get(card), now);
+    assert.equal(p[1], 0);
+    assert.ok(p[2] >= 1 && p[3] > p[2] && p[4] > p[3], JSON.stringify(p));
+    const after = replay([...events, ev('review', { card, rating, ms: 1 }, now)]);
+    const c = after.cards.get(card);
+    assert.equal(dueDay(c, after.settings) - c.lastDay, p[rating], `rating ${rating}`);
+  }
 });

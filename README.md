@@ -49,8 +49,9 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
 - **"I misclicked":** every choice step has this corner button, which takes back a wrong answer.
 - **"Wait, I know it":** shown in drawing steps while the outline is visible (after a mistake or a hint). It hides the outline and takes back the mistakes and hint so far: finishing the kanji from memory then counts as correct. It also stores a local report about the stroke checker.
 - **Reviews:**
-  - Today's due cards are shown, rated Hard, Good or Easy (an Again rating is automatic when the card was missed).
-  - Missed cards come back later in the same session.
+  - Today's due cards are shown. After a correct answer you rate it with Anki's four buttons, Again, Hard, Good or Easy, each showing the interval it gives; a missed card is rated Again.
+  - As in Anki, Hard, Good and Easy are each at least a day apart, even for a weak card whose model intervals would all round to 1 day.
+  - **Again means "today":** the card comes back later in the session, and stays due (also after closing the app, outside the daily limit) until it is answered correctly. That correct pass is a `relearn` event, not a review; it gives FSRS the same-day relearning evidence Anki's relearning steps give.
 - **Practice** (from a lesson or a kanji page) never changes the schedule.
 - **Next lesson** is the next N *unlearned* items in curriculum order, so gaps (items skipped by an import or by learning lessons out of order) are filled first, in full-size lessons.
 - **Welcome screen:** shown once per device, on first launch with no progress. It offers *Start learning*, *I already know some kanji* (the import) and *Sign in to sync* (only where the sync server is reachable); any of them dismisses it for good. Links into the app skip it.
@@ -74,6 +75,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 |---|---|---|
 | `learn` | `{cards: {cardId: rating}}` | lesson finished: creates the cards and schedules them for the first time |
 | `review` | `{card, rating, ms}` | an SRS answer |
+| `relearn` | `{card}` | a card failed with Again answered correctly again; ends its relearning |
 | `seed` | `{cards: {cardId: [stability, dueInDays]}}` | prior-knowledge import |
 | `forget` | `{items: [itemId]}` | un-learns items |
 | `settings` | `{key: value}` | synced settings, last writer wins |

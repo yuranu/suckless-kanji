@@ -246,7 +246,7 @@ export function wordSummary(app, item) {
 }
 
 function fmtDays(d) {
-  if (d < 1) return '<1d';
+  if (d < 1) return 'today';
   if (d < 30) return `${d}d`;
   if (d < 365) return `${(d / 30).toFixed(d < 300 ? 1 : 0).replace(/\.0$/, '')}mo`;
   return `${(d / 365).toFixed(1).replace(/\.0$/, '')}y`;
@@ -263,7 +263,7 @@ function summaryStep(root, app, item, { ok, mode, cardId }) {
       const prev = card ? previewIntervals(app.state, card) : {};
       const ratings = ok ? [1, 2, 3, 4] : [1];
       buttons = ratings.map((r) => h('button.btn.rate.r' + r + (!ok ? '.only' : ''), { onclick: () => rate(r) },
-        h('span', RATING_LABELS[r]), prev[r] ? h('small', fmtDays(prev[r])) : null));
+        h('span', RATING_LABELS[r]), prev[r] != null ? h('small', fmtDays(prev[r])) : null));
       const main = ok ? 3 : 1;
       shortcuts = { ' ': () => rate(main), Enter: () => rate(main), ...Object.fromEntries(ratings.map((r) => [String(r), () => rate(r)])) };
     } else {
