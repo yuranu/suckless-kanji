@@ -100,8 +100,10 @@ test('Again makes a card due today until relearned; relearning is not a review',
   const card = '一|いち#r';
   const events = [
     ev('learn', { cards: { [card]: 3 } }, T0),
-    ev('review', { card, rating: 1, ms: 1000 }, T0 + 3 * DAY),
+    ev('review', { card, rating: 1, ms: 1000, relearn: true }, T0 + 3 * DAY),
   ];
+  // Reviews from before relearning existed (no `relearn` flag) do not start it.
+  assert.equal(replay([events[0], ev('review', { card, rating: 1, ms: 1000 }, T0 + 3 * DAY)]).cards.get(card).relearning, false);
   let s = replay(events);
   const t = dayIndex(T0 + 3 * DAY, 0, s.settings.rolloverHour);
   assert.deepEqual(dueCards(s, T0 + 3 * DAY + 3600000).map((c) => c.id), [card]); // same day
@@ -128,7 +130,7 @@ test('rating buttons: Again today, then each at least a day longer; review keeps
   const card = '一|いち#r';
   // A weak card: learned with Hard, then failed three times.
   const events = [ev('learn', { cards: { [card]: 2 } }, T0)];
-  for (let i = 1; i <= 3; i++) events.push(ev('review', { card, rating: 1, ms: 1 }, T0 + i * DAY));
+  for (let i = 1; i <= 3; i++) events.push(ev('review', { card, rating: 1, ms: 1, relearn: true }, T0 + i * DAY));
   const now = T0 + 4 * DAY;
   for (const rating of [2, 3, 4]) {
     const s = replay(events);

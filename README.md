@@ -74,7 +74,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 | event | data | effect |
 |---|---|---|
 | `learn` | `{cards: {cardId: rating}}` | lesson finished: creates the cards and schedules them for the first time |
-| `review` | `{card, rating, ms}` | an SRS answer |
+| `review` | `{card, rating, ms, relearn?}` | an SRS answer; `relearn: true` on Again starts relearning |
 | `relearn` | `{card}` | a card failed with Again answered correctly again; ends its relearning |
 | `seed` | `{cards: {cardId: [stability, dueInDays]}}` | prior-knowledge import |
 | `forget` | `{items: [itemId]}` | un-learns items |

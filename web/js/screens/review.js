@@ -42,7 +42,8 @@ export function reviewScreen(root, app) {
       } else {
         answered++;
         if (!res.ok) again++;
-        await app.dispatch('review', { card: id, rating: res.ok ? res.rating : 1, ms: res.ms });
+        const rating = res.ok ? res.rating : 1;
+        await app.dispatch('review', { card: id, rating, ms: res.ms, ...(rating === 1 ? { relearn: true } : {}) });
       }
     }
     frame.progress(1, 1, 'done');

@@ -86,8 +86,10 @@ export function applyEvent(state, e) {
       c.fsrs = fsrsNext(c.fsrs, d.rating, elapsed);
       c.reps++;
       c.floor = floor;
-      // Again: due again today, until answered correctly (a `relearn` event).
-      c.relearning = d.rating === 1;
+      // Again: due again today, until answered correctly (a `relearn` event). Only reviews
+      // that say so: before relearning was recorded, the in-session pass went unrecorded,
+      // so older failed cards must not come back as still unlearned.
+      c.relearning = d.rating === 1 && !!d.relearn;
       if (d.rating === 1) c.lapses++;
       c.lastDay = day;
       const st = dayStats(state, day);
