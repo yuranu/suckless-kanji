@@ -5,6 +5,7 @@ import { tts } from '../tts.js';
 import { toYaml, parseBackup } from '../backup.js';
 import { replay } from '../state.js';
 import { syncSection } from '../ui/sync-ui.js';
+import { wipeDevice } from '../store.js';
 
 function control(app, def) {
   const value = app.settings[def.key];
@@ -74,6 +75,31 @@ function versionLine() {
     })
     .catch(() => {});
   return h('div.version', h('span.version-name', 'Suckless Kanji'), ver, meta);
+}
+
+// Delete profile: the account and its synced data on the server (when signed in) and all
+// app data on this device. One warning, then it is gone.
+function deleteSection(app) {
+  const signedIn = !!app.sync.status.email;
+  const what = signedIn
+    ? 'your account and all synced progress on the server (including archived history), and all progress and settings on this device. Your other devices are signed out but keep their own copy until you delete it there too.'
+    : 'all progress and settings on this device. To also delete synced data, sign in first.';
+  return h('section.card.settings.danger-zone',
+    h('h3', 'Delete profile'),
+    h('p.small', `Permanently deletes ${what}`),
+    h('button.btn.danger', {
+      onclick: async () => {
+        if (!await confirmDialog(`Delete your profile? This permanently deletes ${what} It cannot be undone. Export your progress first if you might want it back.`, 'Delete profile')) return;
+        try {
+          if (signedIn) await app.sync.deleteAccount();
+        } catch (err) {
+          toast(`Delete failed, nothing was deleted: ${err.message}`, 5000);
+          return;
+        }
+        await wipeDevice(app.backend);
+        location.replace('./'); // start over: welcome screen
+      },
+    }, 'Delete profile'));
 }
 
 export function settingsScreen(root, app) {
@@ -155,6 +181,8 @@ export function settingsScreen(root, app) {
           h('a', { href: 'privacy' }, 'Privacy policy')),
         versionLine(),
         h('p.muted', `Device id ${app.dev}`)),
+
+      deleteSection(app),
     );
   }
   render();

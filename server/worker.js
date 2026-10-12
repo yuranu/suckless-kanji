@@ -6,6 +6,7 @@
 //   GET  /api/me          -> {email, generation}
 //   POST /api/sync        -> upload missing events, download new ones (see below)
 //   POST /api/replace     -> start a new generation ("use local" / reset); old one is archived
+//   POST /api/delete-account -> delete the account and all its data (Settings -> Delete profile)
 //
 // Env: DB (D1), ASSETS, GOOGLE_CLIENT_ID (var), GOOGLE_CLIENT_SECRET (secret),
 //      SESSION_SECRET (secret), DEV_LOGIN (local only: enables /auth/dev?email=).
@@ -61,10 +62,10 @@ function timingSafeEqual(a, b) {
   return r === 0;
 }
 
-// Session cookie: v1.<payload>.<hmac>, payload = {email, exp}. Stateless; the allowlist is
+// Session cookie: v1.<payload>.<hmac>, payload = {email, iat, exp}. Stateless; the allowlist is
 // still checked on every request, so removing an email locks it out immediately.
 export async function signSession(env, email, now = Date.now()) {
-  const payload = b64url(enc.encode(JSON.stringify({ email, exp: now + SESSION_DAYS * 86400000 })));
+  const payload = b64url(enc.encode(JSON.stringify({ email, iat: now, exp: now + SESSION_DAYS * 86400000 })));
   return `v1.${payload}.${await hmac(env.SESSION_SECRET, payload)}`;
 }
 
@@ -77,6 +78,7 @@ async function readSession(env, request) {
   let data;
   try { data = JSON.parse(new TextDecoder().decode(b64urlDecode(payload))); } catch { return null; }
   if (!data.email || data.exp < Date.now()) return null;
+  data.iat ??= data.exp - SESSION_DAYS * 86400000; // sessions from before `iat` existed
   return data;
 }
 
@@ -98,16 +100,28 @@ export function limits(env) {
 const account = (env, email) =>
   env.DB.prepare('SELECT generation, bytes, blocked, quota FROM users WHERE email = ?').bind(email).first();
 
-// Who may use sync. Creates the account on first use while there is room (the user count is
-// only read then, so it costs nothing per sync). Returns {user} or {denied: reason}.
-async function admit(env, email) {
+async function emailHash(email) {
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(email));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Who may use sync. Creates the account on first use while there is room (the user count and
+// deletion record are only read then, so they cost nothing per sync). `issued`: when the
+// session was signed. Returns {user} or {denied: reason}.
+async function admit(env, email, issued = Date.now()) {
   const L = limits(env);
   if (L.mode === 'allowlist' && !(await allowed(env, email))) return { denied: 'not-allowed' };
   let user = await account(env, email);
   if (!user) {
+    const gone = await env.DB.prepare('SELECT at FROM deleted_accounts WHERE email_hash = ?').bind(await emailHash(email)).first();
+    // A session from before the account was deleted (another device): signed out.
+    if (gone && issued <= gone.at) return { denied: 'deleted' };
     const { n } = await env.DB.prepare('SELECT COUNT(*) AS n FROM users').first();
     if (n >= L.maxUsers) return { denied: 'full' };
-    await env.DB.prepare('INSERT OR IGNORE INTO users (email, generation, created) VALUES (?, 1, ?)').bind(email, Date.now()).run();
+    // A re-created account gets a generation no old device can have, so their stale sync
+    // position is a conflict (they are asked) rather than a silent mismatch.
+    const generation = gone ? gone.at : 1;
+    await env.DB.prepare('INSERT OR IGNORE INTO users (email, generation, created) VALUES (?, ?, ?)').bind(email, generation, Date.now()).run();
     user = await account(env, email);
   }
   if (user.blocked) return { denied: 'blocked' };
@@ -278,6 +292,18 @@ async function sync(env, email, user, body) {
   });
 }
 
+// Delete the account and everything stored for it, archived generations included. Keeps
+// only a hash of the email and the time (see migration 0003), and signs this device out.
+async function deleteAccount(env, email) {
+  const at = Date.now();
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM events WHERE email = ?').bind(email),
+    env.DB.prepare('DELETE FROM users WHERE email = ?').bind(email),
+    env.DB.prepare('INSERT OR REPLACE INTO deleted_accounts (email_hash, at) VALUES (?, ?)').bind(await emailHash(email), at),
+  ]);
+  return json({ deleted: true }, 200, { 'set-cookie': setCookie(SESSION_COOKIE, '', { maxAge: 0 }) });
+}
+
 // Start a new, empty generation. The previous one stays in the table as an archive.
 async function replace(env, email, user) {
   const gen = user.generation + 1;
@@ -295,8 +321,8 @@ async function api(env, request, path) {
   const email = normEmail(session.email);
   // Per-account rate limit, keyed by the signed session: checked before any database read.
   if (await rateLimited(env.SYNC_LIMITER, email)) return json({ error: 'rate-limited' }, 429, { 'retry-after': '10' });
-  const { user, denied } = await admit(env, email);
-  if (denied) return json({ error: denied }, denied === 'not-allowed' ? 401 : 403);
+  const { user, denied } = await admit(env, email, session.iat);
+  if (denied) return json({ error: denied }, denied === 'not-allowed' || denied === 'deleted' ? 401 : 403);
 
   if (path === '/api/me' && request.method === 'GET') {
     return json({ email, generation: user.generation, bytes: user.bytes, quota: user.quota ?? limits(env).maxUserBytes });
@@ -307,6 +333,7 @@ async function api(env, request, path) {
     return sync(env, email, user, body);
   }
   if (path === '/api/replace' && request.method === 'POST') return replace(env, email, user);
+  if (path === '/api/delete-account' && request.method === 'POST') return deleteAccount(env, email);
   return json({ error: 'not found' }, 404);
 }
 

@@ -84,6 +84,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 - **Stable keys:** item ids (`word|kana`, or the kanji itself) come from the curriculum. Regenerating the data doesn't orphan progress, and unknown ids are ignored.
 - **Both schedulers at once:** each card keeps an SM-2 state and an FSRS state, both updated on every answer. Switching the algorithm or the desired retention re-times every card immediately.
 - **Sync:** the server only stores events. Clients upload the events the server lacks and download the ones they lack (matched by `id`), then replay. Concurrent reviews on two devices simply both count (see *Server*).
+- **Delete profile** (bottom of Settings): one warning, then everything is gone. Signed in, it deletes the account on the server with all its events, archived generations included, and signs the device out; on this device it wipes the local log, backups and settings and restarts at the welcome screen. Other signed-in devices are signed out (their old sessions are refused) but keep their local copy until deleted there.
 - **Backups:** Settings → *Export progress* writes a readable YAML file: a summary, settings, every card with its due date, and the full event log, one event per line. *Import / merge* reads the event log back and adds events by id, so importing twice, or from another device, is safe.
 - **Device-only settings:** voice, theme and stroke leniency live in `localStorage`.
 
@@ -99,6 +100,7 @@ Cloudflare serves the static app at https://suckless-kanji.com directly, and a t
   - The defaults bound the worst case (every account full) to ~3 GB, inside D1's free 5 GB. On Cloudflare's free plan, exhausting a limit makes requests fail until it resets; it is never billed.
   - Requests that are not signed in are rejected by the cookie signature check, before touching the database. Static files never run the Worker.
 - **Sync:** clients upload the events the server lacks and download newer ones, with duplicates ignored by id. Normal use never conflicts. When histories genuinely diverge (a first sync with data on both sides, a reset or "use local" on another device, a different account), the app asks: merge / use this device / use the cloud.
+- **Deleting an account** (`POST /api/delete-account`) removes its `users` row and all its events. The server keeps only a SHA-256 of the email and the time in `deleted_accounts`: sessions issued before that are refused (so a forgotten device cannot quietly recreate the account and re-upload), and signing in again creates a fresh account with a generation no old device has, so a stale device gets the merge / use this device / use the cloud question.
 - **No data loss:**
   - "Use local" and reset start a new *generation* on the server; old generations stay in the database as an archive.
   - "Use cloud" keeps a local backup of the replaced log.

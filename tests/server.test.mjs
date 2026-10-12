@@ -288,3 +288,37 @@ test('migration 0002 backfills stored bytes for existing accounts', () => {
   db.exec(/UPDATE users[\s\S]*?;/.exec(sql)[0]);
   assert.equal(userRow(env, 'old@x.com').bytes, 10); // 6 bytes of UTF-8 for 日本 + 4, across generations
 });
+
+test('delete account: all data gone, old sessions refused, signing in again starts fresh', async () => {
+  const env = setup();
+  const issued = Date.now() - 1000;
+  const old = `sk_session=${await signSession(env, 'me@example.com', issued)}`; // another device
+  const cookie = await session(env);
+  const sync = (body, c = cookie) => call(env, '/api/sync', { method: 'POST', body, cookie: c });
+  await sync({ generation: null, cursor: 0, events: [ev('a'), ev('b')] });
+  await call(env, '/api/replace', { method: 'POST', body: {}, cookie }); // an archived generation too
+  await sync({ generation: 2, cursor: 0, events: [ev('c')] });
+
+  const del = await call(env, '/api/delete-account', { method: 'POST', body: {}, cookie });
+  assert.equal(del.status, 200);
+  assert.match(del.headers.get('set-cookie'), /sk_session=;.*Max-Age=0/i);
+  const raw = env.DB.raw;
+  assert.equal(raw.prepare("SELECT COUNT(*) AS n FROM events WHERE email = 'me@example.com'").get().n, 0);
+  assert.equal(raw.prepare("SELECT COUNT(*) AS n FROM users WHERE email = 'me@example.com'").get().n, 0);
+  const row = raw.prepare('SELECT * FROM deleted_accounts').get();
+  assert.match(row.email_hash, /^[0-9a-f]{64}$/); // no plain email kept
+  assert.ok(!JSON.stringify(raw.prepare('SELECT * FROM deleted_accounts').all()).includes('example.com'));
+
+  // A device still holding a session from before: signed out, and nothing is recreated.
+  assert.equal((await sync({ generation: 2, cursor: 0, events: [ev('zombie')] }, old)).status, 401);
+  assert.equal(raw.prepare("SELECT COUNT(*) AS n FROM users WHERE email = 'me@example.com'").get().n, 0);
+
+  // Signing in again later: a fresh, empty account with a generation no old device has.
+  const fresh = `sk_session=${await signSession(env, 'me@example.com', row.at + 1)}`;
+  const me = await call(env, '/api/me', { cookie: fresh });
+  assert.equal(me.status, 200);
+  assert.equal(me.data.bytes, 0);
+  assert.ok(me.data.generation > 2);
+  const stale = await sync({ generation: 2, cursor: 0, events: [] }, fresh);
+  assert.equal(stale.status, 409);
+});

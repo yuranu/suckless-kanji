@@ -479,3 +479,6 @@ body[data-screen]:not([data-screen="home"]) .site-footer { display: none; }
   .welcome-points { margin-bottom: 14px; font-size: 14px; }
   .welcome-links { margin-top: 10px; }
 }
+
+/* ---- delete profile ---- */
+.danger-zone { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }

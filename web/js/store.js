@@ -90,6 +90,15 @@ export const local = {
   },
 };
 
+// Forget everything this app stored on this device: progress, backups, sync position, and
+// local settings (localStorage keys "sk.*").
+export async function wipeDevice(backend) {
+  for (const name of STORES) await backend.clear(name);
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith('sk.')) localStorage.removeItem(k);
+  } catch { /* private mode etc. */ }
+}
+
 export function deviceId() {
   let id = local.get('device', null);
   if (!id) {

@@ -175,6 +175,14 @@ export class Sync {
     await this.saveMeta({ ...(await this.meta()), generation: r.data.generation, cursor: 0 });
   }
 
+  // Delete the account on the server with everything stored for it. The server also signs
+  // this device out. Local data is the caller's to wipe.
+  async deleteAccount() {
+    const r = await this.call('/api/delete-account', {});
+    if (r.status !== 200) throw new Error(r.data?.error || `server error ${r.status}`);
+    this.set({ state: 'signed-out', email: null, conflict: null, lastSync: null });
+  }
+
   // Sign out; local data stays. Forget the sync position so a later sign-in (possibly as
   // another account) is treated as a first sync.
   async signOut() {
