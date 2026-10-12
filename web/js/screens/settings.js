@@ -84,13 +84,6 @@ export function settingsScreen(root, app) {
     add(clear(root),
       h('h1.title', 'Settings'),
       syncSection(app, render),
-      groups.map((g) => h('section.card.settings',
-        h('h3', g),
-        SETTINGS.filter((s) => s.group === g).map((def) => h('label.setting',
-          h('div.setting-text', h('span', def.label), def.scope === 'device' ? h('span.tag', 'this device') : null,
-            def.help ? h('small.muted', def.help) : null),
-          control(app, def))))),
-
       h('section.card.settings',
         h('h3', 'Your data'),
         h('p.small', `Progress is an append-only log of ${events.length} events stored in this browser (IndexedDB)`,
@@ -143,6 +136,13 @@ export function settingsScreen(root, app) {
             render();
           },
         }, 'Reset progress')),
+
+      groups.map((g) => h('section.card.settings',
+        h('h3', g),
+        SETTINGS.filter((s) => s.group === g).map((def) => h('label.setting',
+          h('div.setting-text', h('span', def.label), def.scope === 'device' ? h('span.tag', 'this device') : null,
+            def.help ? h('small.muted', def.help) : null),
+          control(app, def))))),
 
       h('section.card.settings.small',
         h('h3', 'About'),
