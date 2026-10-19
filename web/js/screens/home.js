@@ -1,4 +1,5 @@
 import { h, add, clear } from '../ui/dom.js';
+import { fmtStudy } from '../studytime.js';
 import { dueCards, today } from '../state.js';
 import { nextLessonItems, forecast, learnedCounts } from '../progress.js';
 import { syncPill } from '../ui/sync-ui.js';
@@ -48,6 +49,7 @@ export function homeScreen(root, app) {
         h('div.stat', h('b', String(counts.kanji)), h('span', ` / ${app.data.kanjiList.length} kanji`)),
         h('div.stat', h('b', String(todayStats.reviews)), h('span', ' reviews today'),
           todayStats.reviews ? h('span.muted', ` · ${Math.round(100 * (1 - todayStats.again / todayStats.reviews))}% correct`) : null),
+        h('div.stat', h('b', fmtStudy(todayStats.study || 0)), h('span', ' studied today')),
         h('div.forecast', fc.map((n, i) => h('div.fc-day',
           h('div.fc-bar', { style: { height: `${Math.min(100, (n / Math.max(1, ...fc)) * 100)}%` } }),
           h('div.fc-n', String(n)),

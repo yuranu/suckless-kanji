@@ -46,7 +46,7 @@ const sm2Options = (s) => ({
 });
 
 function dayStats(state, day) {
-  if (!state.days.has(day)) state.days.set(day, { reviews: 0, again: 0, learned: 0, ms: 0 });
+  if (!state.days.has(day)) state.days.set(day, { reviews: 0, again: 0, learned: 0, ms: 0, study: 0 });
   return state.days.get(day);
 }
 
@@ -98,6 +98,9 @@ export function applyEvent(state, e) {
       if (d.rating === 1) st.again++;
       break;
     }
+    case 'study': // focused time in lessons, reviews and practice (studytime.js)
+      dayStats(state, day).study += Math.max(0, Math.min(Number(d.ms) || 0, 6 * 3600000));
+      break;
     case 'relearn': {
       // A failed card answered correctly again (Anki's relearning step). Not a review: it
       // only gives FSRS the same-day evidence that the card was relearned. SM-2 keeps its

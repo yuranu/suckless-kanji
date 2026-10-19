@@ -14,6 +14,7 @@ import { importScreen } from './screens/import.js';
 import { freePracticeScreen } from './screens/free.js';
 import { welcomeScreen, welcomePending } from './screens/welcome.js';
 import { local } from './store.js';
+import { studyTimer } from './studytime.js';
 
 const ROUTES = [
   [/^$/, homeScreen, 'home'],
@@ -47,7 +48,7 @@ async function main() {
   }
   window.app = app; // handy for debugging from the console
 
-  let cleanup = null;
+  let cleanup = null, stopTimer = null;
   let welcome = await welcomePending(app);
   function route() {
     const path = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
@@ -63,6 +64,9 @@ async function main() {
     const [re, screen, tab] = ROUTES.find(([r]) => r.test(path)) || ROUTES[0];
     const params = path.match(re)?.slice(1) || [];
     if (typeof cleanup === 'function') cleanup();
+    // Study time runs on the full-screen flows (lessons, reviews, practice): no tab bar.
+    stopTimer?.();
+    stopTimer = tab ? null : studyTimer(app);
     document.body.dataset.screen = path.split('/')[0] || 'home'; // the footer shows on Home only
     clear(root);
     const body = h('main.screen');

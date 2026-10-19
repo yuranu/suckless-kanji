@@ -53,6 +53,7 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
   - As in Anki, Hard, Good and Easy are each at least a day apart, even for a weak card whose model intervals would all round to 1 day.
   - **Again means "today":** the card comes back later in the session, and stays due (also after closing the app, outside the daily limit) until it is answered correctly. That correct pass is a `relearn` event, not a review; it gives FSRS the same-day relearning evidence Anki's relearning steps give.
 - **Practice** (from a lesson or a kanji page) never changes the schedule.
+- **Time studied today** (Home): time spent in lessons, reviews and practice, counted only while the app is visible and focused and up to 2 minutes after the last tap or key press. Each device saves it every 5 minutes, on leaving the session and when the app is hidden, as `study` events, so the total covers all synced devices.
 - **Next lesson** is the next N *unlearned* items in curriculum order, so gaps (items skipped by an import or by learning lessons out of order) are filled first, in full-size lessons.
 - **Welcome screen:** shown once per device, on first launch with no progress. It offers *Start learning*, *I already know some kanji* (the import) and *Sign in to sync* (only where the sync server is reachable); any of them dismisses it for good. Links into the app skip it.
 - **Mobile first:** every exercise fits one screen, down to 360×640. The drawing pad sizes itself to the viewport height, many-option questions switch to compact layouts, and a new kanji gets its own intro screen.
@@ -76,6 +77,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 | `learn` | `{cards: {cardId: rating}}` | lesson finished: creates the cards and schedules them for the first time |
 | `review` | `{card, rating, ms, relearn?}` | an SRS answer; `relearn: true` on Again starts relearning |
 | `relearn` | `{card}` | a card failed with Again answered correctly again; ends its relearning |
+| `study` | `{ms}` | focused time in a lesson, review or practice; Home shows today's total over all devices |
 | `seed` | `{cards: {cardId: [stability, dueInDays]}}` | prior-knowledge import |
 | `forget` | `{items: [itemId]}` | un-learns items |
 | `settings` | `{key: value}` | synced settings, last writer wins |

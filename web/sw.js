@@ -47,6 +47,7 @@ const PRECACHE = [
   'js/srs/sm2.js',
   'js/state.js',
   'js/store.js',
+  'js/studytime.js',
   'js/stroke.js',
   'js/sync.js',
   'js/tts.js',

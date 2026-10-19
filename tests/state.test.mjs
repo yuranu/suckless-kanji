@@ -142,3 +142,15 @@ test('rating buttons: Again today, then each at least a day longer; review keeps
     assert.equal(dueDay(c, after.settings) - c.lastDay, p[rating], `rating ${rating}`);
   }
 });
+
+test('study time: summed per day over all devices; absurd values capped', () => {
+  const s = replay([
+    ev('study', { ms: 120000 }, T0, 'phone'),
+    ev('study', { ms: 300000 }, T0 + 3600000, 'laptop'),
+    ev('study', { ms: 1e12 }, T0 + DAY, 'phone'),
+    ev('study', { ms: 'junk' }, T0 + DAY, 'phone'),
+  ]);
+  const day = dayIndex(T0, 0, s.settings.rolloverHour);
+  assert.equal(s.days.get(day).study, 420000);
+  assert.equal(s.days.get(day + 1).study, 6 * 3600000);
+});
