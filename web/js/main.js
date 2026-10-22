@@ -14,7 +14,7 @@ import { importScreen } from './screens/import.js';
 import { freePracticeScreen } from './screens/free.js';
 import { welcomeScreen, welcomePending } from './screens/welcome.js';
 import { local } from './store.js';
-import { studyTimer } from './studytime.js';
+import { studyTimer, recoverStudy } from './studytime.js';
 
 const ROUTES = [
   [/^$/, homeScreen, 'home'],
@@ -49,6 +49,7 @@ async function main() {
   window.app = app; // handy for debugging from the console
 
   let cleanup = null, stopTimer = null;
+  recoverStudy(app);
   let welcome = await welcomePending(app);
   function route() {
     const path = decodeURIComponent(location.hash.replace(/^#\/?/, ''));

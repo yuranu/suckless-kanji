@@ -35,9 +35,11 @@ export async function createApp() {
     get settings() { return { ...state.settings, ...device }; },
 
     // Persist first, then apply: state never contains something that is not on disk.
-    async dispatch(type, payload) {
-      const e = makeEvent(type, payload, dev);
-      await backend.putNew('events', [e]);
+    // `fixed` ({id, t}): an event prepared earlier and possibly already stored (a retry);
+    // storing it again is a no-op.
+    async dispatch(type, payload, fixed = null) {
+      const e = fixed ? { ...makeEvent(type, payload, dev, fixed.t), id: fixed.id } : makeEvent(type, payload, dev);
+      if (!(await backend.putNew('events', [e]))) return e; // already stored
       if (e.t >= lastT) applyEvent(state, e);
       else state = replay(await backend.all('events')); // clock went backwards: replay in order
       lastT = Math.max(lastT, e.t);
