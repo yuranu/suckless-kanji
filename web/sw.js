@@ -30,6 +30,7 @@ const PRECACHE = [
   'js/importer.js',
   'js/install.js',
   'js/main.js',
+  'js/nav.js',
   'js/progress.js',
   'js/screens/free.js',
   'js/screens/home.js',

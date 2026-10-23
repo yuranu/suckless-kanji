@@ -4,6 +4,7 @@
 //                            words if none is learned)
 //   practice/kanji-all:<cs>  cards of all words using any of kanji cs
 import { h, clear } from '../ui/dom.js';
+import { navigate } from '../nav.js';
 import { sessionFrame } from '../ui/session.js';
 import { runCard } from '../ui/games.js';
 import { ReviewQueue, spreadShuffle } from '../session.js';
@@ -24,7 +25,7 @@ function itemsFor(app, spec) {
 
 export function practiceScreen(root, app, [spec]) {
   const items = itemsFor(app, spec);
-  if (!items.length) { location.hash = '#/'; return; }
+  if (!items.length) { navigate(''); return; }
   const frame = sessionFrame(root, { app, title: 'Practice' });
   const queue = new ReviewQueue(spreadShuffle(items.flatMap(cardIds)));
   let alive = true, misses = 0;

@@ -1,6 +1,7 @@
 // Prior-knowledge import: mark known kanji, pick the vocabulary level reached, preview the
 // review load, then record one `seed` event (see importer.js).
 import { h, add, clear, confirmDialog, toast } from '../ui/dom.js';
+import { navigate } from '../nav.js';
 import { local } from '../store.js';
 import { estimateKnown, planSeed, suggestDays, kanjiFromText, seedChunks } from '../importer.js';
 import { cardIds } from '../data.js';
@@ -119,7 +120,7 @@ export function importScreen(root, app) {
     for (const cards of seedChunks(plan.cards)) await app.dispatch('seed', { cards });
     local.set('importKanji', []);
     toast(`Imported ${planItems.length} items`);
-    location.hash = '#/';
+    navigate('');
   }
 
   // ---- undo -------------------------------------------------------------------------

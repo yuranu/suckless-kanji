@@ -1,6 +1,7 @@
 // Lesson: introduce each new item, drill all its cards until each was answered correctly
 // `learnRepeats` times, then record a `learn` event that schedules the cards.
 import { h, add, clear, ruby } from '../ui/dom.js';
+import { navigate } from '../nav.js';
 import { sessionFrame } from '../ui/session.js';
 import { drawpad } from '../ui/drawpad.js';
 import { runCard, wordSummary } from '../ui/games.js';
@@ -71,7 +72,7 @@ export function learnScreen(root, app, [n]) {
   const isNext = n === 'next';
   const index = isNext ? -1 : +n - 1;
   const lesson = isNext ? nextLessonItems(app) : lessonList(app)[index];
-  if (!lesson || !lesson.length) { location.hash = '#/lessons'; return; }
+  if (!lesson || !lesson.length) { navigate('lessons'); return; }
   const todo = lesson.filter((it) => !isLearned(app, it));
   const title = isNext ? 'Lesson' : `Lesson ${index + 1}`;
   // Show the kanji panel only for kanji the user does not know yet (imports, gaps).
@@ -123,11 +124,7 @@ export function learnScreen(root, app, [n]) {
       h('ul.preview', todo.map((it) => h('li', h('span.jp', it.kanji || ruby(it.segs)), h('span.preview-meaning', it.meaning || '')))),
       h('div.row.center',
         nextLessonItems(app).length ? h('button.btn.primary', {
-          onclick: () => {
-            // Already on #/learn/next: re-run the route instead of setting the same hash.
-            if (location.hash === '#/learn/next') window.dispatchEvent(new HashChangeEvent('hashchange'));
-            else location.hash = '#/learn/next';
-          },
+          onclick: () => navigate('learn/next'),
         }, 'Next lesson') : null,
         h('a.btn', { href: '#/' }, 'Home'))));
   })();

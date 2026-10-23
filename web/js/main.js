@@ -1,4 +1,4 @@
-// Entry point: boot the app context and route hash URLs to screens.
+// Entry point: boot the app context and route hash URLs to screens (history: nav.js).
 import './install.js'; // first: catches beforeinstallprompt even while the app loads
 import { createApp } from './app.js';
 import { h, clear } from './ui/dom.js';
@@ -15,6 +15,7 @@ import { freePracticeScreen } from './screens/free.js';
 import { welcomeScreen, welcomePending } from './screens/welcome.js';
 import { local } from './store.js';
 import { studyTimer, recoverStudy } from './studytime.js';
+import { startNav } from './nav.js';
 
 const ROUTES = [
   [/^$/, homeScreen, 'home'],
@@ -82,8 +83,7 @@ async function main() {
     cleanup = screen(body, app, params);
     window.scrollTo(0, 0);
   }
-  window.addEventListener('hashchange', route);
-  route();
+  startNav(route);
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     navigator.serviceWorker.register('sw.js').catch((e) => console.warn('service worker', e));
