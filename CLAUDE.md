@@ -5,6 +5,9 @@
 - Commit and push as work progresses: one commit per coherent step (a fix, a
   feature, a data change), not one large commit at the end of a task.
 - Sign off every commit (`git commit -s`).
+- A human must be the author or a co-author of every commit: if the commit is
+  not authored by a human, add a `Co-Authored-By:` trailer for one (normally
+  `Yuri Nudelman <yuranu@gmail.com>`).
 - Message format:
   - Subject: one line, brief, soft limit 60 characters, hard limit 80.
   - Blank line, then a body in Markdown explaining what and why.
