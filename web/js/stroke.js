@@ -120,7 +120,7 @@ function prepare(d) {
 
 // Compare a drawn polyline against a prepared reference stroke.
 // Returns metrics plus a combined score (lower is better) and pass flag.
-function compare(drawn, ref, leniency) {
+function compare(drawn, ref, leniency, place = 1) {
   const L = leniency || 1;
   const u = resample(drawn, N);
   const ulen = length(u); // resampled, so hand jitter does not inflate it
@@ -133,7 +133,7 @@ function compare(drawn, ref, leniency) {
   // Shape is meaningless for dots; only check it on strokes with real extent.
   const shape = ref.len > 18 && ulen > 8 ? frechet(normalize(u), ref.norm) : 0;
   // Short strokes (dots, ticks) get an absolute floor so they're not impossibly strict.
-  const posTol = (10 + 0.12 * ref.len) * L;
+  const posTol = (10 + 0.12 * ref.len) * L * place;
   const checks = {
     avg: avg <= posTol,
     start: start <= posTol * 1.3,
@@ -170,4 +170,119 @@ function match(drawn, refs, index, leniency) {
   return { ...r, reason: 'miss' };
 }
 
-export { parsePath, resample, length, normalize, frechet, prepare, compare, match };
+// ---- freehand: the whole kanji, radical by radical ---------------------------
+// The strokes drawn so far are judged together, in two frames:
+//  1. the whole drawing may be shifted and scaled (keeping its proportions) within the box;
+//  2. each radical (component, see scripts/build.mjs) may then sit a little off and be a
+//     little larger or smaller than in the reference, relative to the rest.
+// Each stroke is then compared with compare() inside its radical's frame, so what counts is
+// the shape of each radical and roughly where it is, not where exactly every stroke landed.
+const BOX_C = [54.5, 54.5];
+const FIT = {
+  // ws: pull of the scale towards 1 (in squared board units: about one stroke of spread 20)
+  kanji: { ws: N * 400, sMin: 0.55, sMax: 1.5, tMax: 30 },
+  comp: { ws: N * 400, sGrow: 0.3, tMax: 20 },
+  // How far two radicals may drift apart (or together) from their reference placement.
+  apart: 13,
+  // Stroke position tolerance inside its radical, relative to compare()'s absolute one: the
+  // frames have taken out the drift of the drawing and of each radical.
+  place: 0.6,
+};
+
+// Least squares fit of u ≈ s * (r - c) + c + t, with s pulled towards 1 (weight o.ws) and
+// clamped to [o.sMin, o.sMax], then t clamped to ±o.tMax. `pairs`: [drawn, reference] points.
+// Uniform: one scale for both axes (a drawing as a whole keeps its proportions, else stretching
+// it would hide radicals drawn too far apart); otherwise one per axis (a radical can be drawn
+// narrower or taller).
+function fit(pairs, c, o, uniform) {
+  const n = pairs.length;
+  const S = [0, 1].map((i) => {
+    let Sa = 0, Saa = 0, Sb = 0, Sab = 0;
+    for (const [u, r] of pairs) {
+      const a = r[i] - c[i], b = u[i] - c[i];
+      Sa += a; Saa += a * a; Sb += b; Sab += a * b;
+    }
+    // With t eliminated: minimise (Saa - Sa²/n) s² - 2 (Sab - Sa Sb / n) s + ws (s - 1)²
+    return { Sa, Sb, q: Saa - Sa * Sa / n, l: Sab - Sa * Sb / n };
+  });
+  const scale = (q, l) => Math.min(o.sMax, Math.max(o.sMin, (l + o.ws) / (q + o.ws)));
+  const both = uniform ? scale(S[0].q + S[1].q, S[0].l + S[1].l) : null;
+  return S.map(({ Sa, Sb, q, l }, i) => {
+    const sc = uniform ? both : scale(q, l);
+    const t = Math.min(o.tMax, Math.max(-o.tMax, (Sb - sc * Sa) / n));
+    return { s: sc, t, c: c[i] };
+  });
+}
+
+// drawn -> reference space
+const unmap = (T, p) => [(p[0] - T[0].c - T[0].t) / T[0].s + T[0].c, (p[1] - T[1].c - T[1].t) / T[1].s + T[1].c];
+
+// Reference data for freehand matching: prepared strokes plus each radical's centre.
+function prepareKanji(kanji) {
+  const refs = kanji.paths.map(prepare);
+  const comps = kanji.comps || refs.map(() => 0);
+  const centers = [];
+  for (let id = 0; id <= Math.max(...comps); id++) {
+    const pts = refs.flatMap((r, i) => (comps[i] === id ? r.pts : []));
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+    centers.push([(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2]);
+  }
+  return { refs, comps, centers };
+}
+
+// Judge drawn strokes (resampled to N points) assigned to reference strokes `assign`.
+function evaluate(K, drawn, assign, L) {
+  const pairs = drawn.flatMap((u, k) => u.map((p, i) => [p, K.refs[assign[k]].pts[i]]));
+  const G = fit(pairs, BOX_C, FIT.kanji, true);
+  const inG = drawn.map((u) => u.map((p) => unmap(G, p)));
+  const grow = FIT.comp.sGrow * L;
+  const co = { ws: FIT.comp.ws, sMin: 1 / (1 + grow), sMax: 1 + grow, tMax: FIT.comp.tMax * L };
+  const frames = new Map();
+  for (const id of new Set(assign.map((j) => K.comps[j]))) {
+    const ps = inG.flatMap((u, k) => (K.comps[assign[k]] === id ? u.map((p, i) => [p, K.refs[assign[k]].pts[i]]) : []));
+    frames.set(id, fit(ps, K.centers[id], co));
+  }
+  // Radicals out of place relative to each other: the drawing as a whole fails.
+  const shifts = [...frames.values()].map((T) => [T[0].t, T[1].t]);
+  let drift = 0;
+  for (const a of shifts) for (const b of shifts) drift = Math.max(drift, dist(a, b));
+  const res = inG.map((u, k) => {
+    const j = assign[k];
+    return compare(u.map((p) => unmap(frames.get(K.comps[j]), p)), K.refs[j], L, FIT.place);
+  });
+  const placed = drift <= FIT.apart * L;
+  return { res, pass: placed && res.every((r) => r.pass), last: res[res.length - 1], drift, G, inG };
+}
+
+// Match the next stroke of a freehand drawing. `done`: the accepted strokes so far (each
+// resampled to N points), in order. Same reasons as match(), plus 'misplaced': the stroke
+// fits, but together with it the drawing no longer does (a radical has drifted too far).
+function matchFree(K, done, drawn, leniency) {
+  const L = leniency || 1;
+  if (drawn.length < 2) drawn = [drawn[0], drawn[0]];
+  const u = resample(drawn, N);
+  const index = done.length;
+  const base = done.map((_, i) => i);
+  const as = (j, pts = u) => evaluate(K, [...done, pts], [...base, j], L);
+  const main = as(index);
+  const r = main.last;
+  // Other strokes are only tried in full when the drawn one roughly resembles them.
+  const inG = main.inG[index];
+  const like = (j) => compare(inG, K.refs[j], L * 2).pass;
+  if (r.pass) {
+    for (let j = 0; j < K.refs.length; j++) {
+      if (j === index || !like(j)) continue;
+      const o = as(j);
+      if (o.pass && o.last.score < 0.6 * r.score - 1) return { ...r, pass: false, reason: j < index ? 'redrawn' : 'wrong-stroke', other: j };
+    }
+    if (!main.pass) return { ...r, pass: false, reason: 'misplaced', pts: u };
+    return { ...r, reason: 'ok', pts: u };
+  }
+  if (as(index, u.slice().reverse()).pass) return { ...r, reason: 'backwards' };
+  for (let j = index + 1; j < K.refs.length; j++) {
+    if (like(j) && as(j).pass) return { ...r, reason: 'wrong-stroke', other: j };
+  }
+  return { ...r, reason: 'miss' };
+}
+
+export { parsePath, resample, length, normalize, frechet, prepare, compare, match, N, prepareKanji, evaluate, matchFree, FIT };

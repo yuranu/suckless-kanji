@@ -9,6 +9,7 @@
     "all": "npm run fetch && npm run build",
     "test": "node --test \"tests/*.test.mjs\"",
     "test:matcher": "node scripts/test-matcher.mjs",
+    "test:freehand": "node scripts/test-freehand.mjs",
     "dev": "wrangler dev",
     "deploy": "node scripts/version.mjs && wrangler d1 migrations apply suckless-kanji --remote && wrangler deploy && wrangler deploy -c server/redirect.wrangler.toml",
     "icons": "node scripts/icons.mjs",
