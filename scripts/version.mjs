@@ -3,7 +3,8 @@
 // "v1.0" exactly on the tag, "v1.0.3" three commits later; the next tag ("v1.1") restarts the
 // count, so versions only go up. Without any tag: "r<commit count>". Uncommitted changes are
 // flagged ("+", "-dirty") so a deploy can never silently differ from git. Generated, not
-// committed (see .gitignore).
+// committed (see .gitignore). An optional argument names a preview channel, appended to the
+// version: `version.mjs next` -> "v1.0.3-next".
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -21,10 +22,11 @@ function release() {
   }
 }
 
+const channel = process.argv[2] ? `-${process.argv[2]}` : '';
 const commit = git('rev-parse', '--short', 'HEAD');
 const dirty = git('status', '--porcelain', '--untracked-files=no').length > 0;
 const info = {
-  version: `${release()}${dirty ? '+' : ''}`,
+  version: `${release()}${channel}${dirty ? '+' : ''}`,
   commit: dirty ? `${commit}-dirty` : commit,
   built: new Date().toISOString(),
 };

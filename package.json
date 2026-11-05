@@ -12,6 +12,7 @@
     "test:freehand": "node scripts/test-freehand.mjs",
     "dev": "wrangler dev",
     "deploy": "node scripts/version.mjs && wrangler d1 migrations apply suckless-kanji --remote && wrangler deploy && wrangler deploy -c server/redirect.wrangler.toml",
+    "deploy:next": "node scripts/version.mjs next && wrangler deploy --env next",
     "icons": "node scripts/icons.mjs",
     "version": "node scripts/version.mjs"
   },

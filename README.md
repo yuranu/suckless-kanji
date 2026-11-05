@@ -122,6 +122,7 @@ scripts/server/users.sh quota <email> <MB|default>  # per-account storage quota
 scripts/server/users.sh allow|disallow|allowed       # allowlist (SIGNUP_MODE = "allowlist")
 npm run dev        # wrangler dev on :8787 (local D1; .dev.vars: SESSION_SECRET, DEV_LOGIN=1)
 npm run deploy     # write web/version.json, apply D1 migrations, deploy both Workers
+npm run deploy:next  # deploy the checked-out branch to next.suckless-kanji.com
 ```
 
 **First deploy:**
@@ -131,6 +132,10 @@ npm run deploy     # write web/version.json, apply D1 migrations, deploy both Wo
 4. With `SIGNUP_MODE = "allowlist"`: `scripts/server/users.sh allow <email>`.
 
 The Google OAuth client must list `https://suckless-kanji.com/auth/callback` (and `http://localhost:8787/auth/callback` for local testing) as redirect URIs.
+
+**Preview at next.suckless-kanji.com:** a development branch can be tried out before it is merged. `npm run deploy:next` deploys the checked-out code as a second Worker (`[env.next]` in `wrangler.toml`), with its version suffixed `-next` in Settings → About. It shares the production database, so it signs in to the same accounts and syncs the same progress; it never applies migrations, so a branch that needs one must not be previewed this way. It is a separate origin, with its own sign-in, local data and installed app. One-time setup:
+1. `npx wrangler secret put SESSION_SECRET --env next` (any random value, e.g. `head -c 32 /dev/urandom | base64`) and `npx wrangler secret put GOOGLE_CLIENT_SECRET --env next`.
+2. Add `https://next.suckless-kanji.com/auth/callback` to the Google OAuth client's redirect URIs.
 
 **Self-hosting a fork:** the domains in `wrangler.toml` and `server/redirect.wrangler.toml` and the D1 `database_id` belong to this deployment. Replace them with your own, create your own Google OAuth client (put its id in `GOOGLE_CLIENT_ID`), then follow the first-deploy steps above.
 
