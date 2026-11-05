@@ -26,6 +26,7 @@ Open http://localhost:8765. The app uses ES modules, so it must be served over H
 ```bash
 npm test               # unit tests: schedulers, state replay, distractors, queues
 npm run test:matcher   # Monte-Carlo check of the stroke matcher
+npm run test:freehand  # Monte-Carlo check of whole-kanji (freehand) matching
 ```
 
 ## How it works
@@ -41,13 +42,18 @@ npm run test:matcher   # Monte-Carlo check of the stroke matcher
   - Summary.
 - **Writing card:**
   - Shown: the kana, and the word with blanks where the kanji go.
-  - Single-kanji words: draw the kanji on a blank pad. A wrong stroke shows the outline. A hint is always available but fails the card.
+  - Single-kanji words: draw the kanji on a blank pad (see *Drawing* below). A hint is always available but fails the card.
   - Multi-kanji words: fill the blanks from a 9- or 12-kanji grid.
   - Exception: if a kanji has no single-kanji word of its own (or none within 300 lessons), the word that introduces it is a *draw* card instead. Only that kanji is blanked, the word's other kanji are shown, and you draw it. This way every kanji is drawn at least once.
   - Then the translation, then the summary.
 - **Kanji card:** draw the kanji from its meaning and readings.
 - **"I misclicked":** every choice step has this corner button, which takes back a wrong answer.
-- **"Wait, I know it":** shown in drawing steps while the outline is visible (after a mistake or a hint). It hides the outline and takes back the mistakes and hint so far: finishing the kanji from memory then counts as correct. It also stores a local report about the stroke checker.
+- **Drawing:** strokes are drawn in order, freehand: they stay as drawn, and what is checked is each radical's shape and roughly where it sits, not the exact position of every stroke ([web/js/stroke.js](web/js/stroke.js), `matchFree`).
+  - The whole drawing may be off-centre or a bit larger or smaller, and each radical (KanjiVG's top-level components, e.g. 言 and 吾 in 語) may sit a little too far, too close or off to the side relative to the others, or be a little larger or smaller.
+  - Each stroke still needs the right shape, order and direction within its radical.
+  - Once a stroke is clearly off, the pad switches to the outline: the strokes so far are replaced by the reference ones, and the next ones must land on the outline. A hint does the same.
+  - A finished freehand drawing stays as drawn, over the faint reference.
+- **"Wait, I know it":** shown in drawing steps while the outline is visible (after a mistake or a hint). It hides the outline and takes back the mistakes and hint so far, and drawing continues freehand from the current stroke: finishing the kanji from memory then counts as correct. It also stores a local report about the stroke checker.
 - **Reviews:**
   - Today's due cards are shown. After a correct answer you rate it with Anki's four buttons, Again, Hard, Good or Easy, each showing the interval it gives; a missed card is rated Again.
   - As in Anki, Hard, Good and Easy are each at least a day apart, even for a weak card whose model intervals would all round to 1 day.
@@ -140,7 +146,7 @@ npm run all     # fetch.sh (checksum-verified) + build-curriculum.mjs + build.mj
 Generated files are committed; never edit them by hand:
 - `data/curriculum.yaml`: the human-readable curriculum.
 - `web/data/curriculum.json`: the app's copy of the same lessons.
-- `web/data/kanji.json`: stroke paths, readings and visual components of the 2297 curriculum kanji.
+- `web/data/kanji.json`: stroke paths, readings, visual components and the radical of each stroke of the 2297 curriculum kanji.
 - `web/fonts/klee-one.woff2`: [Klee One](https://github.com/fontworks-fonts/Klee) SemiBold (SIL OFL 1.1), cut down by `scripts/fonts.mjs` to the characters the app can show (about 3,100, 1.2 MB instead of 8.5 MB). It is a textbook-style font: its kanji have the handwritten shapes the drawing pad expects (氵, 心, 糸, ...), unlike printed Mincho or Gothic. Settings → Display → *Japanese font* can switch to the device's Mincho or Gothic instead.
 
 The build is deterministic:
