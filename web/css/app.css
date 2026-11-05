@@ -271,9 +271,10 @@ svg path, svg polyline { fill: none; stroke-linecap: round; stroke-linejoin: rou
 .ghost path { stroke: var(--ghost); stroke-width: 4; }
 .ghost path.next { stroke: var(--muted); }
 .ghost circle { fill: var(--accent); }
-.done path { stroke: var(--ink); stroke-width: 4; }
+.ghost path.answer { stroke: var(--ghost); stroke-width: 6; animation: settle 0.4s ease-out; }
+.done path, .done polyline { stroke: var(--ink); stroke-width: 4; }
 .done path.fresh { animation: settle 0.25s ease-out; }
-.done.complete path { stroke: var(--good); transition: stroke 0.3s; }
+.done.complete path, .done.complete polyline { stroke: var(--good); transition: stroke 0.3s; }
 .hint path { stroke: var(--accent); stroke-width: 4; opacity: 0.8; }
 .hint circle { fill: var(--accent); }
 .ink polyline { stroke: var(--ink); stroke-width: 3.5; opacity: 0.7; }

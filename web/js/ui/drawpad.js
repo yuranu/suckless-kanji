@@ -1,5 +1,11 @@
 // Kanji drawing pad: the user draws strokes in order, each checked by the stroke matcher.
-// Starts blank (or with an outline in trace mode); a mistake or a hint turns the outline on.
+// Two modes, tied to the outline:
+//  - freehand (no outline): the strokes stay as drawn, and are judged together, radical by
+//    radical (Stroke.matchFree), so a drawing a little off-centre or with a radical a little
+//    too far still counts;
+//  - canonical (outline shown): the strokes so far are replaced by the reference ones, and
+//    each next stroke must land where the outline shows it (Stroke.match).
+// The pad starts freehand (canonical in trace mode); a mistake or a hint switches to canonical.
 import { h, s, clear } from './dom.js';
 import * as Stroke from '../stroke.js';
 
@@ -7,12 +13,14 @@ const MESSAGES = {
   backwards: 'Wrong direction',
   'wrong-stroke': 'Wrong stroke order',
   redrawn: 'Already drawn',
+  misplaced: "Doesn't fit with the rest",
   miss: 'Try again',
 };
 
 export function drawpad(kanji, opts = {}) {
   const { leniency = 1, outline: startOutline = false, onMistake, onComplete, onStroke, onOutline } = opts;
-  const refs = kanji.paths.map(Stroke.prepare);
+  const K = Stroke.prepareKanji(kanji);
+  const { refs } = K;
   const svg = s('svg', { viewBox: '0 0 109 109', class: 'drawpad' });
   const grid = s('g', { class: 'grid' }, svg);
   s('rect', { x: 0.5, y: 0.5, width: 108, height: 108, rx: 3 }, grid);
@@ -23,12 +31,24 @@ export function drawpad(kanji, opts = {}) {
   const el = h('div.drawpad-wrap', svg, msg);
 
   let stroke = 0, mistakes = 0, hintUsed = false, outline = startOutline, finished = false;
+  // Accepted strokes, resampled: as drawn in freehand mode, the reference ones once canonical.
+  let done = [], freehand = false;
   let timers = [];
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
 
   function say(text, cls = '') { msg.textContent = text; msg.className = 'drawpad-msg ' + cls; }
 
+  // Replace the freehand strokes drawn so far with the reference ones.
+  function canonical() {
+    if (!freehand) return;
+    freehand = false;
+    clear(layers.done);
+    for (let i = 0; i < stroke; i++) s('path', { d: kanji.paths[i], class: 'fresh' }, layers.done);
+    done = refs.slice(0, stroke).map((r) => r.pts);
+  }
+
   function setOutline(on) {
+    if (on) canonical();
     outline = on;
     renderGhost();
     onOutline?.(on && !startOutline);
@@ -70,13 +90,24 @@ export function drawpad(kanji, opts = {}) {
   function complete() {
     finished = true;
     clear(layers.ghost); clear(layers.hint); clear(layers.ink);
+    // A freehand drawing stays as drawn, over the reference for comparison.
+    if (freehand) for (const d of kanji.paths) s('path', { d, class: 'answer' }, layers.ghost);
     layers.done.classList.add('complete');
     say('');
     onComplete?.({ mistakes, hintUsed });
   }
 
-  function accept() {
-    s('path', { d: kanji.paths[stroke], class: 'fresh' }, layers.done);
+  // pts: the drawn stroke, resampled, and its ink, kept in freehand mode.
+  function accept(pts, line) {
+    if (outline) {
+      line.remove();
+      s('path', { d: kanji.paths[stroke], class: 'fresh' }, layers.done);
+      done.push(refs[stroke].pts);
+    } else {
+      layers.done.appendChild(line);
+      done.push(pts);
+      freehand = true;
+    }
     clear(layers.hint);
     stroke++;
     say('');
@@ -122,10 +153,9 @@ export function drawpad(kanji, opts = {}) {
   });
 
   function judge(pts, line) {
-    const r = Stroke.match(pts, refs, stroke, leniency);
+    const r = outline ? Stroke.match(pts, refs, stroke, leniency) : Stroke.matchFree(K, done, pts, leniency);
     if (r.reason === 'ok') {
-      line.remove();
-      accept();
+      accept(r.pts, line);
       return;
     }
     line.classList.add('bad');
@@ -152,7 +182,8 @@ export function drawpad(kanji, opts = {}) {
       showHintStroke();
     },
     // "Wait, I know it": take back the mistakes and hints so far and hide the outline; the
-    // kanji is then finished from memory, from the current stroke on.
+    // kanji is then finished from memory, freehand, from the current stroke on (the reference
+    // strokes so far anchor where the rest should go).
     retry() {
       if (finished) return;
       mistakes = 0;
