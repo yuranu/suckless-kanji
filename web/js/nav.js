@@ -10,6 +10,7 @@ const PARENTS = [
   [/^kanji\//, [/^kanji$/], ['', 'kanji']],
   [/^practice\//, [/^learn\//, /^kanji\//, /^free$/], ['']],
   [/^import$/, [/^settings$/], ['']],
+  [/^backlog$/, [/^settings$/], ['']],
 ];
 
 // The chain of screens [Home, ..., path] when navigating to path from the chain current.

@@ -74,6 +74,16 @@ For people switching from another app (Settings → *Import prior knowledge*):
 
 Each card gets an assumed memory strength: early curriculum items are strong, recent ones weak, and writing is weaker than reading. First reviews are spread evenly across the window, weakest first. Nothing is due on import day and nothing is dropped. After the first real review, scheduling follows your actual answers. The import is one `seed` event and can be undone.
 
+## Spreading a review backlog
+
+After a break, hundreds of reviews can be due at once. *Spread overdue reviews* (Home offers it when 50+ cards are overdue from earlier days; also in Settings) spreads them over a chosen number of days, starting today ([web/js/backlog.js](web/js/backlog.js)):
+
+- **Which cards:** every card the scheduler has due today or earlier, including ones spread earlier (planning again replaces the old plan). Cards failed today (Again) stay due today.
+- **Priority:** each card's deadline is the day its FSRS predicted recall falls to 10 points below the desired retention. Stability sets how fast recall falls, so well-known cards can wait much longer than weak or recently learned ones, which come first. Cards are placed earliest deadline first.
+- **Flat load:** reviews that come due anyway during the window are counted, and days with more of them get fewer backlog cards, so the total per day stays about the same. A preview shows the daily load and the mean predicted recall of the backlog if reviewed today versus as spread.
+- **Honest scheduling:** only the due day moves; the memory model is untouched, and when the card is answered the real time since its last review counts. A card is never made due earlier than its model says (e.g. after lowering the desired retention). Spreading over 1 day puts everything back on today, which undoes a spread.
+- It is one `reschedule` event (split into parts for large backlogs).
+
 ## State and sync design
 
 User progress is an append-only **event log** in IndexedDB. Everything else is derived by replaying it ([web/js/state.js](web/js/state.js)):
@@ -85,6 +95,7 @@ User progress is an append-only **event log** in IndexedDB. Everything else is d
 | `relearn` | `{card}` | a card failed with Again answered correctly again; ends its relearning |
 | `study` | `{ms}` | focused time in a lesson, review or practice; Home shows today's total over all devices |
 | `seed` | `{cards: {cardId: [stability, dueInDays]}}` | prior-knowledge import |
+| `reschedule` | `{cards: {cardId: dueInDays}}` | spreads a review backlog: moves only the due day (0 = that day); the next answer clears it |
 | `forget` | `{items: [itemId]}` | un-learns items |
 | `settings` | `{key: value}` | synced settings, last writer wins |
 

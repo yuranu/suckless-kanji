@@ -11,6 +11,7 @@ import { kanjiScreen, kanjiDetailScreen } from './screens/kanji.js';
 import { settingsScreen } from './screens/settings.js';
 import { practiceScreen } from './screens/practice.js';
 import { importScreen } from './screens/import.js';
+import { backlogScreen } from './screens/backlog.js';
 import { freePracticeScreen } from './screens/free.js';
 import { welcomeScreen, welcomePending } from './screens/welcome.js';
 import { local } from './store.js';
@@ -27,6 +28,7 @@ const ROUTES = [
   [/^practice\/(.+)$/, practiceScreen, null],
   [/^settings$/, settingsScreen, 'settings'],
   [/^import$/, importScreen, 'settings'],
+  [/^backlog$/, backlogScreen, 'home'],
   [/^free$/, freePracticeScreen, 'home'],
 ];
 

@@ -141,6 +141,8 @@ export function settingsScreen(root, app) {
         h('p.small.muted', 'The file is readable YAML: a summary, your settings, every card with its due date, and the full history (the part that is imported). Import merges: events already present are skipped, so importing twice or from another device is safe.'),
         h('div.row', h('a.btn', { href: '#/import' }, 'Import prior knowledge…')),
         h('p.small.muted', 'Coming from another app? Mark the kanji you know; their reviews are spread out instead of all due at once.'),
+        h('div.row', h('a.btn', { href: '#/backlog' }, 'Spread overdue reviews…')),
+        h('p.small.muted', 'Back from a break with a pile of reviews? Spread them over a few days, well-known cards last.'),
         reports.length ? h('p.small.muted', `${reports.length} drawing-checker reports saved (included in exports).`) : null,
         h('button.btn.danger', {
           onclick: async () => {

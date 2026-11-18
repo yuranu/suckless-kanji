@@ -1,13 +1,17 @@
 import { h, add, clear } from '../ui/dom.js';
 import { fmtStudy } from '../studytime.js';
 import { dueCards, today } from '../state.js';
+import { overdueCount } from '../backlog.js';
 import { nextLessonItems, forecast, learnedCounts } from '../progress.js';
 import { syncPill } from '../ui/sync-ui.js';
 import { install } from '../install.js';
 
+const BACKLOG_HINT = 50; // overdue cards from earlier days before Home offers to spread them
+
 export function homeScreen(root, app) {
   function render() {
     const due = dueCards(app.state).length;
+    const overdue = overdueCount(app.state);
     const next = nextLessonItems(app);
     const counts = learnedCounts(app);
     const fc = forecast(app, 7);
@@ -22,7 +26,11 @@ export function homeScreen(root, app) {
       h('section.card',
         h('div.row.between',
           h('div', h('div.big-number', String(due)), h('div.muted', due === 1 ? 'card due' : 'cards due')),
-          h('a.btn.primary' + (due ? '' : '.disabled'), { href: due ? '#/review' : undefined }, 'Review'))),
+          h('a.btn.primary' + (due ? '' : '.disabled'), { href: due ? '#/review' : undefined }, 'Review')),
+        // A backlog after a break: offer to spread it instead of facing it all today.
+        overdue >= BACKLOG_HINT ? h('div.row.between.backlog-hint',
+          h('span.small.muted', `${overdue} overdue from earlier days.`),
+          h('a.btn.small', { href: '#/backlog' }, 'Spread them out')) : null),
 
       next.length ? h('section.card',
         h('div.row.between',

@@ -15,6 +15,8 @@ test('screens open under their parent when it is in the chain', () => {
   assert.deepEqual(chainFor('practice/kanji:x', ['', 'kanji', 'kanji/x']), ['', 'kanji', 'kanji/x', 'practice/kanji:x']);
   assert.deepEqual(chainFor('practice/lesson:3', ['', 'lessons', 'learn/3']), ['', 'lessons', 'learn/3', 'practice/lesson:3']);
   assert.deepEqual(chainFor('import', ['', 'settings']), ['', 'settings', 'import']);
+  assert.deepEqual(chainFor('backlog', ['', 'settings']), ['', 'settings', 'backlog']);
+  assert.deepEqual(chainFor('backlog', ['']), ['', 'backlog']);
 });
 
 test('the deepest matching parent wins and siblings replace each other', () => {
