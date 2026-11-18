@@ -61,6 +61,7 @@ export function toYaml({ events, reports = [], data, device = '', now = Date.now
       `due: ${dayDate(dueDay(c, s), t, now)}`,
       `interval: ${intervalOf(c, s)}`,
       c.seeded && c.reps === 1 ? 'imported: true' : null,
+      c.rescheduled != null ? 'spread: true' : null,
     ].filter(Boolean);
     out.push(`  - {${parts.join(', ')}}`);
   }

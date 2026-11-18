@@ -8,6 +8,10 @@
 //   seed     {cards: {cardId: [s, due]}} prior knowledge import: card with stability s days,
 //                                        first due `due` days after the event; existing cards
 //                                        are left alone
+//   reschedule {cards: {cardId: due}}    spread a review backlog: the card is next due `due`
+//                                        days after the event (0 = that day) instead of when
+//                                        its model says; memory state is untouched, and the
+//                                        next answer clears it
 //   forget   {items: [itemId]}           drop items and their cards (back to unlearned)
 //   settings {key: value, ...}           synced settings (last writer wins)
 // Card ids are `${itemId}#${kind}`, kind: r (reading), w (writing), k (kanji-only item).
@@ -86,6 +90,7 @@ export function applyEvent(state, e) {
       c.fsrs = fsrsNext(c.fsrs, d.rating, elapsed);
       c.reps++;
       c.floor = floor;
+      delete c.rescheduled;
       // Again: due again today, until answered correctly (a `relearn` event). Only reviews
       // that say so: before relearning was recorded, the in-session pass went unrecorded,
       // so older failed cards must not come back as still unlearned.
@@ -110,6 +115,7 @@ export function applyEvent(state, e) {
       c.fsrs = fsrsNext(c.fsrs, 3, Math.max(0, day - c.lastDay));
       c.relearning = false;
       c.floor = 0;
+      delete c.rescheduled;
       c.lastDay = day;
       break;
     }
@@ -127,6 +133,15 @@ export function applyEvent(state, e) {
           lastDay: day + due - ivl,
           sm2: { interval: ivl, ease: state.settings.sm2StartingEase }, fsrs: { s, d: 5 },
         });
+      }
+      break;
+    case 'reschedule':
+      // Moves only the due day. The answer is still judged by the real time since the last
+      // review, so a delayed card gets the (weaker) evidence it deserves.
+      for (const [cardId, due] of Object.entries(d.cards || {})) {
+        const c = state.cards.get(cardId);
+        if (!c || c.relearning || !Number.isFinite(due)) continue;
+        c.rescheduled = day + Math.max(0, Math.round(due));
       }
       break;
     case 'forget':
@@ -185,8 +200,17 @@ function ratedIntervals(state, card, elapsed) {
   return { 2: hard, 3: good, 4: easy };
 }
 
-// A card failed with Again is due from the day it failed until it is relearned.
-export const dueDay = (card, settings) => card.lastDay + (card.relearning ? 0 : intervalOf(card, settings));
+// The due day the scheduler gives, ignoring a `reschedule`.
+export const naturalDueDay = (card, settings) => card.lastDay + intervalOf(card, settings);
+
+// A card failed with Again is due from the day it failed until it is relearned. A spread
+// (rescheduled) card is due on its new day, but never earlier than its model says (e.g.
+// after lowering the desired retention).
+export function dueDay(card, settings) {
+  if (card.relearning) return card.lastDay;
+  const natural = naturalDueDay(card, settings);
+  return card.rescheduled == null ? natural : Math.max(natural, card.rescheduled);
+}
 
 export function today(state, now = Date.now()) {
   return dayIndex(now, new Date(now).getTimezoneOffset(), state.settings.rolloverHour);
